@@ -1,6 +1,5 @@
-
 import { useState, useRef, useEffect } from "react";
-import { MessageSquare, History, Template, Settings, Download } from "lucide-react";
+import { MessageSquare, History, FileTemplate, Settings, Download } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
 import { FileUpload } from "./FileUpload";
@@ -199,7 +198,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               onClick={() => setShowTemplates(true)}
               className="flex items-center space-x-2"
             >
-              <Template className="h-4 w-4" />
+              <FileTemplate className="h-4 w-4" />
               <span>Plantillas</span>
             </Button>
           </div>
@@ -234,7 +233,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             </p>
             <div className="flex flex-wrap justify-center gap-2 text-sm">
               <Button variant="outline" size="sm" onClick={() => setShowTemplates(true)}>
-                <Template className="h-3 w-3 mr-1" />
+                <FileTemplate className="h-3 w-3 mr-1" />
                 Ver Plantillas
               </Button>
               <Button variant="outline" size="sm" onClick={() => setShowHistory(true)}>
