@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { History, File, Download } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
@@ -57,7 +58,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const handleSendMessage = async (content: string) => {
     if (!content.trim() && uploadedFiles.length === 0) return;
 
-    console.log('Sending message:', content); // Debug log
+    console.log('ChatInterface: Sending message:', content);
 
     const userMessage: ChatMessageType = {
       id: Date.now().toString(),
@@ -71,12 +72,18 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       }))
     };
 
+    console.log('ChatInterface: Created user message:', userMessage);
     addMessageToCurrentConversation(userMessage);
+    console.log('ChatInterface: Message added to conversation');
+    
     setIsLoading(true);
     setUploadedFiles([]);
     
-    // Clear template content after sending
-    setTemplateContent("");
+    // Clear template content after sending - use a timeout to avoid state conflicts
+    setTimeout(() => {
+      console.log('ChatInterface: Clearing template content');
+      setTemplateContent("");
+    }, 100);
 
     try {
       const response = await mockApiCall(content, uploadedFiles, aiSettings);
@@ -117,6 +124,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   };
 
   const handleSelectTemplate = (template: PromptTemplate) => {
+    console.log('ChatInterface: Template selected:', template.content);
     setTemplateContent(template.content);
     setShowTemplates(false);
   };

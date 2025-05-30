@@ -19,10 +19,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 }) => {
   const [message, setMessage] = useState(initialValue);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const lastInitialValueRef = useRef(initialValue);
 
   useEffect(() => {
-    if (initialValue !== undefined && initialValue !== message) {
+    // Only update if initialValue actually changed and is different from current message
+    if (initialValue !== lastInitialValueRef.current && initialValue !== message) {
+      console.log('ChatInput: Setting message from initialValue:', initialValue);
       setMessage(initialValue);
+      lastInitialValueRef.current = initialValue;
+      
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
         textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
@@ -32,15 +37,19 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         }
       }
     }
-  }, [initialValue]);
+  }, [initialValue, message]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmedMessage = message.trim();
+    console.log('ChatInput: Submitting message:', trimmedMessage);
+    
     if (trimmedMessage && !disabled) {
       onSendMessage(trimmedMessage);
       setMessage("");
+      lastInitialValueRef.current = "";
       onValueChange?.("");
+      
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
         textareaRef.current.focus();
@@ -57,6 +66,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
+    console.log('ChatInput: Input changed:', value);
     setMessage(value);
     onValueChange?.(value);
     
