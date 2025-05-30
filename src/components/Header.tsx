@@ -2,7 +2,6 @@
 import { Moon, Sun, Menu, MessageSquare } from "lucide-react";
 import { useTheme } from "../contexts/ThemeContext";
 import { Button } from "./ui/button";
-import { UserMenu } from "./UserMenu";
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -42,8 +41,6 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
         >
           <Menu className="h-5 w-5" />
         </Button>
-
-        <UserMenu />
       </div>
     </header>
   );
