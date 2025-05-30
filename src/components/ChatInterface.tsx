@@ -243,16 +243,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           </div>
 
           <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExportConversation}
-              disabled={messages.length === 0}
-              className="flex items-center space-x-2"
-            >
-              <Download className="h-4 w-4" />
-              <span>Exportar</span>
-            </Button>
           </div>
         </div>
       </div>
