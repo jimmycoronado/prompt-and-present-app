@@ -107,7 +107,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           type="submit"
           disabled={!message.trim() || disabled}
           size="icon"
-          className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg h-11 w-11 transition-all hover:scale-105"
+          className="bg-skandia-green hover:bg-skandia-green/90 text-white rounded-lg h-11 w-11 transition-all hover:scale-105"
           aria-label="Enviar mensaje"
           id="send-button"
         >
