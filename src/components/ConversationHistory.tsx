@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Search, MessageSquare, Archive, Trash2, Edit3, Calendar, Tag } from 'lucide-react';
 import { useConversation } from '../contexts/ConversationContext';
@@ -39,7 +38,7 @@ export const ConversationHistory: React.FC<ConversationHistoryProps> = ({ onClos
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-800">
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col gap-3 mb-4">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
             <MessageSquare className="h-5 w-5 mr-2" />
             Historial de Conversaciones
@@ -47,7 +46,7 @@ export const ConversationHistory: React.FC<ConversationHistoryProps> = ({ onClos
           <Button
             onClick={handleNewConversation}
             size="sm"
-            className="bg-skandia-green hover:bg-skandia-green/90 text-white whitespace-nowrap"
+            className="bg-skandia-green hover:bg-skandia-green/90 text-white w-full"
           >
             Nueva Conversación
           </Button>
