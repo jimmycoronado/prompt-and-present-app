@@ -27,34 +27,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Configurar listener de cambios de autenticación
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state change:', event, session);
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-        
-        // Si el usuario se autenticó exitosamente y está en la página de auth, redirigir
-        if (event === 'SIGNED_IN' && session && window.location.pathname === '/auth') {
-          console.log('User signed in, redirecting to home');
-          window.location.href = '/';
-        }
-      }
-    );
-
     // Verificar si estamos procesando un callback de OAuth
     const isOAuthCallback = window.location.hash.includes('access_token');
     
     if (isOAuthCallback) {
       console.log('Processing OAuth callback');
-      // Limpiar la URL hash para evitar que se muestre al usuario
+      // Limpiar la URL hash inmediatamente
       const cleanUrl = window.location.pathname + window.location.search;
       window.history.replaceState({}, document.title, cleanUrl);
-      
-      // Supabase procesará automáticamente el callback y activará onAuthStateChange
-    } else {
-      // Si no hay callback, verificar sesión existente
+    }
+
+    // Configurar listener de cambios de autenticación
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log('Auth state change:', event, session);
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+        
+        // Si el usuario se autenticó exitosamente, redirigir a la página principal
+        if (event === 'SIGNED_IN' && session) {
+          console.log('User signed in successfully');
+          // Usar setTimeout para evitar problemas de renderizado
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 100);
+        }
+      }
+    );
+
+    // Verificar sesión existente solo si no es un callback
+    if (!isOAuthCallback) {
       supabase.auth.getSession().then(({ data: { session } }) => {
         console.log('Current session:', session);
         setSession(session);
