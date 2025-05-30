@@ -27,6 +27,11 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     loadConversations();
   }, []);
 
+  // Log currentConversation changes
+  useEffect(() => {
+    console.log('ConversationContext: currentConversation state changed:', currentConversation?.id, currentConversation?.messages?.length);
+  }, [currentConversation]);
+
   const loadConversations = () => {
     try {
       const saved = localStorage.getItem('ai-chat-conversations');
@@ -53,6 +58,7 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const createNewConversation = (): string => {
+    console.log('ConversationContext: Creating new conversation');
     const newId = Date.now().toString();
     const newConversation: Conversation = {
       id: newId,
@@ -65,6 +71,7 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       totalTokens: 0
     };
 
+    console.log('ConversationContext: Setting new conversation:', newConversation);
     setCurrentConversation(newConversation);
     return newId;
   };
@@ -94,6 +101,7 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const saveConversation = async (conversation: Conversation) => {
     try {
+      console.log('ConversationContext: Saving conversation to localStorage:', conversation.id, conversation.messages.length);
       // Save full conversation
       localStorage.setItem(`ai-chat-conversation-${conversation.id}`, JSON.stringify(conversation));
       
@@ -155,14 +163,16 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const addMessageToCurrentConversation = (message: ChatMessage) => {
-    console.log('ConversationContext: Adding message to conversation:', message);
+    console.log('ConversationContext: START addMessageToCurrentConversation with message:', message.id, message.type, message.content.substring(0, 50));
     
     if (!currentConversation) {
       console.warn('ConversationContext: No current conversation to add message to');
       return;
     }
 
-    // Update current conversation state immediately for UI responsiveness
+    console.log('ConversationContext: Current conversation before update:', currentConversation.id, currentConversation.messages.length);
+
+    // Create updated conversation with new message
     const updatedConversation = {
       ...currentConversation,
       messages: [...currentConversation.messages, message],
@@ -172,15 +182,21 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         currentConversation.title
     };
 
-    console.log('ConversationContext: Updated conversation:', updatedConversation);
+    console.log('ConversationContext: Updated conversation created:', updatedConversation.id, updatedConversation.messages.length);
+    console.log('ConversationContext: All messages in updated conversation:', updatedConversation.messages.map(m => `${m.id}:${m.type}:${m.content.substring(0, 20)}`));
     
-    // Set the conversation state immediately
+    // Update state immediately
+    console.log('ConversationContext: Setting currentConversation state...');
     setCurrentConversation(updatedConversation);
     
-    // Save to localStorage asynchronously without affecting the UI state
+    // Save asynchronously without blocking UI
+    console.log('ConversationContext: Scheduling async save...');
     setTimeout(() => {
+      console.log('ConversationContext: Executing async save...');
       saveConversation(updatedConversation);
     }, 0);
+
+    console.log('ConversationContext: END addMessageToCurrentConversation');
   };
 
   const updateConversationTitle = async (id: string, title: string) => {

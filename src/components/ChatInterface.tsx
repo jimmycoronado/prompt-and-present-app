@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { History, File, Download } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
@@ -40,9 +39,20 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   const messages = currentConversation?.messages || [];
 
+  // Log messages array changes
+  useEffect(() => {
+    console.log('ChatInterface: Messages array updated:', messages.length, messages);
+  }, [messages]);
+
+  // Log currentConversation changes
+  useEffect(() => {
+    console.log('ChatInterface: Current conversation changed:', currentConversation?.id, currentConversation?.messages?.length);
+  }, [currentConversation]);
+
   // Crear nueva conversación si no existe una actual
   useEffect(() => {
     if (!currentConversation) {
+      console.log('ChatInterface: Creating new conversation');
       createNewConversation();
     }
   }, [currentConversation, createNewConversation]);
@@ -58,7 +68,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const handleSendMessage = async (content: string) => {
     if (!content.trim() && uploadedFiles.length === 0) return;
 
-    console.log('ChatInterface: Sending message:', content);
+    console.log('ChatInterface: START handleSendMessage with content:', content);
+    console.log('ChatInterface: Current conversation before adding message:', currentConversation?.id, currentConversation?.messages?.length);
 
     const userMessage: ChatMessageType = {
       id: Date.now().toString(),
@@ -73,20 +84,24 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     };
 
     console.log('ChatInterface: Created user message:', userMessage);
+    
+    // Add user message immediately
     addMessageToCurrentConversation(userMessage);
-    console.log('ChatInterface: Message added to conversation');
+    console.log('ChatInterface: Called addMessageToCurrentConversation for user message');
     
     setIsLoading(true);
     setUploadedFiles([]);
     
-    // Clear template content after sending - use a timeout to avoid state conflicts
+    // Clear template content after sending
     setTimeout(() => {
       console.log('ChatInterface: Clearing template content');
       setTemplateContent("");
     }, 100);
 
     try {
+      console.log('ChatInterface: Calling mockApiCall...');
       const response = await mockApiCall(content, uploadedFiles, aiSettings);
+      console.log('ChatInterface: Received API response:', response);
       
       const aiMessage: ChatMessageType = {
         id: (Date.now() + 1).toString(),
@@ -103,9 +118,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         }
       };
 
+      console.log('ChatInterface: Created AI message:', aiMessage);
+      console.log('ChatInterface: Current conversation before adding AI message:', currentConversation?.id, currentConversation?.messages?.length);
+      
       addMessageToCurrentConversation(aiMessage);
+      console.log('ChatInterface: Called addMessageToCurrentConversation for AI message');
+      
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('ChatInterface: Error in mockApiCall:', error);
       const errorMessage: ChatMessageType = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
@@ -120,6 +140,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       addMessageToCurrentConversation(errorMessage);
     } finally {
       setIsLoading(false);
+      console.log('ChatInterface: END handleSendMessage');
     }
   };
 
@@ -261,14 +282,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           </div>
         )}
 
-        {messages.map((message) => (
-          <ChatMessage
-            key={message.id}
-            message={message}
-            isSelected={selectedMessage?.id === message.id}
-            onClick={() => onSelectMessage(message)}
-          />
-        ))}
+        {messages.map((message) => {
+          console.log('ChatInterface: Rendering message:', message.id, message.type, message.content.substring(0, 50));
+          return (
+            <ChatMessage
+              key={message.id}
+              message={message}
+              isSelected={selectedMessage?.id === message.id}
+              onClick={() => onSelectMessage(message)}
+            />
+          );
+        })}
 
         {isLoading && (
           <div className="flex justify-start animate-fade-in" role="status" aria-live="polite" aria-label="Procesando respuesta">
