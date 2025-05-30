@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Conversation, ConversationSummary } from '../types/conversation';
 import { ChatMessage } from '../types/chat';
 
@@ -162,42 +163,41 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     );
   };
 
-  const addMessageToCurrentConversation = (message: ChatMessage) => {
+  const addMessageToCurrentConversation = useCallback((message: ChatMessage) => {
     console.log('ConversationContext: START addMessageToCurrentConversation with message:', message.id, message.type, message.content.substring(0, 50));
     
-    if (!currentConversation) {
-      console.warn('ConversationContext: No current conversation to add message to');
-      return;
-    }
+    setCurrentConversation(prevConversation => {
+      if (!prevConversation) {
+        console.warn('ConversationContext: No current conversation to add message to');
+        return prevConversation;
+      }
 
-    console.log('ConversationContext: Current conversation before update:', currentConversation.id, currentConversation.messages.length);
+      console.log('ConversationContext: Current conversation before update:', prevConversation.id, prevConversation.messages.length);
 
-    // Create updated conversation with new message
-    const updatedConversation = {
-      ...currentConversation,
-      messages: [...currentConversation.messages, message],
-      updatedAt: new Date(),
-      title: currentConversation.messages.length === 0 ? 
-        message.content.substring(0, 50) + (message.content.length > 50 ? '...' : '') : 
-        currentConversation.title
-    };
+      // Create updated conversation with new message
+      const updatedConversation = {
+        ...prevConversation,
+        messages: [...prevConversation.messages, message],
+        updatedAt: new Date(),
+        title: prevConversation.messages.length === 0 ? 
+          message.content.substring(0, 50) + (message.content.length > 50 ? '...' : '') : 
+          prevConversation.title
+      };
 
-    console.log('ConversationContext: Updated conversation created:', updatedConversation.id, updatedConversation.messages.length);
-    console.log('ConversationContext: All messages in updated conversation:', updatedConversation.messages.map(m => `${m.id}:${m.type}:${m.content.substring(0, 20)}`));
-    
-    // Update state immediately
-    console.log('ConversationContext: Setting currentConversation state...');
-    setCurrentConversation(updatedConversation);
-    
-    // Save asynchronously without blocking UI
-    console.log('ConversationContext: Scheduling async save...');
-    setTimeout(() => {
-      console.log('ConversationContext: Executing async save...');
-      saveConversation(updatedConversation);
-    }, 0);
+      console.log('ConversationContext: Updated conversation created:', updatedConversation.id, updatedConversation.messages.length);
+      console.log('ConversationContext: All messages in updated conversation:', updatedConversation.messages.map(m => `${m.id}:${m.type}:${m.content.substring(0, 20)}`));
+      
+      // Save asynchronously without blocking UI
+      console.log('ConversationContext: Scheduling async save...');
+      setTimeout(() => {
+        console.log('ConversationContext: Executing async save...');
+        saveConversation(updatedConversation);
+      }, 0);
 
-    console.log('ConversationContext: END addMessageToCurrentConversation');
-  };
+      console.log('ConversationContext: END addMessageToCurrentConversation');
+      return updatedConversation;
+    });
+  }, [conversations]);
 
   const updateConversationTitle = async (id: string, title: string) => {
     try {

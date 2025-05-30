@@ -67,6 +67,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   const handleSendMessage = async (content: string) => {
     if (!content.trim() && uploadedFiles.length === 0) return;
+    if (!currentConversation) return;
 
     console.log('ChatInterface: START handleSendMessage with content:', content);
     console.log('ChatInterface: Current conversation before adding message:', currentConversation?.id, currentConversation?.messages?.length);
@@ -119,10 +120,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       };
 
       console.log('ChatInterface: Created AI message:', aiMessage);
-      console.log('ChatInterface: Current conversation before adding AI message:', currentConversation?.id, currentConversation?.messages?.length);
       
-      addMessageToCurrentConversation(aiMessage);
-      console.log('ChatInterface: Called addMessageToCurrentConversation for AI message');
+      // Use setTimeout to ensure the user message is fully processed first
+      setTimeout(() => {
+        console.log('ChatInterface: Adding AI message after delay');
+        addMessageToCurrentConversation(aiMessage);
+      }, 50);
       
     } catch (error) {
       console.error('ChatInterface: Error in mockApiCall:', error);
@@ -137,7 +140,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           tokensUsed: 0
         }
       };
-      addMessageToCurrentConversation(errorMessage);
+      setTimeout(() => {
+        addMessageToCurrentConversation(errorMessage);
+      }, 50);
     } finally {
       setIsLoading(false);
       console.log('ChatInterface: END handleSendMessage');
