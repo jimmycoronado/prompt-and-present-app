@@ -29,25 +29,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Configurar listener de cambios de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         console.log('Auth state change:', event, session);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // Si el usuario se autenticó exitosamente y está en la página de auth, redirigir
+        if (event === 'SIGNED_IN' && session && window.location.pathname === '/auth') {
+          console.log('User signed in, redirecting to home');
+          window.location.href = '/';
+        }
       }
     );
 
-    // Verificar si hay tokens en la URL (callback de OAuth)
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const accessToken = hashParams.get('access_token');
+    // Verificar si estamos procesando un callback de OAuth
+    const isOAuthCallback = window.location.hash.includes('access_token');
     
-    if (accessToken) {
-      console.log('Processing OAuth callback with access token');
-      // Limpiar la URL inmediatamente
-      window.history.replaceState({}, document.title, window.location.pathname);
+    if (isOAuthCallback) {
+      console.log('Processing OAuth callback');
+      // Limpiar la URL hash para evitar que se muestre al usuario
+      const cleanUrl = window.location.pathname + window.location.search;
+      window.history.replaceState({}, document.title, cleanUrl);
       
-      // No necesitamos hacer nada más, Supabase manejará automáticamente el callback
-      // El listener onAuthStateChange se activará cuando la sesión esté lista
+      // Supabase procesará automáticamente el callback y activará onAuthStateChange
     } else {
       // Si no hay callback, verificar sesión existente
       supabase.auth.getSession().then(({ data: { session } }) => {
@@ -62,14 +67,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signInWithAzure = async () => {
-    // Usar la URL actual del navegador como redirectTo
-    const currentUrl = window.location.origin;
-    console.log('Redirecting to Azure with return URL:', currentUrl);
+    // Usar la URL de la página de auth como redirectTo
+    const redirectUrl = `${window.location.origin}/auth`;
+    console.log('Redirecting to Azure with return URL:', redirectUrl);
     
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'azure',
       options: {
-        redirectTo: currentUrl,
+        redirectTo: redirectUrl,
         scopes: 'openid profile email'
       }
     });
