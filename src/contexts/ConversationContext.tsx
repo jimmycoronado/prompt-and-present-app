@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Conversation, ConversationSummary } from '../types/conversation';
 import { ChatMessage } from '../types/chat';
@@ -112,8 +111,6 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       const updatedConversations = conversations.filter(c => c.id !== conversation.id);
       updatedConversations.unshift(summary);
       saveConversations(updatedConversations);
-      
-      setCurrentConversation(conversation);
     } catch (error) {
       console.error('Error saving conversation:', error);
     }
@@ -158,8 +155,14 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const addMessageToCurrentConversation = (message: ChatMessage) => {
-    if (!currentConversation) return;
+    console.log('ConversationContext: Adding message to conversation:', message);
+    
+    if (!currentConversation) {
+      console.warn('ConversationContext: No current conversation to add message to');
+      return;
+    }
 
+    // Update current conversation state immediately for UI responsiveness
     const updatedConversation = {
       ...currentConversation,
       messages: [...currentConversation.messages, message],
@@ -169,7 +172,15 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         currentConversation.title
     };
 
-    saveConversation(updatedConversation);
+    console.log('ConversationContext: Updated conversation:', updatedConversation);
+    
+    // Set the conversation state immediately
+    setCurrentConversation(updatedConversation);
+    
+    // Save to localStorage asynchronously without affecting the UI state
+    setTimeout(() => {
+      saveConversation(updatedConversation);
+    }, 0);
   };
 
   const updateConversationTitle = async (id: string, title: string) => {
