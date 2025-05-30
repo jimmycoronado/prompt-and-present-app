@@ -1,6 +1,6 @@
 
 import { useState, useRef, useEffect } from "react";
-import { Send, FileTemplate } from "lucide-react";
+import { Send, File } from "lucide-react";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 
@@ -85,7 +85,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           
           {hasTemplateVariables && (
             <div className="absolute right-12 top-1/2 transform -translate-y-1/2">
-              <FileTemplate className="h-4 w-4 text-orange-500" />
+              <File className="h-4 w-4 text-orange-500" />
             </div>
           )}
         </div>
@@ -104,7 +104,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       
       {hasTemplateVariables && (
         <div className="mt-2 text-xs text-orange-600 dark:text-orange-400 flex items-center">
-          <FileTemplate className="h-3 w-3 mr-1" />
+          <File className="h-3 w-3 mr-1" />
           Reemplaza las variables entre llaves {} con tus valores específicos
         </div>
       )}

@@ -1,5 +1,6 @@
+
 import { useState } from 'react';
-import { FileTemplate, Plus, Search, Bookmark, Code, FileText, Lightbulb, MessageCircle } from 'lucide-react';
+import { File, Plus, Search, Bookmark, Code, FileText, Lightbulb, MessageCircle } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { ScrollArea } from './ui/scroll-area';
@@ -89,7 +90,7 @@ export const PromptTemplates: React.FC<PromptTemplatesProps> = ({ onSelectTempla
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-            <FileTemplate className="h-5 w-5 mr-2" />
+            <File className="h-5 w-5 mr-2" />
             Plantillas de Prompts
           </h2>
           <Button
