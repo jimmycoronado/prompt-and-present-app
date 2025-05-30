@@ -57,11 +57,11 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
               <User className="h-4 w-4" />
             </div>
           ) : (
-            <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
               <img 
                 src="https://www.skandia.com.mx/mercadeo/2021/campana/Sami/Mail/Sami/Thinking2.gif" 
                 alt="Sami"
-                className="w-8 h-8 object-contain"
+                className="w-6 h-6 object-contain"
               />
             </div>
           )}
