@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -19,6 +20,46 @@ export default {
 		},
 		extend: {
 			colors: {
+				// Skandia brand colors
+				'skandia-green': {
+					DEFAULT: '#00A651',
+					50: '#E6F7ED',
+					100: '#CCF0DB',
+					200: '#99E1B7',
+					300: '#66D293',
+					400: '#33C36F',
+					500: '#00A651',
+					600: '#008541',
+					700: '#006431',
+					800: '#004221',
+					900: '#002110'
+				},
+				'skandia-blue': {
+					DEFAULT: '#0066CC',
+					50: '#E6F1FF',
+					100: '#CCE4FF',
+					200: '#99C9FF',
+					300: '#66ADFF',
+					400: '#3392FF',
+					500: '#0066CC',
+					600: '#0052A3',
+					700: '#003D7A',
+					800: '#002952',
+					900: '#001429'
+				},
+				'skandia-teal': {
+					DEFAULT: '#00B5A5',
+					50: '#E6F8F6',
+					100: '#CCF1ED',
+					200: '#99E3DB',
+					300: '#66D5C9',
+					400: '#33C7B7',
+					500: '#00B5A5',
+					600: '#009184',
+					700: '#006D63',
+					800: '#004842',
+					900: '#002421'
+				},
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',

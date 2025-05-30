@@ -14,11 +14,11 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
     <header className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 flex items-center justify-between shadow-sm">
       <div className="flex items-center space-x-4">
         <div className="flex items-center space-x-3">
-          <div className="p-2 bg-blue-600 rounded-lg">
+          <div className="p-2 bg-skandia-green rounded-lg">
             <MessageSquare className="h-6 w-6 text-white" />
           </div>
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-            AI Assistant
+            Super Sami
           </h1>
         </div>
       </div>
