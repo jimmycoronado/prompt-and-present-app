@@ -21,21 +21,24 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (initialValue !== message) {
+    if (initialValue !== undefined && initialValue !== message) {
       setMessage(initialValue);
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
         textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
-        textareaRef.current.focus();
-        textareaRef.current.setSelectionRange(textareaRef.current.value.length, textareaRef.current.value.length);
+        if (initialValue) {
+          textareaRef.current.focus();
+          textareaRef.current.setSelectionRange(textareaRef.current.value.length, textareaRef.current.value.length);
+        }
       }
     }
   }, [initialValue]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (message.trim() && !disabled) {
-      onSendMessage(message);
+    const trimmedMessage = message.trim();
+    if (trimmedMessage && !disabled) {
+      onSendMessage(trimmedMessage);
       setMessage("");
       onValueChange?.("");
       if (textareaRef.current) {

@@ -57,6 +57,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const handleSendMessage = async (content: string) => {
     if (!content.trim() && uploadedFiles.length === 0) return;
 
+    console.log('Sending message:', content); // Debug log
+
     const userMessage: ChatMessageType = {
       id: Date.now().toString(),
       type: 'user',
@@ -72,6 +74,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     addMessageToCurrentConversation(userMessage);
     setIsLoading(true);
     setUploadedFiles([]);
+    
+    // Clear template content after sending
+    setTemplateContent("");
 
     try {
       const response = await mockApiCall(content, uploadedFiles, aiSettings);
