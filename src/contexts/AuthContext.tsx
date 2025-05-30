@@ -27,6 +27,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Configurar listener de cambios de autenticación
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log('Auth state change:', event, session);
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
+    );
+
     // Función para procesar la URL de callback de Azure
     const handleAuthCallback = async () => {
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
@@ -35,44 +45,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (accessToken) {
         console.log('Processing OAuth callback with access token');
         try {
-          // Limpiar la URL
+          // Limpiar la URL inmediatamente
           window.history.replaceState({}, document.title, window.location.pathname);
           
-          // Obtener la sesión de Supabase que debería haberse creado automáticamente
-          const { data: { session }, error } = await supabase.auth.getSession();
-          if (error) {
-            console.error('Error getting session after OAuth:', error);
-          } else if (session) {
-            console.log('Session obtained successfully:', session);
-            setSession(session);
-            setUser(session.user);
-          }
+          // Dar tiempo a Supabase para procesar el token automáticamente
+          setTimeout(async () => {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            if (error) {
+              console.error('Error getting session after OAuth:', error);
+              setLoading(false);
+            } else if (session) {
+              console.log('Session obtained successfully:', session);
+              setSession(session);
+              setUser(session.user);
+              setLoading(false);
+            } else {
+              console.log('No session found after OAuth');
+              setLoading(false);
+            }
+          }, 100);
         } catch (error) {
           console.error('Error processing OAuth callback:', error);
+          setLoading(false);
         }
+      } else {
+        // Si no hay token en la URL, verificar sesión existente
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          console.log('Current session:', session);
+          setSession(session);
+          setUser(session?.user ?? null);
+          setLoading(false);
+        });
       }
     };
 
-    // Configurar listener de cambios de autenticación
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state change:', event, session);
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
-
     // Procesar callback de OAuth si existe
     handleAuthCallback();
-
-    // Verificar sesión existente
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Current session:', session);
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
 
     return () => subscription.unsubscribe();
   }, []);
