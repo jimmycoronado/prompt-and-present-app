@@ -1,11 +1,18 @@
 
 import { useState, useRef, useEffect } from "react";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, History, Template, Settings, Download } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
 import { FileUpload } from "./FileUpload";
+import { ConversationHistory } from "./ConversationHistory";
+import { PromptTemplates } from "./PromptTemplates";
 import { mockApiCall } from "../utils/mockApi";
 import { ChatMessage as ChatMessageType } from "../types/chat";
+import { PromptTemplate } from "../types/templates";
+import { useConversation } from "../contexts/ConversationContext";
+import { useSettings } from "../contexts/SettingsContext";
+import { Button } from "./ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 interface ChatInterfaceProps {
   onSelectMessage: (message: ChatMessageType | null) => void;
@@ -16,10 +23,29 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   onSelectMessage, 
   selectedMessage 
 }) => {
-  const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [templateContent, setTemplateContent] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
+
+  const { 
+    currentConversation, 
+    addMessageToCurrentConversation, 
+    createNewConversation 
+  } = useConversation();
+  const { aiSettings } = useSettings();
+
+  const messages = currentConversation?.messages || [];
+
+  // Crear nueva conversación si no existe una actual
+  useEffect(() => {
+    if (!currentConversation) {
+      createNewConversation();
+    }
+  }, [currentConversation, createNewConversation]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -44,13 +70,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       }))
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    addMessageToCurrentConversation(userMessage);
     setIsLoading(true);
     setUploadedFiles([]);
 
     try {
-      // Simular llamada a API externa
-      const response = await mockApiCall(content, uploadedFiles);
+      const response = await mockApiCall(content, uploadedFiles, aiSettings);
       
       const aiMessage: ChatMessageType = {
         id: (Date.now() + 1).toString(),
@@ -62,12 +87,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         downloadLink: response.downloadLink,
         metadata: {
           processingTime: response.processingTime || Math.random() * 2000 + 500,
-          model: 'gpt-4-turbo',
+          model: aiSettings.model,
           tokensUsed: Math.floor(Math.random() * 1000) + 100
         }
       };
 
-      setMessages(prev => [...prev, aiMessage]);
+      addMessageToCurrentConversation(aiMessage);
     } catch (error) {
       console.error('Error sending message:', error);
       const errorMessage: ChatMessageType = {
@@ -81,27 +106,142 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           tokensUsed: 0
         }
       };
-      setMessages(prev => [...prev, errorMessage]);
+      addMessageToCurrentConversation(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleSelectTemplate = (template: PromptTemplate) => {
+    setTemplateContent(template.content);
+    setShowTemplates(false);
+  };
+
+  const handleExportConversation = () => {
+    if (!currentConversation || messages.length === 0) {
+      toast({
+        title: "No hay conversación",
+        description: "No hay mensajes para exportar",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const content = messages.map(msg => 
+      `${msg.type === 'user' ? 'Usuario' : 'Asistente'} (${msg.timestamp.toLocaleString()}):\n${msg.content}\n\n`
+    ).join('');
+
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `conversacion_${currentConversation.title}_${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Conversación exportada",
+      description: "La conversación se ha descargado como archivo de texto"
+    });
+  };
+
+  // Sidebar para historial y plantillas
+  if (showHistory) {
+    return (
+      <div className="flex h-full">
+        <div className="w-80 border-r border-gray-200 dark:border-gray-700">
+          <ConversationHistory onClose={() => setShowHistory(false)} />
+        </div>
+        <div className="flex-1 flex items-center justify-center text-gray-500 dark:text-gray-400">
+          Selecciona una conversación para continuar
+        </div>
+      </div>
+    );
+  }
+
+  if (showTemplates) {
+    return (
+      <div className="flex h-full">
+        <div className="w-80 border-r border-gray-200 dark:border-gray-700">
+          <PromptTemplates 
+            onSelectTemplate={handleSelectTemplate}
+            onClose={() => setShowTemplates(false)} 
+          />
+        </div>
+        <div className="flex-1 flex items-center justify-center text-gray-500 dark:text-gray-400">
+          Selecciona una plantilla para usar
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full">
+      {/* Action Bar */}
+      <div className="border-b border-gray-200 dark:border-gray-700 p-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowHistory(true)}
+              className="flex items-center space-x-2"
+            >
+              <History className="h-4 w-4" />
+              <span>Historial</span>
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowTemplates(true)}
+              className="flex items-center space-x-2"
+            >
+              <Template className="h-4 w-4" />
+              <span>Plantillas</span>
+            </Button>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportConversation}
+              disabled={messages.length === 0}
+              className="flex items-center space-x-2"
+            >
+              <Download className="h-4 w-4" />
+              <span>Exportar</span>
+            </Button>
+          </div>
+        </div>
+      </div>
+
       {/* Messages Area */}
       <main className="flex-1 overflow-y-auto p-4 space-y-4" role="main" aria-label="Conversación">
         {messages.length === 0 && (
           <div className="text-center py-12">
-            <div className="bg-gradient-to-r from-blue-500 to-purple-600 w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center">
+            <div className="bg-gradient-to-r from-blue-500 to-purple-600 w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center animate-pulse">
               <MessageSquare className="h-8 w-8 text-white" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               ¡Hola! ¿En qué puedo ayudarte hoy?
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+            <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-4">
               Puedes hacerme preguntas, subir archivos para analizar, o pedirme que genere gráficas y tablas de datos.
             </p>
+            <div className="flex flex-wrap justify-center gap-2 text-sm">
+              <Button variant="outline" size="sm" onClick={() => setShowTemplates(true)}>
+                <Template className="h-3 w-3 mr-1" />
+                Ver Plantillas
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setShowHistory(true)}>
+                <History className="h-3 w-3 mr-1" />
+                Ver Historial
+              </Button>
+            </div>
           </div>
         )}
 
@@ -115,7 +255,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         ))}
 
         {isLoading && (
-          <div className="flex justify-start" role="status" aria-live="polite" aria-label="Procesando respuesta">
+          <div className="flex justify-start animate-fade-in" role="status" aria-live="polite" aria-label="Procesando respuesta">
             <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700 max-w-xs">
               <div className="flex items-center space-x-2">
                 <div className="flex space-x-1" aria-hidden="true">
@@ -134,17 +274,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
       {/* File Upload Area */}
       {uploadedFiles.length > 0 && (
-        <div className="border-t border-gray-200 dark:border-gray-700 p-4" aria-label="Archivos seleccionados">
+        <div className="border-t border-gray-200 dark:border-gray-700 p-4 animate-fade-in" aria-label="Archivos seleccionados">
           <div className="flex flex-wrap gap-2">
             {uploadedFiles.map((file, index) => (
               <div
                 key={index}
-                className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full text-sm flex items-center space-x-2"
+                className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full text-sm flex items-center space-x-2 animate-scale-in"
               >
                 <span>{file.name}</span>
                 <button
                   onClick={() => setUploadedFiles(files => files.filter((_, i) => i !== index))}
-                  className="text-blue-500 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                  className="text-blue-500 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded transition-colors"
                   aria-label={`Remover archivo ${file.name}`}
                 >
                   ×
@@ -159,7 +299,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       <div className="border-t border-gray-200 dark:border-gray-700 p-4">
         <div className="max-w-4xl mx-auto">
           <FileUpload onFilesUploaded={setUploadedFiles} />
-          <ChatInput onSendMessage={handleSendMessage} disabled={isLoading} />
+          <ChatInput 
+            onSendMessage={handleSendMessage} 
+            disabled={isLoading}
+            initialValue={templateContent}
+            onValueChange={setTemplateContent}
+          />
         </div>
       </div>
     </div>
