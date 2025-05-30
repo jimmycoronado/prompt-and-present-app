@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { MessageSquare, History, File, Settings, Download } from "lucide-react";
+import { History, File, Download } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
 import { FileUpload } from "./FileUpload";
@@ -222,8 +222,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       <main className="flex-1 overflow-y-auto p-4 space-y-4" role="main" aria-label="Conversación">
         {messages.length === 0 && (
           <div className="text-center py-12">
-            <div className="bg-gradient-to-r from-blue-500 to-purple-600 w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center animate-pulse">
-              <MessageSquare className="h-8 w-8 text-white" />
+            <div className="w-16 h-16 rounded-full mx-auto mb-4 bg-skandia-green p-2 overflow-hidden">
+              <img 
+                src="https://www.skandia.com.mx/mercadeo/2021/campana/Sami/Mail/Sami/Thinking2.gif" 
+                alt="Sami Logo" 
+                className="w-full h-full object-contain animate-pulse"
+              />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               ¡Hola! ¿En qué puedo ayudarte hoy?
