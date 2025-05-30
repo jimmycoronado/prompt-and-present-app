@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { Send, File } from "lucide-react";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
+import { VoiceRecordButton } from "./VoiceRecordButton";
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -76,6 +77,20 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
   };
 
+  const handleVoiceTranscription = (transcribedText: string) => {
+    console.log('ChatInput: Voice transcription received:', transcribedText);
+    const newMessage = message + (message ? ' ' : '') + transcribedText;
+    setMessage(newMessage);
+    onValueChange?.(newMessage);
+    
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+      textareaRef.current.focus();
+      textareaRef.current.setSelectionRange(textareaRef.current.value.length, textareaRef.current.value.length);
+    }
+  };
+
   const hasTemplateVariables = message.includes('{') && message.includes('}');
 
   return (
@@ -102,6 +117,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             </div>
           )}
         </div>
+        
+        <VoiceRecordButton
+          onTranscription={handleVoiceTranscription}
+          disabled={disabled}
+        />
         
         <Button
           type="submit"
