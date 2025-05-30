@@ -1,5 +1,5 @@
 
-import { Moon, Sun, Menu, MessageSquare } from "lucide-react";
+import { Moon, Sun, Menu } from "lucide-react";
 import { useTheme } from "../contexts/ThemeContext";
 import { Button } from "./ui/button";
 
@@ -14,8 +14,12 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
     <header className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 flex items-center justify-between shadow-sm">
       <div className="flex items-center space-x-4">
         <div className="flex items-center space-x-3">
-          <div className="p-2 bg-skandia-green rounded-lg">
-            <MessageSquare className="h-6 w-6 text-white" />
+          <div className="w-10 h-10 rounded-lg overflow-hidden bg-skandia-green p-1">
+            <img 
+              src="https://www.skandia.com.mx/mercadeo/2021/campana/Sami/Mail/Sami/Thinking2.gif" 
+              alt="Sami Logo" 
+              className="w-full h-full object-contain"
+            />
           </div>
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">
             Super Sami

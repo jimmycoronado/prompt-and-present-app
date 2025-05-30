@@ -1,5 +1,5 @@
 
-import { User, Bot, Clock, Download, Copy, ThumbsUp, ThumbsDown } from "lucide-react";
+import { User, Clock, Download, Copy, ThumbsUp, ThumbsDown } from "lucide-react";
 import { ChatMessage as ChatMessageType } from "../types/chat";
 import { DataTable } from "./DataTable";
 import { DataChart } from "./DataChart";
@@ -52,13 +52,19 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
       <div className={`max-w-4xl w-full ${isUser ? 'flex flex-row-reverse' : 'flex'} space-x-3 space-x-reverse`}>
         {/* Avatar */}
         <div className={`flex-shrink-0 ${isUser ? 'ml-3' : 'mr-3'}`}>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-            isUser 
-              ? 'bg-blue-600 text-white' 
-              : 'bg-gray-600 dark:bg-gray-500 text-white'
-          }`}>
-            {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
-          </div>
+          {isUser ? (
+            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-600 text-white">
+              <User className="h-4 w-4" />
+            </div>
+          ) : (
+            <div className="w-8 h-8 rounded-full overflow-hidden bg-skandia-green p-1">
+              <img 
+                src="https://www.skandia.com.mx/mercadeo/2021/campana/Sami/Mail/Sami/Thinking2.gif" 
+                alt="Sami"
+                className="w-full h-full object-contain"
+              />
+            </div>
+          )}
         </div>
 
         {/* Message Content */}
