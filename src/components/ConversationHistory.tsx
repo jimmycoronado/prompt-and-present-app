@@ -47,7 +47,7 @@ export const ConversationHistory: React.FC<ConversationHistoryProps> = ({ onClos
           <Button
             onClick={handleNewConversation}
             size="sm"
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-skandia-green hover:bg-skandia-green/90 text-white whitespace-nowrap"
           >
             Nueva Conversación
           </Button>
