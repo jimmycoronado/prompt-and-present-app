@@ -1,7 +1,6 @@
 
-
 import { useState } from 'react';
-import { File, Plus, Search, Bookmark, Code, FileText, Lightbulb, MessageCircle, BarChart, Users, Calculator, Globe } from 'lucide-react';
+import { File, Plus, Search, Bookmark, Code, FileText, Lightbulb, MessageCircle, BarChart, Users, Calculator, Globe, X } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { ScrollArea } from './ui/scroll-area';
@@ -181,14 +180,24 @@ export const PromptTemplates: React.FC<PromptTemplatesProps> = ({ onSelectTempla
             <File className="h-5 w-5 mr-2" />
             Plantillas de Prompts
           </h2>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {/* TODO: Implementar crear plantilla personalizada */}}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Crear Plantilla
-          </Button>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {/* TODO: Implementar crear plantilla personalizada */}}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Crear Plantilla
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="h-8 w-8 p-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
         
         <div className="space-y-3">
@@ -288,4 +297,3 @@ export const PromptTemplates: React.FC<PromptTemplatesProps> = ({ onSelectTempla
     </div>
   );
 };
-
