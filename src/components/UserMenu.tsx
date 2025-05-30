@@ -18,11 +18,18 @@ export const UserMenu: React.FC = () => {
 
   if (!user) return null;
 
-  const initials = user.user_metadata?.full_name
-    ?.split(' ')
+  // Para usuarios de Azure, el nombre puede estar en diferentes campos
+  const displayName = user.user_metadata?.full_name || 
+                     user.user_metadata?.name || 
+                     user.user_metadata?.preferred_username ||
+                     'Usuario';
+
+  const initials = displayName
+    .split(' ')
     .map((n: string) => n[0])
     .join('')
-    .toUpperCase() || user.email?.substring(0, 2).toUpperCase();
+    .toUpperCase()
+    .substring(0, 2);
 
   const handleSignOut = async () => {
     await signOut();
@@ -43,7 +50,7 @@ export const UserMenu: React.FC = () => {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">
-              {user.user_metadata?.full_name || 'Usuario'}
+              {displayName}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}
