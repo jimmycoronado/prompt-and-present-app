@@ -15,6 +15,14 @@ export const useVoiceRecording = ({ onTranscription, onError }: UseVoiceRecordin
 
   const startRecording = useCallback(async () => {
     try {
+      console.log('Requesting microphone permissions...');
+      
+      // Check if we're in a secure context
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Tu navegador no soporta la captura de audio o no estás en una conexión segura');
+      }
+
+      // Request microphone access with explicit user gesture
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
           sampleRate: 16000,
@@ -24,6 +32,8 @@ export const useVoiceRecording = ({ onTranscription, onError }: UseVoiceRecordin
           autoGainControl: true
         } 
       });
+      
+      console.log('Microphone access granted, starting recording...');
       
       chunksRef.current = [];
       mediaRecorderRef.current = new MediaRecorder(stream, {
@@ -37,6 +47,7 @@ export const useVoiceRecording = ({ onTranscription, onError }: UseVoiceRecordin
       };
       
       mediaRecorderRef.current.onstop = async () => {
+        console.log('Recording stopped, processing audio...');
         const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
         await processAudio(audioBlob);
         
@@ -48,12 +59,22 @@ export const useVoiceRecording = ({ onTranscription, onError }: UseVoiceRecordin
       setIsRecording(true);
     } catch (error) {
       console.error('Error starting recording:', error);
-      onError?.('No se pudo acceder al micrófono. Por favor, verifica los permisos.');
+      
+      if (error.name === 'NotAllowedError') {
+        onError?.('Acceso al micrófono denegado. Por favor, permite el acceso al micrófono en la configuración de tu navegador y recarga la página.');
+      } else if (error.name === 'NotFoundError') {
+        onError?.('No se encontró ningún micrófono. Por favor, conecta un micrófono y vuelve a intentar.');
+      } else if (error.name === 'NotSupportedError') {
+        onError?.('Tu navegador no soporta la captura de audio.');
+      } else {
+        onError?.('No se pudo acceder al micrófono. Por favor, verifica los permisos y que tengas un micrófono conectado.');
+      }
     }
   }, [onError]);
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && isRecording) {
+      console.log('Stopping recording...');
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       setIsProcessing(true);
@@ -82,6 +103,7 @@ export const useVoiceRecording = ({ onTranscription, onError }: UseVoiceRecordin
   };
 
   const toggleRecording = useCallback(() => {
+    console.log('Toggle recording - current state:', isRecording);
     if (isRecording) {
       stopRecording();
     } else {

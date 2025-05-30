@@ -18,6 +18,7 @@ export const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({
   const { isRecording, isProcessing, toggleRecording } = useVoiceRecording({
     onTranscription,
     onError: (error) => {
+      console.error('Voice recording error:', error);
       toast({
         title: "Error de grabación",
         description: error,
@@ -28,6 +29,8 @@ export const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({
 
   const handleClick = () => {
     if (disabled) return;
+    
+    console.log('Voice button clicked');
     toggleRecording();
   };
 
