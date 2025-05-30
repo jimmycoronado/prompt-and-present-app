@@ -53,7 +53,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
         {/* Avatar */}
         <div className={`flex-shrink-0 ${isUser ? 'ml-3' : 'mr-3'}`}>
           {isUser ? (
-            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-600 text-white">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-700 text-white">
               <User className="h-4 w-4" />
             </div>
           ) : (
@@ -71,8 +71,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
         <div className={`flex-1 ${isUser ? 'text-right' : 'text-left'}`}>
           <div className={`inline-block rounded-lg p-4 shadow-sm border ${
             isUser
-              ? 'bg-blue-600 text-white border-blue-600'
-              : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700'
+              ? 'bg-gray-700 text-white border-gray-700'
+              : 'bg-skandia-green text-white border-skandia-green'
           } ${isSelected ? 'ring-2 ring-blue-500' : ''}`}>
             
             {/* Text Content */}
@@ -90,8 +90,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
                     key={index}
                     className={`flex items-center space-x-2 p-2 rounded ${
                       isUser 
-                        ? 'bg-blue-500' 
-                        : 'bg-gray-100 dark:bg-gray-700'
+                        ? 'bg-gray-600' 
+                        : 'bg-skandia-green/80'
                     }`}
                   >
                     <span className="text-sm">{file.name}</span>
@@ -124,7 +124,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
                   asChild
                   variant="outline"
                   size="sm"
-                  className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                  className="text-white border-white hover:bg-white hover:text-skandia-green"
                 >
                   <a href={message.downloadLink.url} download>
                     <Download className="h-4 w-4 mr-2" />
@@ -136,7 +136,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
 
             {/* Actions for Assistant Messages */}
             {!isUser && message.content && (
-              <div className="mt-3 flex items-center space-x-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+              <div className="mt-3 flex items-center space-x-2 pt-2 border-t border-white/20">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -144,7 +144,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
                     e.stopPropagation();
                     handleCopyText();
                   }}
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  className="text-white/80 hover:text-white hover:bg-white/10"
                   aria-label="Copiar mensaje"
                 >
                   <Copy className="h-4 w-4 mr-1" />
@@ -159,7 +159,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
                       e.stopPropagation();
                       handleFeedback('positive');
                     }}
-                    className="text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400"
+                    className="text-white/80 hover:text-white hover:bg-white/10"
                     aria-label="Me gusta esta respuesta"
                   >
                     <ThumbsUp className="h-4 w-4" />
@@ -172,7 +172,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
                       e.stopPropagation();
                       handleFeedback('negative');
                     }}
-                    className="text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
+                    className="text-white/80 hover:text-white hover:bg-white/10"
                     aria-label="No me gusta esta respuesta"
                   >
                     <ThumbsDown className="h-4 w-4" />
