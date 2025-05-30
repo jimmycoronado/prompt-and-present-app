@@ -1,6 +1,6 @@
 
 import { useState, useRef } from "react";
-import { Send, Paperclip } from "lucide-react";
+import { Send } from "lucide-react";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 
@@ -20,6 +20,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled })
       setMessage("");
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
+        textareaRef.current.focus();
       }
     }
   };
@@ -40,7 +41,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled })
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative">
+    <form onSubmit={handleSubmit} className="relative" role="search" aria-label="Enviar mensaje">
       <div className="flex items-end space-x-2">
         <div className="flex-1 relative">
           <Textarea
@@ -48,9 +49,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled })
             value={message}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder="Escribe tu mensaje aquí..."
+            placeholder="Escribe tu mensaje aquí... (Enter para enviar, Shift+Enter para nueva línea)"
             disabled={disabled}
             className="min-h-[44px] max-h-[200px] resize-none pr-12 rounded-lg border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500"
+            aria-label="Mensaje"
+            aria-describedby="send-button"
           />
         </div>
         
@@ -59,10 +62,18 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled })
           disabled={!message.trim() || disabled}
           size="icon"
           className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg h-11 w-11"
+          aria-label="Enviar mensaje"
+          id="send-button"
         >
           <Send className="h-4 w-4" />
         </Button>
       </div>
+      
+      {disabled && (
+        <div className="sr-only" aria-live="polite">
+          Procesando mensaje, por favor espera...
+        </div>
+      )}
     </form>
   );
 };

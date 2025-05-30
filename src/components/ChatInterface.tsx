@@ -90,7 +90,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   return (
     <div className="flex flex-col h-full">
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <main className="flex-1 overflow-y-auto p-4 space-y-4" role="main" aria-label="Conversación">
         {messages.length === 0 && (
           <div className="text-center py-12">
             <div className="bg-gradient-to-r from-blue-500 to-purple-600 w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center">
@@ -115,10 +115,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         ))}
 
         {isLoading && (
-          <div className="flex justify-start">
+          <div className="flex justify-start" role="status" aria-live="polite" aria-label="Procesando respuesta">
             <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700 max-w-xs">
               <div className="flex items-center space-x-2">
-                <div className="flex space-x-1">
+                <div className="flex space-x-1" aria-hidden="true">
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
@@ -130,11 +130,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         )}
 
         <div ref={messagesEndRef} />
-      </div>
+      </main>
 
       {/* File Upload Area */}
       {uploadedFiles.length > 0 && (
-        <div className="border-t border-gray-200 dark:border-gray-700 p-4">
+        <div className="border-t border-gray-200 dark:border-gray-700 p-4" aria-label="Archivos seleccionados">
           <div className="flex flex-wrap gap-2">
             {uploadedFiles.map((file, index) => (
               <div
@@ -144,7 +144,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 <span>{file.name}</span>
                 <button
                   onClick={() => setUploadedFiles(files => files.filter((_, i) => i !== index))}
-                  className="text-blue-500 hover:text-blue-700"
+                  className="text-blue-500 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                  aria-label={`Remover archivo ${file.name}`}
                 >
                   ×
                 </button>

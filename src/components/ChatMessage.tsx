@@ -1,9 +1,10 @@
 
-import { User, Bot, Clock, Download } from "lucide-react";
+import { User, Bot, Clock, Download, Copy, ThumbsUp, ThumbsDown } from "lucide-react";
 import { ChatMessage as ChatMessageType } from "../types/chat";
 import { DataTable } from "./DataTable";
 import { DataChart } from "./DataChart";
 import { Button } from "./ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -13,6 +14,31 @@ interface ChatMessageProps {
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, onClick }) => {
   const isUser = message.type === 'user';
+  const { toast } = useToast();
+
+  const handleCopyText = async () => {
+    try {
+      await navigator.clipboard.writeText(message.content);
+      toast({
+        title: "Texto copiado",
+        description: "El contenido se ha copiado al portapapeles",
+      });
+    } catch (error) {
+      toast({
+        title: "Error al copiar",
+        description: "No se pudo copiar el texto al portapapeles",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFeedback = (type: 'positive' | 'negative') => {
+    // TODO: Implementar cuando se conecte Supabase
+    toast({
+      title: "Feedback registrado",
+      description: `Gracias por tu ${type === 'positive' ? 'valoración positiva' : 'comentario'}`,
+    });
+  };
 
   return (
     <div 
@@ -20,6 +46,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
         isSelected ? 'bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2' : ''
       }`}
       onClick={onClick}
+      role="article"
+      aria-label={`Mensaje de ${isUser ? 'usuario' : 'asistente'}`}
     >
       <div className={`max-w-4xl w-full ${isUser ? 'flex flex-row-reverse' : 'flex'} space-x-3 space-x-reverse`}>
         {/* Avatar */}
@@ -99,6 +127,53 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
                 </Button>
               </div>
             )}
+
+            {/* Actions for Assistant Messages */}
+            {!isUser && message.content && (
+              <div className="mt-3 flex items-center space-x-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCopyText();
+                  }}
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  aria-label="Copiar mensaje"
+                >
+                  <Copy className="h-4 w-4 mr-1" />
+                  Copiar
+                </Button>
+                
+                <div className="flex space-x-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleFeedback('positive');
+                    }}
+                    className="text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400"
+                    aria-label="Me gusta esta respuesta"
+                  >
+                    <ThumbsUp className="h-4 w-4" />
+                  </Button>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleFeedback('negative');
+                    }}
+                    className="text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
+                    aria-label="No me gusta esta respuesta"
+                  >
+                    <ThumbsDown className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Timestamp */}
@@ -106,7 +181,9 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
             isUser ? 'justify-end' : 'justify-start'
           }`}>
             <Clock className="h-3 w-3 mr-1" />
-            {message.timestamp.toLocaleTimeString()}
+            <time dateTime={message.timestamp.toISOString()}>
+              {message.timestamp.toLocaleTimeString()}
+            </time>
           </div>
         </div>
       </div>
