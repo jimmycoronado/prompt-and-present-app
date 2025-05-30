@@ -1,5 +1,6 @@
 
 import { useState, useRef, useEffect } from "react";
+import { MessageSquare } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
 import { FileUpload } from "./FileUpload";
