@@ -7,6 +7,7 @@ import { ScrollArea } from './ui/scroll-area';
 import { ConversationHistory } from './ConversationHistory';
 import { PromptTemplates } from './PromptTemplates';
 import { useConversation } from '../contexts/ConversationContext';
+import { PromptTemplate } from '../types/templates';
 
 interface SidePanelProps {
   isOpen: boolean;
@@ -28,6 +29,15 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   const handleNewChat = () => {
     createNewConversation();
     onNewChat();
+  };
+
+  const handleSelectTemplate = (template: PromptTemplate) => {
+    // TODO: Implement template selection logic
+    console.log('Selected template:', template);
+  };
+
+  const handleCloseTemplates = () => {
+    setActiveTab('chats');
   };
 
   if (!isOpen) {
@@ -128,7 +138,10 @@ export const SidePanel: React.FC<SidePanelProps> = ({
             <ConversationHistory onClose={() => {}} />
           ) : (
             <div className="h-full">
-              <PromptTemplates />
+              <PromptTemplates 
+                onSelectTemplate={handleSelectTemplate}
+                onClose={handleCloseTemplates}
+              />
             </div>
           )}
         </div>
