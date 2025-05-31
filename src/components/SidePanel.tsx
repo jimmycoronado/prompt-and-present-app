@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { PanelLeft, Search, MessageSquare, FileText, Edit3, Plus } from 'lucide-react';
+import { PanelLeft, Search, MessageSquare, FileText, Edit3, Plus, X } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { ScrollArea } from './ui/scroll-area';
@@ -22,7 +22,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   onNewChat,
   hasActiveConversation 
 }) => {
-  const [activeTab, setActiveTab] = useState<'chats' | 'templates'>('chats');
+  const [activeView, setActiveView] = useState<'main' | 'chats' | 'templates'>('main');
   const [searchQuery, setSearchQuery] = useState('');
   const { createNewConversation } = useConversation();
 
@@ -34,10 +34,11 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   const handleSelectTemplate = (template: PromptTemplate) => {
     // TODO: Implement template selection logic
     console.log('Selected template:', template);
+    setActiveView('main');
   };
 
-  const handleCloseTemplates = () => {
-    setActiveTab('chats');
+  const handleBackToMain = () => {
+    setActiveView('main');
   };
 
   if (!isOpen) {
@@ -91,56 +92,76 @@ export const SidePanel: React.FC<SidePanelProps> = ({
             className="h-8 w-8"
             aria-label="Cerrar panel"
           >
-            <PanelLeft className="h-4 w-4" />
+            <X className="h-4 w-4" />
           </Button>
         </div>
 
-        {/* Botón Nuevo Chat */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <Button
-            onClick={handleNewChat}
-            className="w-full bg-skandia-green hover:bg-skandia-green/90 text-white"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Nuevo chat
-          </Button>
-        </div>
-
-        {/* Tabs para Chats y Plantillas */}
-        <div className="flex border-b border-gray-200 dark:border-gray-700">
-          <button
-            onClick={() => setActiveTab('chats')}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium transition-colors ${
-              activeTab === 'chats'
-                ? 'text-skandia-green border-b-2 border-skandia-green bg-green-50 dark:bg-green-900/20'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-            }`}
-          >
-            <Search className="h-4 w-4" />
-            Buscar chats
-          </button>
-          <button
-            onClick={() => setActiveTab('templates')}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium transition-colors ${
-              activeTab === 'templates'
-                ? 'text-skandia-green border-b-2 border-skandia-green bg-green-50 dark:bg-green-900/20'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-            }`}
-          >
-            <FileText className="h-4 w-4" />
-            Plantillas
-          </button>
-        </div>
-
-        {/* Contenido del tab activo */}
+        {/* Contenido principal */}
         <div className="flex-1 overflow-hidden">
-          {activeTab === 'chats' ? (
-            <ConversationHistory onClose={() => {}} />
-          ) : (
+          {activeView === 'main' && (
+            <div className="flex flex-col h-full">
+              {/* Botón Nuevo Chat */}
+              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                <Button
+                  onClick={handleNewChat}
+                  className="w-full bg-skandia-green hover:bg-skandia-green/90 text-white"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nuevo chat
+                </Button>
+              </div>
+
+              {/* Opciones principales */}
+              <div className="p-4 space-y-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => setActiveView('chats')}
+                  className="w-full justify-start h-12"
+                >
+                  <Search className="h-4 w-4 mr-3" />
+                  <div className="text-left">
+                    <div className="font-medium">Buscar chats</div>
+                    <div className="text-xs text-gray-500">Encuentra conversaciones anteriores</div>
+                  </div>
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  onClick={() => setActiveView('templates')}
+                  className="w-full justify-start h-12"
+                >
+                  <FileText className="h-4 w-4 mr-3" />
+                  <div className="text-left">
+                    <div className="font-medium">Plantillas</div>
+                    <div className="text-xs text-gray-500">Prompts predefinidos</div>
+                  </div>
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {activeView === 'chats' && (
+            <div className="h-full">
+              <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 className="font-medium text-gray-900 dark:text-white">Historial de chats</h3>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleBackToMain}
+                  className="h-8 w-8"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <ConversationHistory onClose={handleBackToMain} />
+            </div>
+          )}
+
+          {activeView === 'templates' && (
             <div className="h-full">
               <PromptTemplates 
                 onSelectTemplate={handleSelectTemplate}
-                onClose={handleCloseTemplates}
+                onClose={handleBackToMain}
               />
             </div>
           )}
