@@ -13,7 +13,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onToggleSidePanel }) => {
   const { user } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { isDark, toggleTheme } = useTheme();
 
   return (
     <header className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
@@ -48,7 +48,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onToggleSidePan
           onClick={toggleTheme}
           className="hidden sm:flex"
         >
-          {theme === 'dark' ? (
+          {isDark ? (
             <Sun className="h-5 w-5" />
           ) : (
             <Moon className="h-5 w-5" />
