@@ -106,7 +106,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
         <div className={`flex-1 ${isUser ? 'text-right' : 'text-left'} relative`}>
           {/* Hover area that includes the message bubble and copy icon */}
           <div 
-            className={`group ${isUser ? 'pb-8' : ''}`}
+            className={`group ${isUser ? 'pb-2' : ''}`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
@@ -260,7 +260,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
 
             {/* Copy Button for User Messages - Positioned just below the bubble but above timestamp */}
             {isUser && message.content && (
-              <div className={`${isHovered ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200 flex justify-end mt-1 mb-1`}>
+              <div className={`${isHovered ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200 flex justify-end mt-1 mb-0`}>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -278,7 +278,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
           </div>
 
           {/* Timestamp */}
-          <div className={`mt-1 text-xs text-gray-500 dark:text-gray-400 flex items-center ${
+          <div className={`mt-0.5 text-xs text-gray-500 dark:text-gray-400 flex items-center ${
             isUser ? 'justify-end' : 'justify-start'
           }`}>
             <Clock className="h-3 w-3 mr-1" />
