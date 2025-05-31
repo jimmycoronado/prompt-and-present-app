@@ -1,6 +1,5 @@
-
 import { useState, useRef, useCallback } from 'react';
-import { transcribeAudio } from '../utils/transcriptionApi';
+import { transcribeAudio } from '../utils/azureTranscriptionService';
 
 interface UseVoiceRecordingProps {
   onTranscription: (text: string) => void;
