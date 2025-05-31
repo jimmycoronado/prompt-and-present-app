@@ -59,9 +59,19 @@ export const mockApiCall = async (
     
     console.log('mockApiCall: Created table data:', tableData);
     
+    // Generar enlace de descarga usando Lorem Picsum
+    const imageId = Math.floor(Math.random() * 1000) + 1;
+    const downloadLink = {
+      url: `https://picsum.photos/800/600?random=${imageId}`,
+      filename: `reporte_consulta_${Date.now()}.jpg`
+    };
+    
+    console.log('mockApiCall: Generated download link:', downloadLink);
+    
     return {
-      text: responseText,
+      text: responseText + `\n\n📎 He generado un reporte visual basado en tu consulta que puedes descargar.`,
       data: tableData,
+      downloadLink,
       processingTime
     };
     
