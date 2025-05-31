@@ -46,7 +46,7 @@ export const mockApiCall = async (
     
     const processingTime = Date.now() - startTime;
     
-    // Extraer el texto de respuesta
+    // Extraer el texto de respuesta - ahora maneja tanto "response" como "message"
     const responseText = data.response || data.message || 'No se recibió respuesta del agente';
     
     return {
