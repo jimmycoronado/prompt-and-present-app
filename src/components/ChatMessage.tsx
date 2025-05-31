@@ -6,6 +6,7 @@ import { DataChart } from "./DataChart";
 import { VideoPreview } from "./VideoPreview";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -16,6 +17,7 @@ interface ChatMessageProps {
 export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, onClick }) => {
   const isUser = message.type === 'user';
   const { toast } = useToast();
+  const [feedback, setFeedback] = useState<'positive' | 'negative' | null>(null);
 
   const handleCopyText = async () => {
     try {
@@ -34,6 +36,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
   };
 
   const handleFeedback = (type: 'positive' | 'negative') => {
+    setFeedback(type);
     // TODO: Implementar cuando se conecte Supabase
     toast({
       title: "Feedback registrado",
@@ -212,7 +215,11 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
                       e.stopPropagation();
                       handleFeedback('positive');
                     }}
-                    className="text-white/80 hover:text-white hover:bg-white/10"
+                    className={`hover:bg-white/10 ${
+                      feedback === 'positive' 
+                        ? 'text-green-400 hover:text-green-300' 
+                        : 'text-white/80 hover:text-white'
+                    }`}
                     aria-label="Me gusta esta respuesta"
                   >
                     <ThumbsUp className="h-4 w-4" />
@@ -225,7 +232,11 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
                       e.stopPropagation();
                       handleFeedback('negative');
                     }}
-                    className="text-white/80 hover:text-white hover:bg-white/10"
+                    className={`hover:bg-white/10 ${
+                      feedback === 'negative' 
+                        ? 'text-red-400 hover:text-red-300' 
+                        : 'text-white/80 hover:text-white'
+                    }`}
                     aria-label="No me gusta esta respuesta"
                   >
                     <ThumbsDown className="h-4 w-4" />
