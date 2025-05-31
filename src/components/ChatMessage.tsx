@@ -71,6 +71,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
     }
   };
 
+  console.log('ChatMessage: Rendering message with videoPreview:', message.videoPreview);
+
   return (
     <div 
       className={`flex ${isUser ? 'justify-end' : 'justify-start'} cursor-pointer transition-all duration-200 ${
@@ -150,7 +152,9 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
 
             {/* Video Preview */}
             {message.videoPreview && (
-              <VideoPreview video={message.videoPreview} />
+              <div>
+                <VideoPreview video={message.videoPreview} />
+              </div>
             )}
 
             {/* Image Preview and Download Link */}
