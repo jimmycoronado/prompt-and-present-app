@@ -7,14 +7,6 @@ interface AgentApiResponse {
   error?: string;
 }
 
-// API pública de prueba
-interface TestApiResponse {
-  userId: number;
-  id: number;
-  title: string;
-  body: string;
-}
-
 export const mockApiCall = async (
   message: string, 
   files: File[], 
@@ -32,20 +24,28 @@ export const mockApiCall = async (
   
   const startTime = Date.now();
   
-  // Usar API pública de prueba temporalmente
-  const testApiUrl = 'https://jsonplaceholder.typicode.com/posts/1';
+  // API real de Azure
+  const apiUrl = 'https://jarvis-api-agente-sql.azurewebsites.net/query';
   
-  console.log('mockApiCall: Using test API URL:', testApiUrl);
-  console.log('mockApiCall: This is a test to verify connectivity works');
+  console.log('mockApiCall: Using Azure API URL:', apiUrl);
+  
+  // Preparar el body según el formato requerido
+  const requestBody = {
+    pregunta: message,
+    correo: userEmail || "jcoronado@skandia.com.co"
+  };
+  
+  console.log('mockApiCall: Request body:', requestBody);
   
   try {
-    console.log('mockApiCall: Making fetch request to test API...');
+    console.log('mockApiCall: Making POST request to Azure API...');
     
-    const response = await fetch(testApiUrl, {
-      method: 'GET',
+    const response = await fetch(apiUrl, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-      }
+      },
+      body: JSON.stringify(requestBody)
     });
 
     console.log('mockApiCall: Fetch completed, response status:', response.status);
@@ -55,43 +55,30 @@ export const mockApiCall = async (
     if (!response.ok) {
       const errorText = await response.text();
       console.error('mockApiCall: Response not ok, error text:', errorText);
-      throw new Error(`Error en la API de prueba: ${response.status} - ${response.statusText}. Details: ${errorText}`);
+      throw new Error(`Error en la API de Azure: ${response.status} - ${response.statusText}. Details: ${errorText}`);
     }
 
-    const testData: TestApiResponse = await response.json();
-    console.log('mockApiCall: Test API response data:', testData);
+    const apiData: AgentApiResponse = await response.json();
+    console.log('mockApiCall: Azure API response data:', apiData);
     
     const processingTime = Date.now() - startTime;
     
-    // Crear respuesta simulada basada en la API de prueba
-    const responseText = `✅ ¡Conexión exitosa con API pública!
-
-Tu pregunta: "${message}"
-Usuario: ${userEmail}
-
-Datos de prueba obtenidos:
-- ID: ${testData.id}
-- Título: ${testData.title}
-- Contenido: ${testData.body.substring(0, 100)}...
-
-Esto confirma que el código de conexión funciona correctamente. El problema está en la API de Azure, no en el código.`;
+    // Procesar la respuesta de la API
+    const responseText = apiData.response || apiData.message || 'Respuesta recibida del agente';
     
     console.log('mockApiCall: Final response text created successfully');
     
-    // Crear estructura de datos compatible con DataTable
-    const tableData = {
-      headers: ['Campo', 'Valor'],
-      rows: [
-        ['ID', testData.id.toString()],
-        ['User ID', testData.userId.toString()],
-        ['Título', testData.title],
-        ['Contenido', testData.body.substring(0, 50) + '...']
-      ]
-    };
+    // Si la respuesta contiene datos estructurados, intentar procesarlos
+    let tableData = null;
+    let chartData = null;
+    
+    // Aquí puedes agregar lógica para detectar y procesar datos tabulares o de gráficos
+    // según el formato que devuelva tu API
     
     return {
       text: responseText,
       data: tableData,
+      chart: chartData,
       processingTime
     };
     
@@ -105,16 +92,16 @@ Esto confirma que el código de conexión funciona correctamente. El problema es
       console.error('mockApiCall: Possible causes: CORS, server down, network issues');
     }
     
-    // Fallback en caso de error
-    const errorMessage = `❌ Error incluso con API pública de prueba: ${error instanceof Error ? error.message : 'Error desconocido'}. 
-
-Esto indica que hay un problema en el entorno de ejecución o configuración de red.
+    // Mensaje de error más informativo
+    const errorMessage = `❌ Error al conectar con el agente maestro: ${error instanceof Error ? error.message : 'Error desconocido'}. 
 
 Detalles del error:
-- Tipo: ${typeof error}
+- Endpoint: ${apiUrl}
+- Método: POST
+- Tipo de error: ${typeof error}
 - Constructor: ${error instanceof Error ? error.constructor.name : 'Desconocido'}
 
-API de prueba utilizada: ${testApiUrl}`;
+Por favor, inténtalo de nuevo.`;
 
     return {
       text: errorMessage,
