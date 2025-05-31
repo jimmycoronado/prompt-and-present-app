@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { History, File, Download } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
@@ -10,6 +11,7 @@ import { ChatMessage as ChatMessageType } from "../types/chat";
 import { PromptTemplate } from "../types/templates";
 import { useConversation } from "../contexts/ConversationContext";
 import { useSettings } from "../contexts/SettingsContext";
+import { useAuth } from "../contexts/AuthContext";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
 
@@ -36,6 +38,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     createNewConversation 
   } = useConversation();
   const { aiSettings } = useSettings();
+  const { user } = useAuth();
 
   const messages = currentConversation?.messages || [];
 
@@ -70,7 +73,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     if (!currentConversation) return;
 
     console.log('ChatInterface: START handleSendMessage with content:', content);
-    console.log('ChatInterface: Current conversation before adding message:', currentConversation?.id, currentConversation?.messages?.length);
+    console.log('ChatInterface: User email for API:', user?.email);
 
     const userMessage: ChatMessageType = {
       id: Date.now().toString(),
@@ -100,8 +103,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }, 100);
 
     try {
-      console.log('ChatInterface: Calling mockApiCall...');
-      const response = await mockApiCall(content, uploadedFiles, aiSettings);
+      console.log('ChatInterface: Calling mockApiCall with user email:', user?.email);
+      const response = await mockApiCall(content, uploadedFiles, aiSettings, user?.email);
       console.log('ChatInterface: Received API response:', response);
       
       const aiMessage: ChatMessageType = {
@@ -298,7 +301,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                 </div>
-                <span className="text-gray-500 dark:text-gray-400 text-sm">Procesando...</span>
+                <span className="text-gray-500 dark:text-gray-400 text-sm">Consultando agente...</span>
               </div>
             </div>
           </div>
