@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { File, Plus, Search, Bookmark, Code, FileText, Lightbulb, MessageCircle, BarChart, Users, Calculator, Globe, X } from 'lucide-react';
 import { Button } from './ui/button';
@@ -173,31 +172,30 @@ export const PromptTemplates: React.FC<PromptTemplatesProps> = ({ onSelectTempla
   };
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-800">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-800 relative">
+      {/* Close button */}
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 z-10 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+        aria-label="Cerrar plantillas"
+      >
+        <X className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+      </button>
+
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center pr-8">
             <File className="h-5 w-5 mr-2" />
             Plantillas de Prompts
           </h2>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {/* TODO: Implementar crear plantilla personalizada */}}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Crear Plantilla
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="h-8 w-8 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {/* TODO: Implementar crear plantilla personalizada */}}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Crear Plantilla
+          </Button>
         </div>
         
         <div className="space-y-3">
