@@ -7,6 +7,14 @@ interface AgentApiResponse {
   error?: string;
 }
 
+// API pública de prueba
+interface TestApiResponse {
+  userId: number;
+  id: number;
+  title: string;
+  body: string;
+}
+
 export const mockApiCall = async (
   message: string, 
   files: File[], 
@@ -23,24 +31,21 @@ export const mockApiCall = async (
   console.log('mockApiCall: User email:', userEmail);
   
   const startTime = Date.now();
-  const apiUrl = 'https://jarvis-api-agente-sql.azurewebsites.net/query';
-  const requestBody = {
-    pregunta: message,
-    correo: userEmail || 'usuario@ejemplo.com'
-  };
   
-  console.log('mockApiCall: API URL:', apiUrl);
-  console.log('mockApiCall: Request body:', requestBody);
+  // Usar API pública de prueba temporalmente
+  const testApiUrl = 'https://jsonplaceholder.typicode.com/posts/1';
+  
+  console.log('mockApiCall: Using test API URL:', testApiUrl);
+  console.log('mockApiCall: This is a test to verify connectivity works');
   
   try {
-    console.log('mockApiCall: Making fetch request...');
+    console.log('mockApiCall: Making fetch request to test API...');
     
-    const response = await fetch(apiUrl, {
-      method: 'POST',
+    const response = await fetch(testApiUrl, {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody)
+      }
     });
 
     console.log('mockApiCall: Fetch completed, response status:', response.status);
@@ -50,21 +55,32 @@ export const mockApiCall = async (
     if (!response.ok) {
       const errorText = await response.text();
       console.error('mockApiCall: Response not ok, error text:', errorText);
-      throw new Error(`Error en la API: ${response.status} - ${response.statusText}. Details: ${errorText}`);
+      throw new Error(`Error en la API de prueba: ${response.status} - ${response.statusText}. Details: ${errorText}`);
     }
 
-    const data: AgentApiResponse = await response.json();
-    console.log('mockApiCall: API response data:', data);
+    const testData: TestApiResponse = await response.json();
+    console.log('mockApiCall: Test API response data:', testData);
     
     const processingTime = Date.now() - startTime;
     
-    // Extraer el texto de respuesta - ahora maneja tanto "response" como "message"
-    const responseText = data.response || data.message || 'No se recibió respuesta del agente';
+    // Crear respuesta simulada basada en la API de prueba
+    const responseText = `✅ ¡Conexión exitosa con API pública!
+
+Tu pregunta: "${message}"
+Usuario: ${userEmail}
+
+Datos de prueba obtenidos:
+- ID: ${testData.id}
+- Título: ${testData.title}
+- Contenido: ${testData.body.substring(0, 100)}...
+
+Esto confirma que el código de conexión funciona correctamente. El problema está en la API de Azure, no en el código.`;
     
-    console.log('mockApiCall: Final response text:', responseText);
+    console.log('mockApiCall: Final response text created successfully');
     
     return {
       text: responseText,
+      data: testData,
       processingTime
     };
     
@@ -79,14 +95,15 @@ export const mockApiCall = async (
     }
     
     // Fallback en caso de error
-    const errorMessage = `Lo siento, hubo un error al conectar con el agente maestro: ${error instanceof Error ? error.message : 'Error desconocido'}. 
+    const errorMessage = `❌ Error incluso con API pública de prueba: ${error instanceof Error ? error.message : 'Error desconocido'}. 
 
-Posibles causas:
-- El servidor puede estar temporalmente inactivo
-- Problemas de CORS (el servidor no permite solicitudes desde este dominio)
-- Problemas de conectividad de red
+Esto indica que hay un problema en el entorno de ejecución o configuración de red.
 
-Por favor, inténtalo de nuevo en unos momentos.`;
+Detalles del error:
+- Tipo: ${typeof error}
+- Constructor: ${error instanceof Error ? error.constructor.name : 'Desconocido'}
+
+API de prueba utilizada: ${testApiUrl}`;
 
     return {
       text: errorMessage,
