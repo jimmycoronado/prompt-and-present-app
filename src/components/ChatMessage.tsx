@@ -72,6 +72,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
   };
 
   console.log('ChatMessage: Rendering message with videoPreview:', message.videoPreview);
+  console.log('ChatMessage: Message object:', message);
 
   return (
     <div 
@@ -152,7 +153,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
 
             {/* Video Preview */}
             {message.videoPreview && (
-              <div>
+              <div className="mt-4">
                 <VideoPreview video={message.videoPreview} />
               </div>
             )}

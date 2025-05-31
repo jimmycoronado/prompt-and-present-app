@@ -95,6 +95,8 @@ export const mockApiCall = async (
       responseText += `Duración: ${videoData.duration} | Plataforma: ${videoData.platform.charAt(0).toUpperCase() + videoData.platform.slice(1)}\n\n`;
       responseText += `Puedes ver una vista previa aquí abajo y hacer clic para reproducirlo en pantalla completa.`;
 
+      console.log('mockApiCall: Returning video data:', videoData);
+
       return {
         text: responseText,
         videoPreview: videoData,
