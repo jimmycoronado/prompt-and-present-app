@@ -1,4 +1,5 @@
 
+
 import { User, Clock, Download, Copy, ThumbsUp, ThumbsDown } from "lucide-react";
 import { ChatMessage as ChatMessageType } from "../types/chat";
 import { DataTable } from "./DataTable";
@@ -254,9 +255,9 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
             )}
           </div>
 
-          {/* Copy Button for User Messages - To the left and just below bubble */}
+          {/* Copy Button for User Messages - Positioned just below the bubble */}
           {isUser && isHovered && message.content && (
-            <div className="absolute top-full left-0 mt-1">
+            <div className="absolute top-full right-0 mt-1 flex justify-end">
               <Button
                 variant="ghost"
                 size="sm"
@@ -286,3 +287,4 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
     </div>
   );
 };
+
