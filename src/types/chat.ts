@@ -30,6 +30,14 @@ export interface DownloadLink {
   filename: string;
 }
 
+export interface VideoPreview {
+  url: string;
+  title: string;
+  thumbnail: string;
+  duration?: string;
+  platform: 'youtube' | 'vimeo' | 'generic';
+}
+
 export interface MessageMetadata {
   processingTime: number;
   model: string;
@@ -45,5 +53,6 @@ export interface ChatMessage {
   data?: TableData;
   chart?: ChartData;
   downloadLink?: DownloadLink;
+  videoPreview?: VideoPreview;
   metadata?: MessageMetadata;
 }

@@ -1,4 +1,3 @@
-
 import { AISettings } from "../types/settings";
 
 interface JSONPlaceholderPost {
@@ -18,6 +17,7 @@ export const mockApiCall = async (
   data?: any;
   chart?: any;
   downloadLink?: { url: string; filename: string };
+  videoPreview?: any;
   processingTime?: number;
 }> => {
   console.log('mockApiCall: Starting with message:', message);
@@ -26,8 +26,83 @@ export const mockApiCall = async (
   const startTime = Date.now();
   
   try {
-    // Detectar si el usuario está pidiendo gráficas
+    // Detectar si el usuario está pidiendo contenido de video o envía enlaces
     const messageLower = message.toLowerCase();
+    const isVideoRequest = messageLower.includes('youtube') || 
+                          messageLower.includes('video') ||
+                          messageLower.includes('vimeo') ||
+                          messageLower.includes('reproducir') ||
+                          messageLower.includes('ver') ||
+                          messageLower.includes('tutorial') ||
+                          messageLower.includes('película') ||
+                          messageLower.includes('pelicula') ||
+                          messageLower.includes('documental') ||
+                          messageLower.match(/https?:\/\/(www\.)?(youtube\.com|youtu\.be|vimeo\.com)/);
+
+    if (isVideoRequest) {
+      console.log('mockApiCall: Video request detected');
+      
+      // Determinar el tipo de video basado en palabras clave
+      let videoData;
+      
+      if (messageLower.includes('youtube') || messageLower.includes('youtu.be')) {
+        videoData = {
+          url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+          title: 'Tutorial de React: Cómo crear componentes interactivos',
+          thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
+          duration: '10:30',
+          platform: 'youtube' as const
+        };
+      } else if (messageLower.includes('vimeo')) {
+        videoData = {
+          url: 'https://vimeo.com/123456789',
+          title: 'Introducción a TypeScript - Conceptos básicos',
+          thumbnail: 'https://i.vimeocdn.com/video/123456789_640.jpg',
+          duration: '8:15',
+          platform: 'vimeo' as const
+        };
+      } else if (messageLower.includes('tutorial')) {
+        videoData = {
+          url: 'https://www.youtube.com/watch?v=L8_98i_bNQE',
+          title: 'Aprende React en 30 minutos - Tutorial completo para principiantes',
+          thumbnail: 'https://img.youtube.com/vi/L8_98i_bNQE/maxresdefault.jpg',
+          duration: '30:45',
+          platform: 'youtube' as const
+        };
+      } else if (messageLower.includes('documental')) {
+        videoData = {
+          url: 'https://vimeo.com/987654321',
+          title: 'La evolución de la programación: De FORTRAN a React',
+          thumbnail: 'https://i.vimeocdn.com/video/987654321_640.jpg',
+          duration: '45:20',
+          platform: 'vimeo' as const
+        };
+      } else {
+        // Video genérico
+        videoData = {
+          url: 'https://www.youtube.com/watch?v=9bZkp7q19f0',
+          title: 'Introducción a la Inteligencia Artificial - Conceptos fundamentales',
+          thumbnail: 'https://img.youtube.com/vi/9bZkp7q19f0/maxresdefault.jpg',
+          duration: '15:42',
+          platform: 'youtube' as const
+        };
+      }
+
+      const processingTime = Date.now() - startTime;
+      
+      let responseText = `He encontrado contenido de video relacionado con tu consulta: "${message}"\n\n`;
+      responseText += `📹 **${videoData.title}**\n`;
+      responseText += `Duración: ${videoData.duration} | Plataforma: ${videoData.platform.charAt(0).toUpperCase() + videoData.platform.slice(1)}\n\n`;
+      responseText += `Puedes ver una vista previa aquí abajo y hacer clic para reproducirlo en pantalla completa.`;
+
+      return {
+        text: responseText,
+        videoPreview: videoData,
+        processingTime
+      };
+    }
+
+    // Detectar si el usuario está pidiendo gráficas
     const isChartRequest = messageLower.includes('gráfica') || 
                           messageLower.includes('grafica') ||
                           messageLower.includes('chart') ||

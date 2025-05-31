@@ -3,6 +3,7 @@ import { User, Clock, Download, Copy, ThumbsUp, ThumbsDown } from "lucide-react"
 import { ChatMessage as ChatMessageType } from "../types/chat";
 import { DataTable } from "./DataTable";
 import { DataChart } from "./DataChart";
+import { VideoPreview } from "./VideoPreview";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
 
@@ -145,6 +146,11 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
               <div className="mt-4">
                 <DataChart chartData={message.chart} />
               </div>
+            )}
+
+            {/* Video Preview */}
+            {message.videoPreview && (
+              <VideoPreview video={message.videoPreview} />
             )}
 
             {/* Image Preview and Download Link */}
