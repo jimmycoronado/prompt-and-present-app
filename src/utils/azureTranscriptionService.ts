@@ -12,10 +12,10 @@ export const transcribeAudio = async (audioBlob: Blob): Promise<string> => {
     }
     const base64Audio = btoa(binaryString);
     
-    console.log('Calling Supabase transcription function...');
+    console.log('Calling Azure transcription API...');
     
-    // Use Supabase Edge Function for transcription
-    const response = await fetch('/functions/v1/transcribe-audio', {
+    // Call your Azure API for transcription
+    const response = await fetch('https://jarvis-api-agente-sql.azurewebsites.net/transcribe', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -25,7 +25,7 @@ export const transcribeAudio = async (audioBlob: Blob): Promise<string> => {
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Supabase transcription function error:', errorText);
+      console.error('Azure transcription API error:', errorText);
       throw new Error(`Error de transcripción: ${response.status} - ${errorText}`);
     }
     
