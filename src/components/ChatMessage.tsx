@@ -1,4 +1,3 @@
-
 import { User, Clock, Download, Copy, ThumbsUp, ThumbsDown } from "lucide-react";
 import { ChatMessage as ChatMessageType } from "../types/chat";
 import { DataTable } from "./DataTable";
@@ -114,28 +113,6 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
             onMouseLeave={() => setIsHovered(false)}
           >
             
-            {/* Copy Button on Hover */}
-            {isHovered && message.content && (
-              <div className={`absolute ${isUser ? 'left-2' : 'right-2'} top-2 z-10`}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCopyText();
-                  }}
-                  className={`h-8 w-8 p-0 rounded-md ${
-                    isUser 
-                      ? 'bg-black/10 hover:bg-black/20 text-white'
-                      : 'bg-gray-100 hover:bg-gray-200 text-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-400'
-                  }`}
-                  aria-label="Copiar mensaje"
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-
             {/* Text Content */}
             {message.content && (
               <div className="whitespace-pre-wrap">
@@ -223,6 +200,22 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
             {/* Actions for Assistant Messages */}
             {!isUser && message.content && (
               <div className="mt-3 flex items-center space-x-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                {/* Copy Button for Agent Messages - Left of feedback buttons */}
+                {isHovered && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCopyText();
+                    }}
+                    className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    aria-label="Copiar mensaje"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                )}
+                
                 <div className="flex space-x-1">
                   <Button
                     variant="ghost"
@@ -261,6 +254,24 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
               </div>
             )}
           </div>
+
+          {/* Copy Button for User Messages - Bottom left corner outside bubble */}
+          {isUser && isHovered && message.content && (
+            <div className="absolute -bottom-2 left-0">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCopyText();
+                }}
+                className="h-8 w-8 p-0 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-400"
+                aria-label="Copiar mensaje"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
 
           {/* Timestamp */}
           <div className={`mt-1 text-xs text-gray-500 dark:text-gray-400 flex items-center ${
