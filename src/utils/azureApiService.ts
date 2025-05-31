@@ -23,29 +23,24 @@ export const callAzureAgentApi = async (
   const startTime = Date.now();
   
   try {
-    // Preparar el body para tu API
-    const requestBody = {
-      pregunta: message,
-      correo: userEmail
-    };
-
-    console.log('azureApiService: Request body:', requestBody);
-
-    // Llamar a tu API real
-    const response = await fetch('https://jarvis-api-agente-sql.azurewebsites.net/query', {
+    // Usar la función Edge como proxy para evitar problemas de CORS
+    const response = await fetch('/functions/v1/azure-agent-proxy', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify({
+        pregunta: message,
+        correo: userEmail
+      })
     });
 
-    console.log('azureApiService: Response status:', response.status);
+    console.log('azureApiService: Proxy response status:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('azureApiService: API error:', errorText);
-      throw new Error(`API Error: ${response.status} - ${errorText}`);
+      console.error('azureApiService: Proxy error:', errorText);
+      throw new Error(`Proxy Error: ${response.status} - ${errorText}`);
     }
 
     const apiData = await response.json();
