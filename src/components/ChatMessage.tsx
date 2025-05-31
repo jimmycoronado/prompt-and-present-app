@@ -147,9 +147,20 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
               </div>
             )}
 
-            {/* Download Link */}
+            {/* Image Preview and Download Link */}
             {message.downloadLink && (
               <div className="mt-4">
+                {/* Image Preview */}
+                <div className="mb-3">
+                  <img 
+                    src={message.downloadLink.url} 
+                    alt="Vista previa"
+                    className="max-w-xs rounded border border-white/20 shadow-sm"
+                    style={{ maxHeight: '200px', width: 'auto' }}
+                  />
+                </div>
+                
+                {/* Download Button */}
                 <Button
                   variant="outline"
                   size="sm"
