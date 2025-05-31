@@ -321,16 +321,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-4">
               Puedes hacerme preguntas, subir archivos para analizar, o pedirme que genere gráficas y tablas de datos.
             </p>
-            <div className="flex flex-wrap justify-center gap-2 text-sm">
-              <Button variant="outline" size="sm" onClick={() => setShowTemplates(true)}>
-                <File className="h-3 w-3 mr-1" />
-                Ver Plantillas
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => setShowHistory(true)}>
-                <File className="h-3 w-3 mr-1" />
-                Ver Historial
-              </Button>
-            </div>
           </div>
         )}
 
