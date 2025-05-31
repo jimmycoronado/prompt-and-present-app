@@ -78,9 +78,20 @@ Esto confirma que el código de conexión funciona correctamente. El problema es
     
     console.log('mockApiCall: Final response text created successfully');
     
+    // Crear estructura de datos compatible con DataTable
+    const tableData = {
+      headers: ['Campo', 'Valor'],
+      rows: [
+        ['ID', testData.id.toString()],
+        ['User ID', testData.userId.toString()],
+        ['Título', testData.title],
+        ['Contenido', testData.body.substring(0, 50) + '...']
+      ]
+    };
+    
     return {
       text: responseText,
-      data: testData,
+      data: tableData,
       processingTime
     };
     
