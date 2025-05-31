@@ -21,6 +21,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 }) => {
   const [message, setMessage] = useState(initialValue);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [hasFiles, setHasFiles] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const lastInitialValueRef = useRef(initialValue);
@@ -48,9 +49,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     const trimmedMessage = message.trim();
     console.log('ChatInput: Submitting message:', trimmedMessage);
     
-    if (trimmedMessage && !disabled) {
+    if ((trimmedMessage || hasFiles) && !disabled) {
       onSendMessage(trimmedMessage);
       setMessage("");
+      setHasFiles(false);
       lastInitialValueRef.current = "";
       onValueChange?.("");
       
@@ -115,6 +117,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     });
     
     if (validFiles.length > 0) {
+      setHasFiles(true);
       onFilesSelected?.(validFiles);
     }
   };
@@ -238,7 +241,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         
         <Button
           type="submit"
-          disabled={!message.trim() || disabled}
+          disabled={(!message.trim() && !hasFiles) || disabled}
           size="icon"
           className="bg-skandia-green hover:bg-skandia-green/90 text-white rounded-lg h-11 w-11 transition-all hover:scale-105"
           aria-label="Enviar mensaje"
