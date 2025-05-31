@@ -1,4 +1,5 @@
 
+
 import { User, Download, Copy, ThumbsUp, ThumbsDown } from "lucide-react";
 import { ChatMessage as ChatMessageType } from "../types/chat";
 import { DataTable } from "./DataTable";
@@ -8,6 +9,7 @@ import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserPhoto } from "@/hooks/useUserPhoto";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState } from "react";
 
 interface ChatMessageProps {
@@ -19,6 +21,8 @@ interface ChatMessageProps {
 export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, onClick }) => {
   const isUser = message.type === 'user';
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { photoUrl } = useUserPhoto();
   const [feedback, setFeedback] = useState<'positive' | 'negative' | null>(null);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -77,6 +81,21 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
     }
   };
 
+  // Generar iniciales del usuario
+  const getUserInitials = () => {
+    if (!user) return 'U';
+    const displayName = user.user_metadata?.full_name || 
+                       user.user_metadata?.name || 
+                       user.name ||
+                       'Usuario';
+    return displayName
+      .split(' ')
+      .map((n: string) => n[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
   console.log('ChatMessage: Rendering message with videoPreview:', message.videoPreview);
   console.log('ChatMessage: Message object:', message);
 
@@ -90,9 +109,14 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
         {/* Avatar */}
         <div className={`flex-shrink-0 ${isUser ? 'ml-3' : 'mr-3'}`}>
           {isUser ? (
-            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-700 text-white">
-              <User className="h-4 w-4" />
-            </div>
+            <Avatar className="w-8 h-8">
+              {photoUrl && (
+                <AvatarImage src={photoUrl} alt={user?.name || 'Usuario'} />
+              )}
+              <AvatarFallback className="bg-gray-700 text-white text-xs">
+                {getUserInitials()}
+              </AvatarFallback>
+            </Avatar>
           ) : (
             <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
               <img 
@@ -292,3 +316,4 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
     </div>
   );
 };
+
