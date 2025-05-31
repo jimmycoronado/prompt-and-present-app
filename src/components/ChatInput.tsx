@@ -21,6 +21,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onFilesSelected 
 }) => {
   const [message, setMessage] = useState(initialValue);
+  const [isDragOver, setIsDragOver] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const lastInitialValueRef = useRef(initialValue);
@@ -98,27 +99,79 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     fileInputRef.current?.click();
   };
 
+  const validateAndProcessFiles = (files: FileList | null) => {
+    if (!files) return;
+    
+    const validFiles = Array.from(files).filter(file => {
+      const validTypes = [
+        'application/pdf',
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'text/csv'
+      ];
+      return validTypes.includes(file.type) && file.size <= 10 * 1024 * 1024; // 10MB limit
+    });
+    
+    if (validFiles.length > 0) {
+      onFilesSelected?.(validFiles);
+    }
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const validFiles = Array.from(e.target.files).filter(file => {
-        const validTypes = [
-          'application/pdf',
-          'image/jpeg',
-          'image/png',
-          'image/gif',
-          'application/vnd.ms-excel',
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-          'text/csv'
-        ];
-        return validTypes.includes(file.type) && file.size <= 10 * 1024 * 1024; // 10MB limit
-      });
-      
-      if (validFiles.length > 0) {
-        onFilesSelected?.(validFiles);
+    validateAndProcessFiles(e.target.files);
+    // Reset the input so the same file can be selected again
+    e.target.value = '';
+  };
+
+  // Drag and drop handlers
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!disabled) {
+      setIsDragOver(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+    
+    if (!disabled) {
+      validateAndProcessFiles(e.dataTransfer.files);
+    }
+  };
+
+  // Paste handler for Ctrl+V
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items || disabled) return;
+
+    const files: File[] = [];
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.kind === 'file') {
+        const file = item.getAsFile();
+        if (file) {
+          files.push(file);
+        }
       }
-      
-      // Reset the input so the same file can be selected again
-      e.target.value = '';
+    }
+
+    if (files.length > 0) {
+      e.preventDefault(); // Prevent default paste behavior for files
+      const fileList = new DataTransfer();
+      files.forEach(file => fileList.items.add(file));
+      validateAndProcessFiles(fileList.files);
     }
   };
 
@@ -149,22 +202,41 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           className="hidden"
         />
         
-        <div className="flex-1 relative">
+        <div 
+          className={`flex-1 relative transition-all duration-200 ${
+            isDragOver ? 'ring-2 ring-blue-400 ring-opacity-50 bg-blue-50 dark:bg-blue-900/20' : ''
+          }`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
           <Textarea
             ref={textareaRef}
             value={message}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
             placeholder="Escribe tu mensaje aquí... (Enter para enviar, Shift+Enter para nueva línea)"
             disabled={disabled}
             className={`min-h-[44px] max-h-[200px] resize-none pr-12 rounded-lg border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 transition-all ${
               hasTemplateVariables ? 'border-orange-300 dark:border-orange-600' : ''
+            } ${
+              isDragOver ? 'border-blue-400 dark:border-blue-400' : ''
             }`}
             aria-label="Mensaje"
             aria-describedby="send-button"
           />
           
-          {hasTemplateVariables && (
+          {isDragOver && (
+            <div className="absolute inset-0 flex items-center justify-center bg-blue-50 dark:bg-blue-900/40 rounded-lg border-2 border-dashed border-blue-400 dark:border-blue-300 pointer-events-none">
+              <div className="text-blue-600 dark:text-blue-300 text-sm font-medium flex items-center">
+                <Paperclip className="h-4 w-4 mr-2" />
+                Suelta los archivos aquí
+              </div>
+            </div>
+          )}
+          
+          {hasTemplateVariables && !isDragOver && (
             <div className="absolute right-12 top-1/2 transform -translate-y-1/2">
               <File className="h-4 w-4 text-orange-500" />
             </div>
