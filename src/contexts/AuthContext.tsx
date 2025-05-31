@@ -47,17 +47,26 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({ children }
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('Auth state changed:', { 
+    console.log('🔄 Auth state changed:', { 
       inProgress, 
       isAuthenticated, 
       accountsLength: accounts.length,
-      accounts 
+      accounts: accounts.map(acc => ({
+        username: acc.username,
+        name: acc.name,
+        homeAccountId: acc.homeAccountId
+      }))
     });
 
     if (inProgress === InteractionStatus.None) {
       if (isAuthenticated && accounts.length > 0) {
         const account = accounts[0];
-        console.log('Creating user data from account:', account);
+        console.log('👤 Creating user data from account:', {
+          username: account.username,
+          name: account.name,
+          homeAccountId: account.homeAccountId,
+          localAccountId: account.localAccountId
+        });
         
         const userData: User = {
           id: account.homeAccountId,
@@ -70,38 +79,46 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({ children }
           }
         };
         
-        console.log('Setting user data:', userData);
+        console.log('✅ Setting NEW user data:', userData);
+        console.log('🔄 Previous user data was:', user);
         setUser(userData);
       } else {
-        console.log('No authentication or accounts, setting user to null');
+        console.log('❌ No authentication or accounts, setting user to null');
         setUser(null);
       }
       setLoading(false);
     } else {
-      console.log('Interaction in progress, keeping loading state');
+      console.log('⏳ Interaction in progress, keeping loading state');
     }
   }, [isAuthenticated, accounts, inProgress]);
 
+  // Log whenever user state changes
+  useEffect(() => {
+    console.log('👤 USER STATE CHANGED:', user);
+  }, [user]);
+
   const signInWithAzure = async () => {
     try {
-      console.log('Starting loginPopup...');
+      console.log('🚀 Starting loginPopup...');
+      // Clear any existing user data before login
+      setUser(null);
       const result: AuthenticationResult = await instance.loginPopup(loginRequest);
-      console.log('Login successful:', result);
+      console.log('✅ Login successful:', result);
       return { error: null };
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error('❌ Login failed:', error);
       return { error };
     }
   };
 
   const signOut = async () => {
     try {
-      console.log('Starting logout...');
+      console.log('🚪 Starting logout...');
       await instance.logoutPopup();
       setUser(null);
-      console.log('Logout successful');
+      console.log('✅ Logout successful');
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error('❌ Logout failed:', error);
     }
   };
 

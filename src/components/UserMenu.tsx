@@ -18,12 +18,24 @@ export const UserMenu: React.FC = () => {
   const { user, signOut } = useAuth();
   const { photoUrl } = useUserPhoto();
 
-  if (!user) return null;
+  // Log user data when component renders
+  console.log('🎨 UserMenu rendering with user:', user);
+
+  if (!user) {
+    console.log('❌ UserMenu: No user, not rendering menu');
+    return null;
+  }
 
   const displayName = user.user_metadata?.full_name || 
                      user.user_metadata?.name || 
                      user.name ||
                      'Usuario';
+
+  console.log('📝 UserMenu display data:', {
+    displayName,
+    email: user.email,
+    fullUserObject: user
+  });
 
   const initials = displayName
     .split(' ')
@@ -33,6 +45,7 @@ export const UserMenu: React.FC = () => {
     .substring(0, 2);
 
   const handleSignOut = async () => {
+    console.log('🚪 UserMenu: Signing out...');
     await signOut();
   };
 
