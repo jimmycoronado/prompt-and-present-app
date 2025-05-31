@@ -56,9 +56,9 @@ const CustomizedContent = (props: any) => {
           {name}
         </text>
       ) : null}
-      {depth === 1 ? (
+      {depth === 1 && payload ? (
         <text x={x + width / 2} y={y + height / 2 + 21} textAnchor="middle" fill="#fff" fontSize={12}>
-          {payload.value}
+          {payload.value || payload.size || ''}
         </text>
       ) : null}
     </g>
@@ -136,7 +136,6 @@ export const DataChart: React.FC<DataChartProps> = ({ chartData }) => {
             <Treemap
               data={data}
               dataKey={valueKey || 'size'}
-              ratio={4/3}
               stroke="#fff"
               content={<CustomizedContent colors={COLORS} />}
             />
