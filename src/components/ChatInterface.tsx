@@ -3,7 +3,6 @@ import { useState, useRef, useEffect } from "react";
 import { History, File, Download } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
-import { FileUpload } from "./FileUpload";
 import { ConversationHistory } from "./ConversationHistory";
 import { PromptTemplates } from "./PromptTemplates";
 import { mockApiCall } from "../utils/mockApi";
@@ -338,12 +337,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       {/* Input Area */}
       <div className="border-t border-gray-200 dark:border-gray-700 p-4">
         <div className="max-w-4xl mx-auto">
-          <FileUpload onFilesUploaded={setUploadedFiles} />
           <ChatInput 
             onSendMessage={handleSendMessage} 
             disabled={isLoading}
             initialValue={templateContent}
             onValueChange={setTemplateContent}
+            onFilesSelected={setUploadedFiles}
           />
         </div>
       </div>

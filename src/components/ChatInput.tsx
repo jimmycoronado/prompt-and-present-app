@@ -1,6 +1,6 @@
 
 import { useState, useRef, useEffect } from "react";
-import { Send, File } from "lucide-react";
+import { Send, File, Paperclip } from "lucide-react";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { VoiceRecordButton } from "./VoiceRecordButton";
@@ -10,16 +10,19 @@ interface ChatInputProps {
   disabled?: boolean;
   initialValue?: string;
   onValueChange?: (value: string) => void;
+  onFilesSelected?: (files: File[]) => void;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({ 
   onSendMessage, 
   disabled, 
   initialValue = "",
-  onValueChange 
+  onValueChange,
+  onFilesSelected 
 }) => {
   const [message, setMessage] = useState(initialValue);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const lastInitialValueRef = useRef(initialValue);
 
   useEffect(() => {
@@ -91,11 +94,61 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
   };
 
+  const handleFileButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const validFiles = Array.from(e.target.files).filter(file => {
+        const validTypes = [
+          'application/pdf',
+          'image/jpeg',
+          'image/png',
+          'image/gif',
+          'application/vnd.ms-excel',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'text/csv'
+        ];
+        return validTypes.includes(file.type) && file.size <= 10 * 1024 * 1024; // 10MB limit
+      });
+      
+      if (validFiles.length > 0) {
+        onFilesSelected?.(validFiles);
+      }
+      
+      // Reset the input so the same file can be selected again
+      e.target.value = '';
+    }
+  };
+
   const hasTemplateVariables = message.includes('{') && message.includes('}');
 
   return (
     <form onSubmit={handleSubmit} className="relative" role="search" aria-label="Enviar mensaje">
       <div className="flex items-end space-x-2">
+        {/* File Upload Button */}
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={handleFileButtonClick}
+          disabled={disabled}
+          className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg h-11 w-11 flex-shrink-0"
+          aria-label="Adjuntar archivo"
+        >
+          <Paperclip className="h-5 w-5" />
+        </Button>
+        
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          onChange={handleFileChange}
+          accept=".pdf,.jpg,.jpeg,.png,.gif,.xlsx,.xls,.csv"
+          className="hidden"
+        />
+        
         <div className="flex-1 relative">
           <Textarea
             ref={textareaRef}
