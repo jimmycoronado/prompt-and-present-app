@@ -54,56 +54,68 @@ export const callAzureAgentApi = async (
     
     const processingTime = Date.now() - startTime;
     
-    // Transformar la respuesta de tu API al formato esperado por el frontend
-    let responseText = apiData.respuesta || apiData.text || apiData.message || 'Respuesta recibida del agente';
-    
-    // Si tu API devuelve datos estructurados, podemos procesarlos
+    // Procesar la respuesta de tu API
+    let responseText = '';
     let tableData = undefined;
     let chartData = undefined;
-    let downloadLink = undefined;
-    let videoPreview = undefined;
 
-    // Procesar datos si tu API los incluye
-    if (apiData.data) {
-      // Si tu API devuelve datos tabulares
-      if (Array.isArray(apiData.data)) {
+    // Si la respuesta es un array (como en tu caso)
+    if (Array.isArray(apiData)) {
+      console.log('azureApiService: Processing array response with', apiData.length, 'items');
+      
+      // Crear mensaje descriptivo
+      responseText = `Se encontraron ${apiData.length} registros:`;
+      
+      // Crear datos para la tabla
+      if (apiData.length > 0) {
+        const headers = Object.keys(apiData[0]);
+        const rows = apiData.map((item: any) => Object.values(item));
+        
         tableData = {
-          headers: Object.keys(apiData.data[0] || {}),
-          rows: apiData.data.map((row: any) => Object.values(row))
+          headers,
+          rows
+        };
+        
+        console.log('azureApiService: Created table data with headers:', headers);
+        console.log('azureApiService: Table rows count:', rows.length);
+      }
+    } 
+    // Si la respuesta es un objeto con propiedades específicas
+    else if (typeof apiData === 'object' && apiData !== null) {
+      console.log('azureApiService: Processing object response');
+      
+      // Buscar texto de respuesta en diferentes campos posibles
+      responseText = apiData.respuesta || 
+                   apiData.text || 
+                   apiData.message || 
+                   apiData.resultado ||
+                   'Respuesta recibida del agente';
+      
+      // Si hay datos estructurados
+      if (apiData.data && Array.isArray(apiData.data)) {
+        const headers = Object.keys(apiData.data[0] || {});
+        const rows = apiData.data.map((row: any) => Object.values(row));
+        
+        tableData = {
+          headers,
+          rows
         };
       }
+      
+      // Procesar gráficas si las hay
+      if (apiData.chart || apiData.grafica) {
+        chartData = apiData.chart || apiData.grafica;
+      }
     }
-
-    // Procesar gráficas si tu API las incluye
-    if (apiData.chart || apiData.grafica) {
-      chartData = apiData.chart || apiData.grafica;
-    }
-
-    // Procesar archivos de descarga si tu API los incluye
-    if (apiData.downloadUrl || apiData.download_link) {
-      downloadLink = {
-        url: apiData.downloadUrl || apiData.download_link,
-        filename: apiData.filename || `reporte_${Date.now()}.pdf`
-      };
-    }
-
-    // Procesar videos si tu API los incluye
-    if (apiData.video || apiData.videoUrl) {
-      videoPreview = {
-        url: apiData.video || apiData.videoUrl,
-        title: apiData.videoTitle || 'Video generado',
-        thumbnail: apiData.thumbnail || '',
-        duration: apiData.duration || '0:00',
-        platform: 'generic' as const
-      };
+    // Si la respuesta es texto simple
+    else {
+      responseText = String(apiData) || 'Respuesta recibida del agente';
     }
 
     return {
       text: responseText,
       data: tableData,
       chart: chartData,
-      downloadLink: downloadLink,
-      videoPreview: videoPreview,
       processingTime
     };
     
