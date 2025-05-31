@@ -1,16 +1,6 @@
-
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Conversation, ConversationSummary } from '../types/conversation';
 import { ChatMessage } from '../types/chat';
-import { useAuth } from './AuthContext';
-import {
-  saveConversation as saveConversationToAzure,
-  updateConversation as updateConversationInAzure,
-  getUserConversations,
-  getConversation,
-  deleteConversation as deleteConversationFromAzure,
-  archiveConversation as archiveConversationInAzure
-} from '../utils/azureDataService';
 
 interface ConversationContextType {
   conversations: ConversationSummary[];
@@ -32,14 +22,11 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuth();
 
   useEffect(() => {
-    if (user?.email) {
-      loadConversations();
-      restoreCurrentConversation();
-    }
-  }, [user?.email]);
+    loadConversations();
+    restoreCurrentConversation();
+  }, []);
 
   // Log currentConversation changes
   useEffect(() => {
@@ -58,7 +45,7 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const restoreCurrentConversation = async () => {
     try {
       const currentId = localStorage.getItem('ai-chat-current-conversation-id');
-      if (currentId && user?.email) {
+      if (currentId) {
         console.log('ConversationContext: Restoring conversation:', currentId);
         await loadConversation(currentId);
       }
@@ -67,36 +54,38 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
 
-  const loadConversations = async () => {
-    if (!user?.email) return;
-    
+  const loadConversations = () => {
     try {
-      setIsLoading(true);
-      const userConversations = await getUserConversations(user.email);
-      setConversations(userConversations);
+      const saved = localStorage.getItem('ai-chat-conversations');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setConversations(parsed.map((conv: any) => ({
+          ...conv,
+          createdAt: new Date(conv.createdAt),
+          updatedAt: new Date(conv.updatedAt)
+        })));
+      }
     } catch (error) {
       console.error('Error loading conversations:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const saveConversationToAzureAndUpdate = async (conversation: Conversation) => {
-    if (!user?.email) return;
-    
+  const saveConversations = (convs: ConversationSummary[]) => {
     try {
-      console.log('ConversationContext: Saving conversation to Azure:', conversation.id, conversation.messages.length);
+      localStorage.setItem('ai-chat-conversations', JSON.stringify(convs));
+      setConversations(convs);
+    } catch (error) {
+      console.error('Error saving conversations:', error);
+    }
+  };
+
+  const saveConversationImmediate = (conversation: Conversation) => {
+    try {
+      console.log('ConversationContext: Immediate save of conversation:', conversation.id, conversation.messages.length);
+      // Save full conversation immediately
+      localStorage.setItem(`ai-chat-conversation-${conversation.id}`, JSON.stringify(conversation));
       
-      // Check if conversation exists
-      const existingConv = conversations.find(c => c.id === conversation.id);
-      
-      if (existingConv) {
-        await updateConversationInAzure(user.email, conversation);
-      } else {
-        await saveConversationToAzure(user.email, conversation);
-      }
-      
-      // Update local summary
+      // Update summary immediately
       const summary: ConversationSummary = {
         id: conversation.id,
         title: conversation.title,
@@ -107,12 +96,11 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         tags: conversation.tags
       };
 
-      setConversations(prev => {
-        const filtered = prev.filter(c => c.id !== conversation.id);
-        return [summary, ...filtered];
-      });
+      const updatedConversations = conversations.filter(c => c.id !== conversation.id);
+      updatedConversations.unshift(summary);
+      saveConversations(updatedConversations);
     } catch (error) {
-      console.error('Error saving conversation to Azure:', error);
+      console.error('Error in immediate save:', error);
     }
   };
 
@@ -133,16 +121,27 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     console.log('ConversationContext: Setting new conversation:', newConversation);
     setCurrentConversation(newConversation);
     
+    // Save immediately
+    saveConversationImmediate(newConversation);
+    
     return newId;
   };
 
   const loadConversation = async (id: string) => {
-    if (!user?.email) return;
-    
     setIsLoading(true);
     try {
-      const loadedConversation = await getConversation(user.email, id);
-      if (loadedConversation) {
+      const saved = localStorage.getItem(`ai-chat-conversation-${id}`);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const loadedConversation = {
+          ...parsed,
+          createdAt: new Date(parsed.createdAt),
+          updatedAt: new Date(parsed.updatedAt),
+          messages: parsed.messages.map((msg: any) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp)
+          }))
+        };
         setCurrentConversation(loadedConversation);
         console.log('ConversationContext: Loaded conversation with messages:', loadedConversation.messages.length);
       }
@@ -154,15 +153,14 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const saveConversation = async (conversation: Conversation) => {
-    return saveConversationToAzureAndUpdate(conversation);
+    return saveConversationImmediate(conversation);
   };
 
   const deleteConversation = async (id: string) => {
-    if (!user?.email) return;
-    
     try {
-      await deleteConversationFromAzure(user.email, id);
-      setConversations(prev => prev.filter(c => c.id !== id));
+      localStorage.removeItem(`ai-chat-conversation-${id}`);
+      const updated = conversations.filter(c => c.id !== id);
+      saveConversations(updated);
       
       if (currentConversation?.id === id) {
         setCurrentConversation(null);
@@ -173,11 +171,14 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const archiveConversation = async (id: string) => {
-    if (!user?.email) return;
-    
     try {
-      await archiveConversationInAzure(user.email, id);
-      await loadConversations(); // Reload conversations to reflect changes
+      const saved = localStorage.getItem(`ai-chat-conversation-${id}`);
+      if (saved) {
+        const conversation = JSON.parse(saved);
+        conversation.isArchived = true;
+        localStorage.setItem(`ai-chat-conversation-${id}`, JSON.stringify(conversation));
+        loadConversations();
+      }
     } catch (error) {
       console.error('Error archiving conversation:', error);
     }
@@ -217,27 +218,23 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       console.log('ConversationContext: Updated conversation created:', updatedConversation.id, updatedConversation.messages.length);
       console.log('ConversationContext: All messages in updated conversation:', updatedConversation.messages.map(m => `${m.id}:${m.type}:${m.content.substring(0, 20)}`));
       
-      // Save to Azure immediately
-      console.log('ConversationContext: Executing save to Azure...');
-      saveConversationToAzureAndUpdate(updatedConversation);
+      // Save immediately - no timeout
+      console.log('ConversationContext: Executing immediate save...');
+      saveConversationImmediate(updatedConversation);
 
       console.log('ConversationContext: END addMessageToCurrentConversation');
       return updatedConversation;
     });
-  }, [user?.email]);
+  }, [conversations]);
 
   const updateConversationTitle = async (id: string, title: string) => {
-    if (!user?.email) return;
-    
     try {
-      const conversation = await getConversation(user.email, id);
-      if (conversation) {
-        const updatedConversation = {
-          ...conversation,
-          title,
-          updatedAt: new Date()
-        };
-        await saveConversation(updatedConversation);
+      const saved = localStorage.getItem(`ai-chat-conversation-${id}`);
+      if (saved) {
+        const conversation = JSON.parse(saved);
+        conversation.title = title;
+        conversation.updatedAt = new Date();
+        await saveConversation(conversation);
       }
     } catch (error) {
       console.error('Error updating conversation title:', error);
