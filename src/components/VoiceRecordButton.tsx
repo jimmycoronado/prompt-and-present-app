@@ -1,8 +1,8 @@
-
 import { Mic, MicOff, Loader2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { useVoiceRecording } from "../hooks/useVoiceRecording";
 import { useToast } from "@/hooks/use-toast";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 
 interface VoiceRecordButtonProps {
   onTranscription: (text: string) => void;
@@ -56,19 +56,30 @@ export const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({
   };
 
   return (
-    <Button
-      type="button"
-      variant={getButtonVariant()}
-      size="icon"
-      onClick={handleClick}
-      disabled={disabled || isProcessing}
-      className={`h-11 w-11 transition-all hover:scale-105 ${
-        isRecording ? 'animate-pulse' : ''
-      }`}
-      aria-label={getAriaLabel()}
-      title={getAriaLabel()}
-    >
-      {getButtonIcon()}
-    </Button>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            type="button"
+            variant={getButtonVariant()}
+            size="icon"
+            onClick={handleClick}
+            disabled={disabled || isProcessing}
+            className={`h-11 w-11 transition-all hover:scale-105 ${
+              isRecording 
+                ? 'animate-pulse' 
+                : 'text-gray-500 hover:text-orange-500 hover:bg-gray-100'
+            }`}
+            aria-label={getAriaLabel()}
+            title={getAriaLabel()}
+          >
+            {getButtonIcon()}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{getAriaLabel()}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };

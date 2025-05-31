@@ -3,6 +3,7 @@ import { Send, File, Paperclip } from "lucide-react";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { VoiceRecordButton } from "./VoiceRecordButton";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -81,7 +82,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     // Auto-resize textarea
     const textarea = e.target;
     textarea.style.height = 'auto';
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
+    textarea.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
   };
 
   const handleVoiceTranscription = (transcribedText: string) => {
@@ -181,89 +182,98 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const hasTemplateVariables = message.includes('{') && message.includes('}');
 
   return (
-    <form onSubmit={handleSubmit} className="relative" role="search" aria-label="Enviar mensaje">
-      <div className="flex items-end space-x-2">
-        {/* File Upload Button */}
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={handleFileButtonClick}
-          disabled={disabled}
-          className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg h-11 w-11 flex-shrink-0"
-          aria-label="Adjuntar archivo"
-        >
-          <Paperclip className="h-5 w-5" />
-        </Button>
-        
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          onChange={handleFileChange}
-          accept=".pdf,.jpg,.jpeg,.png,.gif,.xlsx,.xls,.csv"
-          className="hidden"
-        />
-        
-        <div 
-          className={`flex-1 relative transition-all duration-200 ${
-            isDragOver ? 'ring-2 ring-blue-400 ring-opacity-50 bg-blue-50 dark:bg-blue-900/20' : ''
-          }`}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          <Textarea
-            ref={textareaRef}
-            value={message}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            onPaste={handlePaste}
-            placeholder="Escribe tu mensaje aquí... (Enter para enviar, Shift+Enter para nueva línea)"
-            disabled={disabled}
-            className={`min-h-[44px] max-h-[200px] resize-none pr-12 rounded-lg border-gray-300 dark:border-gray-600 outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none focus:shadow-none focus-visible:shadow-none ${
-              hasTemplateVariables ? 'border-orange-300 dark:border-orange-600' : ''
-            }`}
-            aria-label="Mensaje"
-            aria-describedby="send-button"
+    <TooltipProvider>
+      <form onSubmit={handleSubmit} className="relative" role="search" aria-label="Enviar mensaje">
+        <div className="flex items-end space-x-2">
+          {/* File Upload Button */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={handleFileButtonClick}
+                disabled={disabled}
+                className="text-gray-500 hover:text-orange-500 hover:bg-gray-100 rounded-lg h-11 w-11 flex-shrink-0 transition-colors"
+                aria-label="Adjuntar archivo"
+              >
+                <Paperclip className="h-5 w-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Adjuntar archivo (PDF, imágenes, Excel, CSV)</p>
+            </TooltipContent>
+          </Tooltip>
+          
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            onChange={handleFileChange}
+            accept=".pdf,.jpg,.jpeg,.png,.gif,.xlsx,.xls,.csv"
+            className="hidden"
           />
           
-          {hasTemplateVariables && (
-            <div className="absolute right-12 top-1/2 transform -translate-y-1/2">
-              <File className="h-4 w-4 text-orange-500" />
-            </div>
-          )}
+          <div 
+            className={`flex-1 relative transition-all duration-200 ${
+              isDragOver ? 'ring-2 ring-blue-400 ring-opacity-50 bg-blue-50 dark:bg-blue-900/20' : ''
+            }`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
+            <Textarea
+              ref={textareaRef}
+              value={message}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              onPaste={handlePaste}
+              placeholder="Escribe tu mensaje aquí... (Enter para enviar, Shift+Enter para nueva línea)"
+              disabled={disabled}
+              className={`min-h-[44px] max-h-[200px] resize-none pr-12 rounded-lg border-gray-300 dark:border-gray-600 outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none focus:shadow-none focus-visible:shadow-none ${
+                hasTemplateVariables ? 'border-orange-300 dark:border-orange-600' : ''
+              }`}
+              aria-label="Mensaje"
+              aria-describedby="send-button"
+            />
+            
+            {hasTemplateVariables && (
+              <div className="absolute right-12 top-1/2 transform -translate-y-1/2">
+                <File className="h-4 w-4 text-orange-500" />
+              </div>
+            )}
+          </div>
+          
+          <VoiceRecordButton
+            onTranscription={handleVoiceTranscription}
+            disabled={disabled}
+          />
+          
+          <Button
+            type="submit"
+            disabled={(!message.trim() && !hasFiles) || disabled}
+            size="icon"
+            className="bg-skandia-green hover:bg-skandia-green/90 text-white rounded-lg h-11 w-11 transition-all hover:scale-105"
+            aria-label="Enviar mensaje"
+            id="send-button"
+          >
+            <Send className="h-4 w-4" />
+          </Button>
         </div>
         
-        <VoiceRecordButton
-          onTranscription={handleVoiceTranscription}
-          disabled={disabled}
-        />
+        {hasTemplateVariables && (
+          <div className="mt-2 text-xs text-orange-600 dark:text-orange-400 flex items-center">
+            <File className="h-3 w-3 mr-1" />
+            Reemplaza las variables entre llaves {} con tus valores específicos
+          </div>
+        )}
         
-        <Button
-          type="submit"
-          disabled={(!message.trim() && !hasFiles) || disabled}
-          size="icon"
-          className="bg-skandia-green hover:bg-skandia-green/90 text-white rounded-lg h-11 w-11 transition-all hover:scale-105"
-          aria-label="Enviar mensaje"
-          id="send-button"
-        >
-          <Send className="h-4 w-4" />
-        </Button>
-      </div>
-      
-      {hasTemplateVariables && (
-        <div className="mt-2 text-xs text-orange-600 dark:text-orange-400 flex items-center">
-          <File className="h-3 w-3 mr-1" />
-          Reemplaza las variables entre llaves {} con tus valores específicos
-        </div>
-      )}
-      
-      {disabled && (
-        <div className="sr-only" aria-live="polite">
-          Procesando mensaje, por favor espera...
-        </div>
-      )}
-    </form>
+        {disabled && (
+          <div className="sr-only" aria-live="polite">
+            Procesando mensaje, por favor espera...
+          </div>
+        )}
+      </form>
+    </TooltipProvider>
   );
 };
