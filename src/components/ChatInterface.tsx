@@ -5,7 +5,7 @@ import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
 import { ConversationHistory } from "./ConversationHistory";
 import { PromptTemplates } from "./PromptTemplates";
-import { mockApiCall } from "../utils/mockApi";
+import { callAzureAgentApi } from "../utils/azureApiService";
 import { ChatMessage as ChatMessageType } from "../types/chat";
 import { PromptTemplate } from "../types/templates";
 import { useConversation } from "../contexts/ConversationContext";
@@ -76,7 +76,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     if (!currentConversation) return;
 
     console.log('ChatInterface: START handleSendMessage with content:', content);
-    console.log('ChatInterface: Using authenticated user email for API:', userEmail);
+    console.log('ChatInterface: Using authenticated user email for Azure API:', userEmail);
 
     const userMessage: ChatMessageType = {
       id: Date.now().toString(),
@@ -106,9 +106,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }, 100);
 
     try {
-      console.log('ChatInterface: Calling mockApiCall with authenticated user email:', userEmail);
-      const response = await mockApiCall(content, uploadedFiles, aiSettings, userEmail);
-      console.log('ChatInterface: Received API response:', response);
+      console.log('ChatInterface: Calling Azure API with authenticated user email:', userEmail);
+      const response = await callAzureAgentApi(content, uploadedFiles, aiSettings, userEmail);
+      console.log('ChatInterface: Received Azure API response:', response);
       
       const aiMessage: ChatMessageType = {
         id: (Date.now() + 1).toString(),
@@ -135,11 +135,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       }, 50);
       
     } catch (error) {
-      console.error('ChatInterface: Error in mockApiCall:', error);
+      console.error('ChatInterface: Error in Azure API call:', error);
       const errorMessage: ChatMessageType = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: 'Lo siento, hubo un error al procesar tu solicitud. Por favor, inténtalo de nuevo.',
+        content: 'Lo siento, hubo un error al conectar con el agente. Por favor, inténtalo de nuevo.',
         timestamp: new Date(),
         metadata: {
           processingTime: 0,
