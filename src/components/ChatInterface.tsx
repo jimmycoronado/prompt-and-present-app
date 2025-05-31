@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { History, File, Download } from "lucide-react";
+import { File, Download } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
 import { ConversationHistory } from "./ConversationHistory";
@@ -295,25 +295,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       <div className="border-b border-gray-200 dark:border-gray-700 p-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowHistory(true)}
-              className="flex items-center space-x-2"
-            >
-              <History className="h-4 w-4" />
-              <span>Historial</span>
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowTemplates(true)}
-              className="flex items-center space-x-2"
-            >
-              <File className="h-4 w-4" />
-              <span>Plantillas</span>
-            </Button>
+            {/* Removed Historial and Plantillas buttons */}
           </div>
 
           <div className="flex items-center space-x-2">
@@ -345,7 +327,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 Ver Plantillas
               </Button>
               <Button variant="outline" size="sm" onClick={() => setShowHistory(true)}>
-                <History className="h-3 w-3 mr-1" />
+                <File className="h-3 w-3 mr-1" />
                 Ver Historial
               </Button>
             </div>
