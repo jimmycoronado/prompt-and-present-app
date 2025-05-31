@@ -1,11 +1,11 @@
 
 import { AISettings } from "../types/settings";
 
-interface AgentApiResponse {
-  response?: string;
-  message?: string;
-  error?: string;
-  clientes_nuevos_mes_actual?: number;
+interface JSONPlaceholderPost {
+  userId: number;
+  id: number;
+  title: string;
+  body: string;
 }
 
 export const mockApiCall = async (
@@ -25,97 +25,50 @@ export const mockApiCall = async (
   
   const startTime = Date.now();
   
-  // Usar función edge de Supabase como proxy para evitar problemas de CORS
-  const proxyUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/azure-agent-proxy`;
-  
-  console.log('mockApiCall: Using Supabase proxy URL:', proxyUrl);
-  
-  // Preparar el body según el formato requerido
-  const requestBody = {
-    pregunta: message,
-    correo: userEmail || "jcoronado@skandia.com.co"
-  };
-  
-  console.log('mockApiCall: Request body:', requestBody);
-  
   try {
-    console.log('mockApiCall: Making POST request through Supabase proxy...');
+    console.log('mockApiCall: Making request to JSONPlaceholder API...');
     
-    const response = await fetch(proxyUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-      },
-      body: JSON.stringify(requestBody)
-    });
-
-    console.log('mockApiCall: Fetch completed, response status:', response.status);
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts?_limit=5');
+    
+    console.log('mockApiCall: Response status:', response.status);
     console.log('mockApiCall: Response ok:', response.ok);
-    console.log('mockApiCall: Response headers:', Object.fromEntries(response.headers.entries()));
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('mockApiCall: Response not ok, error text:', errorText);
-      throw new Error(`Error en el proxy de Supabase: ${response.status} - ${response.statusText}. Details: ${errorText}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const apiData: AgentApiResponse = await response.json();
-    console.log('mockApiCall: Azure API response data through proxy:', apiData);
+    const posts: JSONPlaceholderPost[] = await response.json();
+    console.log('mockApiCall: API response data:', posts);
     
     const processingTime = Date.now() - startTime;
     
-    // Procesar la respuesta de la API
-    let responseText = apiData.response || apiData.message || 'Respuesta recibida del agente';
+    // Crear respuesta basada en la pregunta
+    let responseText = `He procesado tu consulta: "${message}"\n\n`;
+    responseText += `Encontré ${posts.length} registros de ejemplo. Aquí tienes algunos datos de muestra:`;
     
-    // Si hay un error en la respuesta de la API
-    if (apiData.error) {
-      responseText = `❌ Error del agente: ${apiData.error}`;
-    }
+    // Transformar datos para la tabla
+    const tableData = {
+      headers: ['ID', 'Usuario', 'Título', 'Contenido'],
+      rows: posts.map(post => [
+        post.id.toString(),
+        `Usuario ${post.userId}`,
+        post.title.substring(0, 30) + '...',
+        post.body.substring(0, 50) + '...'
+      ])
+    };
     
-    console.log('mockApiCall: Final response text created successfully');
-    
-    // Si la respuesta contiene datos estructurados, intentar procesarlos
-    let tableData = null;
-    let chartData = null;
-    
-    // Verificar si hay datos numéricos para crear una tabla
-    if (apiData.clientes_nuevos_mes_actual !== undefined) {
-      tableData = {
-        headers: ['Métrica', 'Valor'],
-        rows: [
-          ['Clientes nuevos mes actual', apiData.clientes_nuevos_mes_actual.toString()]
-        ]
-      };
-    }
+    console.log('mockApiCall: Created table data:', tableData);
     
     return {
       text: responseText,
       data: tableData,
-      chart: chartData,
       processingTime
     };
     
   } catch (error) {
-    console.error('mockApiCall: Error in try-catch block:', error);
-    console.error('mockApiCall: Error type:', typeof error);
-    console.error('mockApiCall: Error constructor:', error.constructor.name);
+    console.error('mockApiCall: Error:', error);
     
-    if (error instanceof TypeError && error.message === 'Failed to fetch') {
-      console.error('mockApiCall: This is a network connectivity issue');
-      console.error('mockApiCall: Possible causes: CORS, server down, network issues');
-    }
-    
-    // Mensaje de error más informativo
-    const errorMessage = `❌ Error al conectar con el agente maestro: ${error instanceof Error ? error.message : 'Error desconocido'}. 
-
-Detalles del error:
-- Proxy: ${proxyUrl}
-- Método: POST
-- Tipo de error: ${typeof error}
-- Constructor: ${error instanceof Error ? error.constructor.name : 'Desconocido'}
-
-Por favor, inténtalo de nuevo.`;
+    const errorMessage = `❌ Error al conectar con el servicio: ${error instanceof Error ? error.message : 'Error desconocido'}. Por favor, inténtalo de nuevo.`;
 
     return {
       text: errorMessage,
