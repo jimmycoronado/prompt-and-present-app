@@ -1,3 +1,4 @@
+
 import { Mic, MicOff, Loader2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { useVoiceRecording } from "../hooks/useVoiceRecording";
@@ -71,7 +72,6 @@ export const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({
                 : 'text-gray-500 hover:text-orange-500 hover:bg-gray-100'
             }`}
             aria-label={getAriaLabel()}
-            title={getAriaLabel()}
           >
             {getButtonIcon()}
           </Button>
