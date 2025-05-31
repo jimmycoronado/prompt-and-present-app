@@ -43,31 +43,57 @@ export const mockApiCall = async (
       console.log('mockApiCall: Chart request detected');
       
       // Determinar tipo de gráfica basado en palabras clave
-      let chartType: 'bar' | 'line' = 'bar';
+      let chartType: 'bar' | 'line' | 'pie' = 'bar';
       if (messageLower.includes('línea') || messageLower.includes('linea') || messageLower.includes('line')) {
         chartType = 'line';
+      } else if (messageLower.includes('pie') || messageLower.includes('pastel') || messageLower.includes('torta')) {
+        chartType = 'pie';
       }
 
-      // Generar datos de ejemplo para la gráfica
-      const chartData = {
-        type: chartType,
-        data: [
-          { mes: 'Enero', ventas: 4500, gastos: 2800 },
-          { mes: 'Febrero', ventas: 5200, gastos: 3100 },
-          { mes: 'Marzo', ventas: 4800, gastos: 2900 },
-          { mes: 'Abril', ventas: 6100, gastos: 3400 },
-          { mes: 'Mayo', ventas: 5800, gastos: 3200 },
-          { mes: 'Junio', ventas: 6800, gastos: 3700 }
-        ],
-        xKey: 'mes',
-        yKey: 'ventas',
-        title: chartType === 'bar' ? 'Ventas Mensuales - Gráfica de Barras' : 'Tendencia de Ventas - Gráfica de Líneas'
-      };
+      // Generar datos según el tipo de gráfica
+      let chartData;
+      
+      if (chartType === 'pie') {
+        chartData = {
+          type: chartType,
+          data: [
+            { categoria: 'Ventas Online', valor: 3500, fill: '#0088FE' },
+            { categoria: 'Ventas en Tienda', valor: 2800, fill: '#00C49F' },
+            { categoria: 'Ventas Telefónicas', valor: 1200, fill: '#FFBB28' },
+            { categoria: 'Ventas por Catálogo', valor: 800, fill: '#FF8042' },
+            { categoria: 'Ventas Mayoristas', valor: 1500, fill: '#8884D8' }
+          ],
+          nameKey: 'categoria',
+          valueKey: 'valor',
+          title: 'Distribución de Ventas por Canal - Gráfica de Pie'
+        };
+      } else {
+        chartData = {
+          type: chartType,
+          data: [
+            { mes: 'Enero', ventas: 4500, gastos: 2800 },
+            { mes: 'Febrero', ventas: 5200, gastos: 3100 },
+            { mes: 'Marzo', ventas: 4800, gastos: 2900 },
+            { mes: 'Abril', ventas: 6100, gastos: 3400 },
+            { mes: 'Mayo', ventas: 5800, gastos: 3200 },
+            { mes: 'Junio', ventas: 6800, gastos: 3700 }
+          ],
+          xKey: 'mes',
+          yKey: 'ventas',
+          title: chartType === 'bar' ? 'Ventas Mensuales - Gráfica de Barras' : 'Tendencia de Ventas - Gráfica de Líneas'
+        };
+      }
 
       const processingTime = Date.now() - startTime;
       
-      let responseText = `He generado una ${chartType === 'bar' ? 'gráfica de barras' : 'gráfica de líneas'} basada en tu solicitud: "${message}"\n\n`;
-      responseText += `La gráfica muestra datos de ventas mensuales de los últimos 6 meses. Puedes ver la tendencia y comparar los valores mes a mes.`;
+      let responseText;
+      if (chartType === 'pie') {
+        responseText = `He generado una gráfica de pie basada en tu solicitud: "${message}"\n\n`;
+        responseText += `La gráfica muestra la distribución de ventas por diferentes canales. Puedes ver qué porcentaje representa cada canal del total de ventas.`;
+      } else {
+        responseText = `He generado una ${chartType === 'bar' ? 'gráfica de barras' : 'gráfica de líneas'} basada en tu solicitud: "${message}"\n\n`;
+        responseText += `La gráfica muestra datos de ventas mensuales de los últimos 6 meses. Puedes ver la tendencia y comparar los valores mes a mes.`;
+      }
 
       return {
         text: responseText,

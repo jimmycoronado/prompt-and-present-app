@@ -11,10 +11,12 @@ export interface TableData {
 }
 
 export interface ChartData {
-  type: 'bar' | 'line';
+  type: 'bar' | 'line' | 'pie';
   data: Array<{ [key: string]: string | number }>;
-  xKey: string;
-  yKey: string;
+  xKey?: string;
+  yKey?: string;
+  nameKey?: string;
+  valueKey?: string;
   title?: string;
 }
 
