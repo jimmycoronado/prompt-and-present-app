@@ -37,6 +37,12 @@ export const UserMenu: React.FC = () => {
     fullUserObject: user
   });
 
+  console.log('🔍 DEBUGGING: What text is being rendered?', {
+    displayName,
+    userEmail: user.email,
+    showingUserPrefix: displayName === 'Usuario'
+  });
+
   const initials = displayName
     .split(' ')
     .map((n: string) => n[0])
