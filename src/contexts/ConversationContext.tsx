@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Conversation, ConversationSummary } from '../types/conversation';
 import { ChatMessage } from '../types/chat';
@@ -26,12 +25,34 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   useEffect(() => {
     loadConversations();
+    restoreCurrentConversation();
   }, []);
 
   // Log currentConversation changes
   useEffect(() => {
     console.log('ConversationContext: currentConversation state changed:', currentConversation?.id, currentConversation?.messages?.length);
   }, [currentConversation]);
+
+  // Save current conversation ID to localStorage whenever it changes
+  useEffect(() => {
+    if (currentConversation) {
+      localStorage.setItem('ai-chat-current-conversation-id', currentConversation.id);
+    } else {
+      localStorage.removeItem('ai-chat-current-conversation-id');
+    }
+  }, [currentConversation?.id]);
+
+  const restoreCurrentConversation = async () => {
+    try {
+      const currentId = localStorage.getItem('ai-chat-current-conversation-id');
+      if (currentId) {
+        console.log('ConversationContext: Restoring conversation:', currentId);
+        await loadConversation(currentId);
+      }
+    } catch (error) {
+      console.error('Error restoring current conversation:', error);
+    }
+  };
 
   const loadConversations = () => {
     try {
@@ -58,6 +79,31 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
 
+  const saveConversationImmediate = (conversation: Conversation) => {
+    try {
+      console.log('ConversationContext: Immediate save of conversation:', conversation.id, conversation.messages.length);
+      // Save full conversation immediately
+      localStorage.setItem(`ai-chat-conversation-${conversation.id}`, JSON.stringify(conversation));
+      
+      // Update summary immediately
+      const summary: ConversationSummary = {
+        id: conversation.id,
+        title: conversation.title,
+        messageCount: conversation.messages.length,
+        lastMessage: conversation.messages[conversation.messages.length - 1]?.content || '',
+        createdAt: conversation.createdAt,
+        updatedAt: conversation.updatedAt,
+        tags: conversation.tags
+      };
+
+      const updatedConversations = conversations.filter(c => c.id !== conversation.id);
+      updatedConversations.unshift(summary);
+      saveConversations(updatedConversations);
+    } catch (error) {
+      console.error('Error in immediate save:', error);
+    }
+  };
+
   const createNewConversation = (): string => {
     console.log('ConversationContext: Creating new conversation');
     const newId = Date.now().toString();
@@ -74,6 +120,10 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     console.log('ConversationContext: Setting new conversation:', newConversation);
     setCurrentConversation(newConversation);
+    
+    // Save immediately
+    saveConversationImmediate(newConversation);
+    
     return newId;
   };
 
@@ -83,7 +133,7 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       const saved = localStorage.getItem(`ai-chat-conversation-${id}`);
       if (saved) {
         const parsed = JSON.parse(saved);
-        setCurrentConversation({
+        const loadedConversation = {
           ...parsed,
           createdAt: new Date(parsed.createdAt),
           updatedAt: new Date(parsed.updatedAt),
@@ -91,7 +141,9 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             ...msg,
             timestamp: new Date(msg.timestamp)
           }))
-        });
+        };
+        setCurrentConversation(loadedConversation);
+        console.log('ConversationContext: Loaded conversation with messages:', loadedConversation.messages.length);
       }
     } catch (error) {
       console.error('Error loading conversation:', error);
@@ -101,28 +153,7 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const saveConversation = async (conversation: Conversation) => {
-    try {
-      console.log('ConversationContext: Saving conversation to localStorage:', conversation.id, conversation.messages.length);
-      // Save full conversation
-      localStorage.setItem(`ai-chat-conversation-${conversation.id}`, JSON.stringify(conversation));
-      
-      // Update summary
-      const summary: ConversationSummary = {
-        id: conversation.id,
-        title: conversation.title,
-        messageCount: conversation.messages.length,
-        lastMessage: conversation.messages[conversation.messages.length - 1]?.content || '',
-        createdAt: conversation.createdAt,
-        updatedAt: conversation.updatedAt,
-        tags: conversation.tags
-      };
-
-      const updatedConversations = conversations.filter(c => c.id !== conversation.id);
-      updatedConversations.unshift(summary);
-      saveConversations(updatedConversations);
-    } catch (error) {
-      console.error('Error saving conversation:', error);
-    }
+    return saveConversationImmediate(conversation);
   };
 
   const deleteConversation = async (id: string) => {
@@ -187,12 +218,9 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       console.log('ConversationContext: Updated conversation created:', updatedConversation.id, updatedConversation.messages.length);
       console.log('ConversationContext: All messages in updated conversation:', updatedConversation.messages.map(m => `${m.id}:${m.type}:${m.content.substring(0, 20)}`));
       
-      // Save asynchronously without blocking UI
-      console.log('ConversationContext: Scheduling async save...');
-      setTimeout(() => {
-        console.log('ConversationContext: Executing async save...');
-        saveConversation(updatedConversation);
-      }, 0);
+      // Save immediately - no timeout
+      console.log('ConversationContext: Executing immediate save...');
+      saveConversationImmediate(updatedConversation);
 
       console.log('ConversationContext: END addMessageToCurrentConversation');
       return updatedConversation;

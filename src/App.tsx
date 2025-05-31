@@ -8,12 +8,14 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
 import { AuthPage } from "./components/AuthPage";
+import { MobileOrientationHandler } from "./components/MobileOrientationHandler";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <MobileOrientationHandler />
       <Toaster />
       <Sonner />
       <AuthProvider>

@@ -12,7 +12,7 @@ const IndexContent = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidePanelOpen, setSidePanelOpen] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(null);
-  const { currentConversation } = useConversation();
+  const { currentConversation, isLoading } = useConversation();
 
   const hasActiveConversation = currentConversation !== null;
 
@@ -20,6 +20,24 @@ const IndexContent = () => {
     // Cerrar el panel lateral después de crear un nuevo chat
     setSidePanelOpen(false);
   };
+
+  // Show loading state while restoring conversation
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 rounded-full mx-auto mb-4 bg-white p-2 overflow-hidden border border-gray-200">
+            <img 
+              src="https://www.skandia.com.mx/mercadeo/2021/campana/Sami/Mail/Sami/Thinking2.gif" 
+              alt="Sami Logo" 
+              className="w-full h-full object-contain"
+            />
+          </div>
+          <p className="text-gray-600 dark:text-gray-400">Restaurando conversación...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
