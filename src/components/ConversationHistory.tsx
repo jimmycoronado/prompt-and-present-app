@@ -20,19 +20,13 @@ export const ConversationHistory: React.FC<ConversationHistoryProps> = ({ onClos
     loadConversation, 
     deleteConversation, 
     archiveConversation,
-    searchConversations,
-    createNewConversation 
+    searchConversations
   } = useConversation();
 
   const filteredConversations = searchConversations(searchQuery);
 
   const handleLoadConversation = async (id: string) => {
     await loadConversation(id);
-    onClose();
-  };
-
-  const handleNewConversation = () => {
-    createNewConversation();
     onClose();
   };
 
@@ -48,19 +42,10 @@ export const ConversationHistory: React.FC<ConversationHistoryProps> = ({ onClos
       </button>
 
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex flex-col gap-3 mb-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center pr-8">
-            <MessageSquare className="h-5 w-5 mr-2" />
-            Historial de Conversaciones
-          </h2>
-          <Button
-            onClick={handleNewConversation}
-            size="sm"
-            className="bg-skandia-green hover:bg-skandia-green/90 text-white w-full"
-          >
-            Nueva Conversación
-          </Button>
-        </div>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center pr-8 mb-4">
+          <MessageSquare className="h-5 w-5 mr-2" />
+          Historial de Conversaciones
+        </h2>
         
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
