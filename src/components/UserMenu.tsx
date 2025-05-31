@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserPhoto } from '@/hooks/useUserPhoto';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -10,11 +11,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LogOut, User, Settings } from 'lucide-react';
 
 export const UserMenu: React.FC = () => {
   const { user, signOut } = useAuth();
+  const { photoUrl } = useUserPhoto();
 
   if (!user) return null;
 
@@ -39,6 +41,9 @@ export const UserMenu: React.FC = () => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
+            {photoUrl && (
+              <AvatarImage src={photoUrl} alt={displayName} />
+            )}
             <AvatarFallback className="bg-skandia-green text-white text-xs">
               {initials}
             </AvatarFallback>
