@@ -1,5 +1,4 @@
-
-import { User, Clock, Download, Copy, ThumbsUp, ThumbsDown } from "lucide-react";
+import { User, Download, Copy, ThumbsUp, ThumbsDown } from "lucide-react";
 import { ChatMessage as ChatMessageType } from "../types/chat";
 import { DataTable } from "./DataTable";
 import { DataChart } from "./DataChart";
@@ -281,7 +280,6 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
           <div className={`mt-0.5 text-xs text-gray-500 dark:text-gray-400 flex items-center ${
             isUser ? 'justify-end' : 'justify-start'
           }`}>
-            <Clock className="h-3 w-3 mr-1" />
             <time dateTime={message.timestamp.toISOString()}>
               {message.timestamp.toLocaleTimeString()}
             </time>
