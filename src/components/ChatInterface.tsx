@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { History, File, Download } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
@@ -283,8 +284,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     <div className="flex flex-col h-full relative">
       {/* Global drag overlay */}
       {isDragOver && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-blue-50/90 dark:bg-blue-900/40 border-4 border-dashed border-blue-400 dark:border-blue-300">
-          <div className="text-blue-600 dark:text-blue-300 text-xl font-medium flex items-center bg-white dark:bg-gray-800 px-6 py-4 rounded-lg shadow-lg">
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-orange-50/90 dark:bg-orange-900/40 border-4 border-dashed border-orange-400 dark:border-orange-300">
+          <div className="text-orange-600 dark:text-orange-300 text-xl font-medium flex items-center bg-white dark:bg-gray-800 px-6 py-4 rounded-lg shadow-lg">
             <File className="h-6 w-6 mr-3" />
             Suelta los archivos aquí para cargarlos
           </div>
@@ -389,12 +390,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             {uploadedFiles.map((file, index) => (
               <div
                 key={index}
-                className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full text-sm flex items-center space-x-2 animate-scale-in"
+                className="bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 px-3 py-1 rounded-full text-sm flex items-center space-x-2 animate-scale-in"
               >
                 <span>{file.name}</span>
                 <button
                   onClick={() => setUploadedFiles(files => files.filter((_, i) => i !== index))}
-                  className="text-blue-500 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded transition-colors"
+                  className="text-orange-500 hover:text-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 rounded transition-colors"
                   aria-label={`Remover archivo ${file.name}`}
                 >
                   ×
