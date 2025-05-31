@@ -23,31 +23,45 @@ export const mockApiCall = async (
   console.log('mockApiCall: User email:', userEmail);
   
   const startTime = Date.now();
+  const apiUrl = 'https://jarvis-api-agente-sql.azurewebsites.net/query';
+  const requestBody = {
+    pregunta: message,
+    correo: userEmail || 'usuario@ejemplo.com'
+  };
+  
+  console.log('mockApiCall: API URL:', apiUrl);
+  console.log('mockApiCall: Request body:', requestBody);
   
   try {
-    // Llamar a tu API de agente maestro
-    const response = await fetch('https://jarvis-api-agente-sql.azurewebsites.net/query', {
+    console.log('mockApiCall: Making fetch request...');
+    
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        pregunta: message,
-        correo: userEmail || 'usuario@ejemplo.com' // fallback si no hay email
-      })
+      body: JSON.stringify(requestBody)
     });
 
+    console.log('mockApiCall: Fetch completed, response status:', response.status);
+    console.log('mockApiCall: Response ok:', response.ok);
+    console.log('mockApiCall: Response headers:', Object.fromEntries(response.headers.entries()));
+
     if (!response.ok) {
-      throw new Error(`Error en la API: ${response.status} - ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('mockApiCall: Response not ok, error text:', errorText);
+      throw new Error(`Error en la API: ${response.status} - ${response.statusText}. Details: ${errorText}`);
     }
 
     const data: AgentApiResponse = await response.json();
-    console.log('mockApiCall: API response:', data);
+    console.log('mockApiCall: API response data:', data);
     
     const processingTime = Date.now() - startTime;
     
     // Extraer el texto de respuesta - ahora maneja tanto "response" como "message"
     const responseText = data.response || data.message || 'No se recibió respuesta del agente';
+    
+    console.log('mockApiCall: Final response text:', responseText);
     
     return {
       text: responseText,
@@ -55,11 +69,27 @@ export const mockApiCall = async (
     };
     
   } catch (error) {
-    console.error('mockApiCall: Error calling agent API:', error);
+    console.error('mockApiCall: Error in try-catch block:', error);
+    console.error('mockApiCall: Error type:', typeof error);
+    console.error('mockApiCall: Error constructor:', error.constructor.name);
+    
+    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+      console.error('mockApiCall: This is a network connectivity issue');
+      console.error('mockApiCall: Possible causes: CORS, server down, network issues');
+    }
     
     // Fallback en caso de error
+    const errorMessage = `Lo siento, hubo un error al conectar con el agente maestro: ${error instanceof Error ? error.message : 'Error desconocido'}. 
+
+Posibles causas:
+- El servidor puede estar temporalmente inactivo
+- Problemas de CORS (el servidor no permite solicitudes desde este dominio)
+- Problemas de conectividad de red
+
+Por favor, inténtalo de nuevo en unos momentos.`;
+
     return {
-      text: `Lo siento, hubo un error al conectar con el agente maestro: ${error instanceof Error ? error.message : 'Error desconocido'}. Por favor, inténtalo de nuevo.`,
+      text: errorMessage,
       processingTime: Date.now() - startTime
     };
   }
