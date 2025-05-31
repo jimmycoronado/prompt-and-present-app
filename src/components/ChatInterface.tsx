@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { History, File, Download } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
@@ -327,7 +326,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       <main className="flex-1 overflow-y-auto p-4 space-y-4" role="main" aria-label="Conversación">
         {messages.length === 0 && (
           <div className="text-center py-12">
-            <div className="w-16 h-16 rounded-full mx-auto mb-4 bg-skandia-green p-2 overflow-hidden">
+            <div className="w-16 h-16 rounded-full mx-auto mb-4 bg-white p-2 overflow-hidden border border-gray-200">
               <img 
                 src="https://www.skandia.com.mx/mercadeo/2021/campana/Sami/Mail/Sami/Thinking2.gif" 
                 alt="Sami Logo" 
