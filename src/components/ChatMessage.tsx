@@ -162,9 +162,9 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
                 
                 {/* Download Button */}
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   size="sm"
-                  className="text-white border-white hover:bg-white hover:text-skandia-green"
+                  className="bg-white text-skandia-green hover:bg-gray-100 border border-white"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDownload(message.downloadLink!.url, message.downloadLink!.filename);
