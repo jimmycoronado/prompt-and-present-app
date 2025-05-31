@@ -23,7 +23,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 }) => {
   const [message, setMessage] = useState(initialValue);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [hasFiles, setHasFiles] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const lastInitialValueRef = useRef(initialValue);
@@ -56,7 +55,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     if ((trimmedMessage || hasFiles) && !disabled) {
       onSendMessage(trimmedMessage);
       setMessage("");
-      setHasFiles(false);
       lastInitialValueRef.current = "";
       onValueChange?.("");
       
@@ -121,7 +119,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     });
     
     if (validFiles.length > 0) {
-      setHasFiles(true);
       onFilesSelected?.(validFiles);
     }
   };
