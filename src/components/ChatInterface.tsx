@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { History, File, Download } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
@@ -27,6 +26,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const [showHistory, setShowHistory] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
   const [templateContent, setTemplateContent] = useState("");
+  const [isDragOver, setIsDragOver] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -188,6 +188,67 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     });
   };
 
+  // Window-level drag and drop handlers
+  useEffect(() => {
+    const handleDragOver = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!isLoading && !showHistory && !showTemplates) {
+        setIsDragOver(true);
+      }
+    };
+
+    const handleDragLeave = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      // Only hide drag overlay if leaving the window
+      if (!e.relatedTarget || !document.contains(e.relatedTarget as Node)) {
+        setIsDragOver(false);
+      }
+    };
+
+    const handleDrop = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragOver(false);
+      
+      if (!isLoading && !showHistory && !showTemplates) {
+        validateAndProcessFiles(e.dataTransfer?.files || null);
+      }
+    };
+
+    document.addEventListener('dragover', handleDragOver);
+    document.addEventListener('dragleave', handleDragLeave);
+    document.addEventListener('drop', handleDrop);
+
+    return () => {
+      document.removeEventListener('dragover', handleDragOver);
+      document.removeEventListener('dragleave', handleDragLeave);
+      document.removeEventListener('drop', handleDrop);
+    };
+  }, [isLoading, showHistory, showTemplates]);
+
+  const validateAndProcessFiles = (files: FileList | null) => {
+    if (!files) return;
+    
+    const validFiles = Array.from(files).filter(file => {
+      const validTypes = [
+        'application/pdf',
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'text/csv'
+      ];
+      return validTypes.includes(file.type) && file.size <= 10 * 1024 * 1024; // 10MB limit
+    });
+    
+    if (validFiles.length > 0) {
+      setUploadedFiles(prev => [...prev, ...validFiles]);
+    }
+  };
+
   // Sidebar para historial y plantillas
   if (showHistory) {
     return (
@@ -219,7 +280,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full relative">
+      {/* Global drag overlay */}
+      {isDragOver && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-blue-50/90 dark:bg-blue-900/40 border-4 border-dashed border-blue-400 dark:border-blue-300">
+          <div className="text-blue-600 dark:text-blue-300 text-xl font-medium flex items-center bg-white dark:bg-gray-800 px-6 py-4 rounded-lg shadow-lg">
+            <File className="h-6 w-6 mr-3" />
+            Suelta los archivos aquí para cargarlos
+          </div>
+        </div>
+      )}
+
       {/* Action Bar */}
       <div className="border-b border-gray-200 dark:border-gray-700 p-3">
         <div className="flex items-center justify-between">
@@ -342,7 +413,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             disabled={isLoading}
             initialValue={templateContent}
             onValueChange={setTemplateContent}
-            onFilesSelected={setUploadedFiles}
+            onFilesSelected={(files) => setUploadedFiles(prev => [...prev, ...files])}
           />
         </div>
       </div>

@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Send, File, Paperclip } from "lucide-react";
 import { Button } from "./ui/button";
@@ -220,23 +219,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             disabled={disabled}
             className={`min-h-[44px] max-h-[200px] resize-none pr-12 rounded-lg border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 transition-all ${
               hasTemplateVariables ? 'border-orange-300 dark:border-orange-600' : ''
-            } ${
-              isDragOver ? 'border-blue-400 dark:border-blue-400' : ''
             }`}
             aria-label="Mensaje"
             aria-describedby="send-button"
           />
           
-          {isDragOver && (
-            <div className="absolute inset-0 flex items-center justify-center bg-blue-50 dark:bg-blue-900/40 rounded-lg border-2 border-dashed border-blue-400 dark:border-blue-300 pointer-events-none">
-              <div className="text-blue-600 dark:text-blue-300 text-sm font-medium flex items-center">
-                <Paperclip className="h-4 w-4 mr-2" />
-                Suelta los archivos aquí
-              </div>
-            </div>
-          )}
-          
-          {hasTemplateVariables && !isDragOver && (
+          {hasTemplateVariables && (
             <div className="absolute right-12 top-1/2 transform -translate-y-1/2">
               <File className="h-4 w-4 text-orange-500" />
             </div>
