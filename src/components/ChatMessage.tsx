@@ -106,10 +106,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
 
         {/* Message Content */}
         <div className={`flex-1 ${isUser ? 'text-right' : 'text-left'}`}>
-          <div className={`inline-block rounded-lg p-4 shadow-sm border ${
+          <div className={`inline-block p-4 ${
             isUser
-              ? 'bg-gray-700 text-white border-gray-700'
-              : 'bg-skandia-green text-white border-skandia-green'
+              ? 'rounded-lg bg-skandia-green text-white border border-skandia-green shadow-sm'
+              : 'text-gray-900 dark:text-gray-100'
           } ${isSelected ? 'ring-2 ring-blue-500' : ''}`}>
             
             {/* Text Content */}
@@ -127,8 +127,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
                     key={index}
                     className={`flex items-center space-x-2 p-2 rounded ${
                       isUser 
-                        ? 'bg-gray-600' 
-                        : 'bg-skandia-green/80'
+                        ? 'bg-skandia-green/80' 
+                        : 'bg-gray-100 dark:bg-gray-800'
                     }`}
                   >
                     <span className="text-sm">{file.name}</span>
@@ -169,7 +169,9 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
                   <img 
                     src={message.downloadLink.url} 
                     alt="Vista previa"
-                    className="max-w-xs rounded border border-white/20 shadow-sm"
+                    className={`max-w-xs rounded border shadow-sm ${
+                      isUser ? 'border-white/20' : 'border-gray-200 dark:border-gray-700'
+                    }`}
                     style={{ maxHeight: '200px', width: 'auto' }}
                   />
                 </div>
@@ -178,7 +180,11 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="bg-white text-skandia-green hover:bg-gray-100 border border-white"
+                  className={`${
+                    isUser 
+                      ? 'bg-white text-skandia-green hover:bg-gray-100 border border-white'
+                      : 'bg-skandia-green text-white hover:bg-skandia-green/80'
+                  }`}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDownload(message.downloadLink!.url, message.downloadLink!.filename);
@@ -192,7 +198,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
 
             {/* Actions for Assistant Messages */}
             {!isUser && message.content && (
-              <div className="mt-3 flex items-center space-x-2 pt-2 border-t border-white/20">
+              <div className="mt-3 flex items-center space-x-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -200,7 +206,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
                     e.stopPropagation();
                     handleCopyText();
                   }}
-                  className="text-white/80 hover:text-white hover:bg-white/10"
+                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
                   aria-label="Copiar mensaje"
                 >
                   <Copy className="h-4 w-4 mr-1" />
@@ -215,10 +221,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
                       e.stopPropagation();
                       handleFeedback('positive');
                     }}
-                    className={`hover:bg-white/10 ${
+                    className={`hover:bg-gray-100 dark:hover:bg-gray-800 ${
                       feedback === 'positive' 
-                        ? 'text-green-400 hover:text-green-300' 
-                        : 'text-white/80 hover:text-white'
+                        ? 'text-green-500 hover:text-green-600' 
+                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
                     }`}
                     aria-label="Me gusta esta respuesta"
                   >
@@ -232,10 +238,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
                       e.stopPropagation();
                       handleFeedback('negative');
                     }}
-                    className={`hover:bg-white/10 ${
+                    className={`hover:bg-gray-100 dark:hover:bg-gray-800 ${
                       feedback === 'negative' 
-                        ? 'text-red-400 hover:text-red-300' 
-                        : 'text-white/80 hover:text-white'
+                        ? 'text-red-500 hover:text-red-600' 
+                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
                     }`}
                     aria-label="No me gusta esta respuesta"
                   >
