@@ -16,7 +16,7 @@ export const mockApiCall = async (
   text: string;
   data?: any;
   chart?: any;
-  downloadLink?: string;
+  downloadLink?: { url: string; filename: string };
   processingTime?: number;
 }> => {
   console.log('mockApiCall: Starting with message:', message);
