@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { File, Download } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
@@ -9,6 +10,7 @@ import { ChatMessage as ChatMessageType } from "../types/chat";
 import { PromptTemplate } from "../types/templates";
 import { useConversation } from "../contexts/ConversationContext";
 import { useSettings } from "../contexts/SettingsContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
 
@@ -30,8 +32,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  // Correo temporal fijo
-  const userEmail = "jcoronado@skandia.com.co";
+  // Get user email from auth context
+  const { user } = useAuth();
+  const userEmail = user?.email || "usuario@dominio.com";
 
   const { 
     currentConversation, 
@@ -73,7 +76,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     if (!currentConversation) return;
 
     console.log('ChatInterface: START handleSendMessage with content:', content);
-    console.log('ChatInterface: Using fixed email for API:', userEmail);
+    console.log('ChatInterface: Using authenticated user email for API:', userEmail);
 
     const userMessage: ChatMessageType = {
       id: Date.now().toString(),
@@ -103,7 +106,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }, 100);
 
     try {
-      console.log('ChatInterface: Calling mockApiCall with fixed email:', userEmail);
+      console.log('ChatInterface: Calling mockApiCall with authenticated user email:', userEmail);
       const response = await mockApiCall(content, uploadedFiles, aiSettings, userEmail);
       console.log('ChatInterface: Received API response:', response);
       
