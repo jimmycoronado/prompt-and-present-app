@@ -115,6 +115,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         data: response.data,
         chart: response.chart,
         downloadLink: response.downloadLink,
+        videoPreview: response.videoPreview,
         metadata: {
           processingTime: response.processingTime || Math.random() * 2000 + 500,
           model: aiSettings.model,
