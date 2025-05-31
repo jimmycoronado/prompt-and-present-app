@@ -18,6 +18,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
   const isUser = message.type === 'user';
   const { toast } = useToast();
   const [feedback, setFeedback] = useState<'positive' | 'negative' | null>(null);
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleCopyText = async () => {
     try {
@@ -79,10 +80,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
 
   return (
     <div 
-      className={`flex ${isUser ? 'justify-end' : 'justify-start'} cursor-pointer transition-all duration-200 ${
-        isSelected ? 'bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2' : ''
-      }`}
-      onClick={onClick}
+      className={`flex ${isUser ? 'justify-end' : 'justify-start'} transition-all duration-200`}
       role="article"
       aria-label={`Mensaje de ${isUser ? 'usuario' : 'asistente'}`}
     >
@@ -105,13 +103,39 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
         </div>
 
         {/* Message Content */}
-        <div className={`flex-1 ${isUser ? 'text-right' : 'text-left'}`}>
-          <div className={`inline-block p-4 ${
-            isUser
-              ? 'rounded-lg bg-skandia-green text-white border border-skandia-green shadow-sm'
-              : 'text-gray-900 dark:text-gray-100'
-          } ${isSelected ? 'ring-2 ring-blue-500' : ''}`}>
+        <div className={`flex-1 ${isUser ? 'text-right' : 'text-left'} relative group`}>
+          <div 
+            className={`inline-block p-4 relative ${
+              isUser
+                ? 'rounded-lg bg-skandia-green text-white border border-skandia-green shadow-sm'
+                : 'text-gray-900 dark:text-gray-100'
+            }`}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
             
+            {/* Copy Button on Hover */}
+            {isHovered && message.content && (
+              <div className={`absolute ${isUser ? 'left-2' : 'right-2'} top-2 z-10`}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCopyText();
+                  }}
+                  className={`h-8 w-8 p-0 rounded-md ${
+                    isUser 
+                      ? 'bg-black/10 hover:bg-black/20 text-white'
+                      : 'bg-gray-100 hover:bg-gray-200 text-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-400'
+                  }`}
+                  aria-label="Copiar mensaje"
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+
             {/* Text Content */}
             {message.content && (
               <div className="whitespace-pre-wrap">
@@ -199,20 +223,6 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
             {/* Actions for Assistant Messages */}
             {!isUser && message.content && (
               <div className="mt-3 flex items-center space-x-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCopyText();
-                  }}
-                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
-                  aria-label="Copiar mensaje"
-                >
-                  <Copy className="h-4 w-4 mr-1" />
-                  Copiar
-                </Button>
-                
                 <div className="flex space-x-1">
                   <Button
                     variant="ghost"
