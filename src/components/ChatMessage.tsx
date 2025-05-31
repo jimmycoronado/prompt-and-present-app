@@ -40,6 +40,36 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
     });
   };
 
+  const handleDownload = async (url: string, filename: string) => {
+    try {
+      // Crear un enlace temporal para forzar la descarga
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Limpiar la URL del objeto
+      window.URL.revokeObjectURL(downloadUrl);
+      
+      toast({
+        title: "Descarga iniciada",
+        description: `Se está descargando ${filename}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error en la descarga",
+        description: "No se pudo descargar el archivo",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div 
       className={`flex ${isUser ? 'justify-end' : 'justify-start'} cursor-pointer transition-all duration-200 ${
@@ -121,15 +151,16 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
             {message.downloadLink && (
               <div className="mt-4">
                 <Button
-                  asChild
                   variant="outline"
                   size="sm"
                   className="text-white border-white hover:bg-white hover:text-skandia-green"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDownload(message.downloadLink!.url, message.downloadLink!.filename);
+                  }}
                 >
-                  <a href={message.downloadLink.url} download>
-                    <Download className="h-4 w-4 mr-2" />
-                    {message.downloadLink.filename}
-                  </a>
+                  <Download className="h-4 w-4 mr-2" />
+                  {message.downloadLink.filename}
                 </Button>
               </div>
             )}
