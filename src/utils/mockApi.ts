@@ -35,6 +35,20 @@ export const mockApiCall = async (
                           messageLower.includes('líneas') ||
                           messageLower.includes('lineas') ||
                           messageLower.includes('pie') ||
+                          messageLower.includes('área') ||
+                          messageLower.includes('area') ||
+                          messageLower.includes('dispersión') ||
+                          messageLower.includes('dispersion') ||
+                          messageLower.includes('scatter') ||
+                          messageLower.includes('radar') ||
+                          messageLower.includes('araña') ||
+                          messageLower.includes('treemap') ||
+                          messageLower.includes('árbol') ||
+                          messageLower.includes('embudo') ||
+                          messageLower.includes('funnel') ||
+                          messageLower.includes('combinada') ||
+                          messageLower.includes('composed') ||
+                          messageLower.includes('sankey') ||
                           messageLower.includes('ventas') ||
                           messageLower.includes('estadísticas') ||
                           messageLower.includes('estadisticas');
@@ -43,11 +57,24 @@ export const mockApiCall = async (
       console.log('mockApiCall: Chart request detected');
       
       // Determinar tipo de gráfica basado en palabras clave
-      let chartType: 'bar' | 'line' | 'pie' = 'bar';
+      let chartType: 'bar' | 'line' | 'pie' | 'area' | 'scatter' | 'radar' | 'treemap' | 'funnel' | 'composed' | 'sankey' = 'bar';
+      
       if (messageLower.includes('línea') || messageLower.includes('linea') || messageLower.includes('line')) {
         chartType = 'line';
       } else if (messageLower.includes('pie') || messageLower.includes('pastel') || messageLower.includes('torta')) {
         chartType = 'pie';
+      } else if (messageLower.includes('área') || messageLower.includes('area')) {
+        chartType = 'area';
+      } else if (messageLower.includes('dispersión') || messageLower.includes('dispersion') || messageLower.includes('scatter')) {
+        chartType = 'scatter';
+      } else if (messageLower.includes('radar') || messageLower.includes('araña')) {
+        chartType = 'radar';
+      } else if (messageLower.includes('treemap') || messageLower.includes('árbol') || messageLower.includes('mapa')) {
+        chartType = 'treemap';
+      } else if (messageLower.includes('embudo') || messageLower.includes('funnel')) {
+        chartType = 'funnel';
+      } else if (messageLower.includes('combinada') || messageLower.includes('composed') || messageLower.includes('mixta')) {
+        chartType = 'composed';
       }
 
       // Generar datos según el tipo de gráfica
@@ -67,7 +94,98 @@ export const mockApiCall = async (
           valueKey: 'valor',
           title: 'Distribución de Ventas por Canal - Gráfica de Pie'
         };
+      } else if (chartType === 'area') {
+        chartData = {
+          type: chartType,
+          data: [
+            { mes: 'Enero', ventas: 4500, ingresos: 6000 },
+            { mes: 'Febrero', ventas: 5200, ingresos: 6800 },
+            { mes: 'Marzo', ventas: 4800, ingresos: 6200 },
+            { mes: 'Abril', ventas: 6100, ingresos: 7500 },
+            { mes: 'Mayo', ventas: 5800, ingresos: 7200 },
+            { mes: 'Junio', ventas: 6800, ingresos: 8400 }
+          ],
+          xKey: 'mes',
+          yKey: 'ventas',
+          title: 'Evolución de Ventas - Gráfica de Área'
+        };
+      } else if (chartType === 'scatter') {
+        chartData = {
+          type: chartType,
+          data: [
+            { precio: 100, ventas: 4500 },
+            { precio: 120, ventas: 5200 },
+            { precio: 80, ventas: 4800 },
+            { precio: 150, ventas: 6100 },
+            { precio: 110, ventas: 5800 },
+            { precio: 130, ventas: 6800 },
+            { precio: 90, ventas: 5100 },
+            { precio: 140, ventas: 6200 }
+          ],
+          xKey: 'precio',
+          yKey: 'ventas',
+          title: 'Relación Precio vs Ventas - Gráfica de Dispersión'
+        };
+      } else if (chartType === 'radar') {
+        chartData = {
+          type: chartType,
+          data: [
+            { subject: 'Calidad', A: 120, B: 110, fullMark: 150 },
+            { subject: 'Precio', A: 98, B: 130, fullMark: 150 },
+            { subject: 'Servicio', A: 86, B: 130, fullMark: 150 },
+            { subject: 'Marketing', A: 99, B: 100, fullMark: 150 },
+            { subject: 'Innovación', A: 85, B: 90, fullMark: 150 },
+            { subject: 'Logística', A: 65, B: 85, fullMark: 150 }
+          ],
+          nameKey: 'subject',
+          radarKeys: ['A', 'B'],
+          title: 'Comparación de Productos - Gráfica de Radar'
+        };
+      } else if (chartType === 'treemap') {
+        chartData = {
+          type: chartType,
+          data: [
+            { name: 'Electrónicos', size: 5000, fill: '#0088FE' },
+            { name: 'Ropa', size: 3200, fill: '#00C49F' },
+            { name: 'Hogar', size: 2800, fill: '#FFBB28' },
+            { name: 'Deportes', size: 2200, fill: '#FF8042' },
+            { name: 'Libros', size: 1500, fill: '#8884D8' },
+            { name: 'Belleza', size: 1200, fill: '#82CA9D' }
+          ],
+          valueKey: 'size',
+          title: 'Distribución de Ventas por Categoría - Mapa de Árbol'
+        };
+      } else if (chartType === 'funnel') {
+        chartData = {
+          type: chartType,
+          data: [
+            { name: 'Visitantes', value: 10000, fill: '#0088FE' },
+            { name: 'Interesados', value: 5000, fill: '#00C49F' },
+            { name: 'Carrito', value: 2000, fill: '#FFBB28' },
+            { name: 'Checkout', value: 1000, fill: '#FF8042' },
+            { name: 'Compra', value: 500, fill: '#8884D8' }
+          ],
+          valueKey: 'value',
+          title: 'Embudo de Conversión - Gráfica de Embudo'
+        };
+      } else if (chartType === 'composed') {
+        chartData = {
+          type: chartType,
+          data: [
+            { mes: 'Enero', ventas: 4500, gastos: 2800, utilidad: 1700 },
+            { mes: 'Febrero', ventas: 5200, gastos: 3100, utilidad: 2100 },
+            { mes: 'Marzo', ventas: 4800, gastos: 2900, utilidad: 1900 },
+            { mes: 'Abril', ventas: 6100, gastos: 3400, utilidad: 2700 },
+            { mes: 'Mayo', ventas: 5800, gastos: 3200, utilidad: 2600 },
+            { mes: 'Junio', ventas: 6800, gastos: 3700, utilidad: 3100 }
+          ],
+          xKey: 'mes',
+          yKey: 'ventas',
+          yKey2: 'gastos',
+          title: 'Ventas y Gastos Mensuales - Gráfica Combinada'
+        };
       } else {
+        // Default bar/line chart
         chartData = {
           type: chartType,
           data: [
@@ -86,14 +204,8 @@ export const mockApiCall = async (
 
       const processingTime = Date.now() - startTime;
       
-      let responseText;
-      if (chartType === 'pie') {
-        responseText = `He generado una gráfica de pie basada en tu solicitud: "${message}"\n\n`;
-        responseText += `La gráfica muestra la distribución de ventas por diferentes canales. Puedes ver qué porcentaje representa cada canal del total de ventas.`;
-      } else {
-        responseText = `He generado una ${chartType === 'bar' ? 'gráfica de barras' : 'gráfica de líneas'} basada en tu solicitud: "${message}"\n\n`;
-        responseText += `La gráfica muestra datos de ventas mensuales de los últimos 6 meses. Puedes ver la tendencia y comparar los valores mes a mes.`;
-      }
+      let responseText = `He generado una gráfica de ${getChartTypeName(chartType)} basada en tu solicitud: "${message}"\n\n`;
+      responseText += getChartDescription(chartType);
 
       return {
         text: responseText,
@@ -162,4 +274,37 @@ export const mockApiCall = async (
       processingTime: Date.now() - startTime
     };
   }
+};
+
+// Helper functions
+const getChartTypeName = (type: string): string => {
+  const names: { [key: string]: string } = {
+    'bar': 'barras',
+    'line': 'líneas',
+    'pie': 'pie',
+    'area': 'área',
+    'scatter': 'dispersión',
+    'radar': 'radar',
+    'treemap': 'mapa de árbol',
+    'funnel': 'embudo',
+    'composed': 'combinada',
+    'sankey': 'Sankey'
+  };
+  return names[type] || type;
+};
+
+const getChartDescription = (type: string): string => {
+  const descriptions: { [key: string]: string } = {
+    'bar': 'La gráfica muestra datos de ventas mensuales usando barras verticales para facilitar la comparación.',
+    'line': 'La gráfica muestra la tendencia de ventas a lo largo del tiempo con una línea continua.',
+    'pie': 'La gráfica muestra la distribución porcentual de ventas por diferentes canales.',
+    'area': 'La gráfica muestra la evolución de ventas con el área bajo la curva rellena para enfatizar la magnitud.',
+    'scatter': 'La gráfica muestra la relación entre precio y ventas usando puntos dispersos.',
+    'radar': 'La gráfica compara múltiples métricas en una forma circular tipo radar.',
+    'treemap': 'La gráfica muestra la proporción de ventas por categoría usando rectángulos de diferentes tamaños.',
+    'funnel': 'La gráfica muestra el proceso de conversión desde visitantes hasta compras.',
+    'composed': 'La gráfica combina barras y líneas para mostrar ventas y gastos en una sola visualización.',
+    'sankey': 'La gráfica muestra flujos de datos entre diferentes categorías.'
+  };
+  return descriptions[type] || 'Gráfica generada con datos de ejemplo.';
 };

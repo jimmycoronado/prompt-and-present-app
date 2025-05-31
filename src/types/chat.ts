@@ -11,13 +11,18 @@ export interface TableData {
 }
 
 export interface ChartData {
-  type: 'bar' | 'line' | 'pie';
+  type: 'bar' | 'line' | 'pie' | 'area' | 'scatter' | 'radar' | 'treemap' | 'funnel' | 'composed' | 'sankey';
   data: Array<{ [key: string]: string | number }>;
   xKey?: string;
   yKey?: string;
   nameKey?: string;
   valueKey?: string;
   title?: string;
+  // Additional keys for complex charts
+  yKey2?: string; // For composed charts
+  radarKeys?: string[]; // For radar charts
+  sankeyNodes?: Array<{ name: string }>;
+  sankeyLinks?: Array<{ source: number; target: number; value: number }>;
 }
 
 export interface DownloadLink {
