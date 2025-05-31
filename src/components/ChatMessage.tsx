@@ -1,5 +1,4 @@
 
-
 import { User, Clock, Download, Copy, ThumbsUp, ThumbsDown } from "lucide-react";
 import { ChatMessage as ChatMessageType } from "../types/chat";
 import { DataTable } from "./DataTable";
@@ -104,10 +103,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
         </div>
 
         {/* Message Content */}
-        <div className={`flex-1 ${isUser ? 'text-right' : 'text-left'} relative group`}>
-          {/* Extended hover area for user messages to include copy button */}
+        <div className={`flex-1 ${isUser ? 'text-right' : 'text-left'} relative`}>
+          {/* Hover area that includes the message bubble and copy icon */}
           <div 
-            className={`${isUser ? 'pb-10' : ''}`}
+            className={`group ${isUser ? 'pb-8' : ''}`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
@@ -259,9 +258,9 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
               )}
             </div>
 
-            {/* Copy Button for User Messages - Positioned just below the bubble */}
-            {isUser && isHovered && message.content && (
-              <div className="absolute top-full right-0 mt-1 flex justify-end">
+            {/* Copy Button for User Messages - Positioned just below the bubble but above timestamp */}
+            {isUser && message.content && (
+              <div className={`${isHovered ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200 flex justify-end mt-1 mb-1`}>
                 <Button
                   variant="ghost"
                   size="sm"
