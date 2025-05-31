@@ -10,6 +10,7 @@ interface ChatInputProps {
   initialValue?: string;
   onValueChange?: (value: string) => void;
   onFilesSelected?: (files: File[]) => void;
+  uploadedFiles?: File[];
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({ 
@@ -17,7 +18,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   disabled, 
   initialValue = "",
   onValueChange,
-  onFilesSelected 
+  onFilesSelected,
+  uploadedFiles = []
 }) => {
   const [message, setMessage] = useState(initialValue);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -25,6 +27,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const lastInitialValueRef = useRef(initialValue);
+
+  const hasFiles = uploadedFiles.length > 0;
 
   useEffect(() => {
     // Only update if initialValue actually changed and is different from current message

@@ -414,6 +414,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             initialValue={templateContent}
             onValueChange={setTemplateContent}
             onFilesSelected={(files) => setUploadedFiles(prev => [...prev, ...files])}
+            uploadedFiles={uploadedFiles}
           />
         </div>
       </div>
