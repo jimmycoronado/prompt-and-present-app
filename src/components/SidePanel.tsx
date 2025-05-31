@@ -53,6 +53,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                 onClick={onToggle}
                 className="h-10 w-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 [&_svg]:text-gray-600 [&_svg]:hover:text-orange-500"
                 aria-label="Abrir panel lateral"
+                title="Abrir barra lateral"
               >
                 <PanelLeft className="h-5 w-5" />
               </Button>
@@ -71,6 +72,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                   onClick={handleNewChat}
                   className="h-10 w-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 [&_svg]:text-gray-600 [&_svg]:hover:text-orange-500"
                   aria-label="Nuevo chat"
+                  title="Nuevo chat"
                 >
                   <Edit3 className="h-5 w-5" />
                 </Button>
