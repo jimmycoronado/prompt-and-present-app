@@ -9,37 +9,76 @@ import { useToast } from '@/hooks/use-toast';
 
 export const AuthPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { signInWithAzure, user } = useAuth();
+  const { signInWithAzure, user, loading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   // Redirigir si ya está autenticado
   useEffect(() => {
-    if (user) {
-      navigate('/');
+    if (!loading && user) {
+      console.log('User authenticated, redirecting to home:', user);
+      navigate('/', { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, loading, navigate]);
 
   const handleAzureSignIn = async () => {
     setIsLoading(true);
+    console.log('Starting Azure sign in...');
 
-    const { error } = await signInWithAzure();
+    try {
+      const { error } = await signInWithAzure();
 
-    if (error) {
-      toast({
-        title: "Error al iniciar sesión",
-        description: error.message || "Error de autenticación con Microsoft",
-        variant: "destructive",
-      });
+      if (error) {
+        console.error('Sign in error:', error);
+        toast({
+          title: "Error al iniciar sesión",
+          description: error.message || "Error de autenticación con Microsoft",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+      } else {
+        console.log('Sign in successful');
+        toast({
+          title: "Inicio de sesión exitoso",
+          description: "Bienvenido a Super Sami",
+        });
+        // La redirección se manejará automáticamente por el useEffect
+        // pero agregamos un timeout como respaldo
+        setTimeout(() => {
+          if (user) {
+            navigate('/', { replace: true });
+          }
+          setIsLoading(false);
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('Unexpected error during sign in:', error);
       setIsLoading(false);
-    } else {
-      // La redirección se manejará automáticamente por el useEffect
       toast({
-        title: "Inicio de sesión exitoso",
-        description: "Bienvenido a Super Sami",
+        title: "Error inesperado",
+        description: "Ocurrió un error inesperado durante el inicio de sesión",
+        variant: "destructive",
       });
     }
   };
+
+  // Mostrar loading si se está verificando la autenticación
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="w-16 h-16 rounded-full mx-auto mb-4 bg-skandia-green p-2 overflow-hidden">
+            <img 
+              src="https://www.skandia.com.mx/mercadeo/2021/campana/Sami/Mail/Sami/Thinking2.gif" 
+              alt="Sami Logo" 
+              className="w-full h-full object-contain"
+            />
+          </div>
+          <p className="text-gray-600 dark:text-gray-400">Verificando autenticación...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">

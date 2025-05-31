@@ -47,9 +47,18 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({ children }
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('Auth state changed:', { 
+      inProgress, 
+      isAuthenticated, 
+      accountsLength: accounts.length,
+      accounts 
+    });
+
     if (inProgress === InteractionStatus.None) {
       if (isAuthenticated && accounts.length > 0) {
         const account = accounts[0];
+        console.log('Creating user data from account:', account);
+        
         const userData: User = {
           id: account.homeAccountId,
           email: account.username,
@@ -60,16 +69,22 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({ children }
             preferred_username: account.username,
           }
         };
+        
+        console.log('Setting user data:', userData);
         setUser(userData);
       } else {
+        console.log('No authentication or accounts, setting user to null');
         setUser(null);
       }
       setLoading(false);
+    } else {
+      console.log('Interaction in progress, keeping loading state');
     }
   }, [isAuthenticated, accounts, inProgress]);
 
   const signInWithAzure = async () => {
     try {
+      console.log('Starting loginPopup...');
       const result: AuthenticationResult = await instance.loginPopup(loginRequest);
       console.log('Login successful:', result);
       return { error: null };
@@ -81,8 +96,10 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({ children }
 
   const signOut = async () => {
     try {
+      console.log('Starting logout...');
       await instance.logoutPopup();
       setUser(null);
+      console.log('Logout successful');
     } catch (error) {
       console.error('Logout failed:', error);
     }
