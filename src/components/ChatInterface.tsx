@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { File, Download } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
@@ -57,11 +56,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   // Crear nueva conversación si no existe una actual
   useEffect(() => {
-    if (!currentConversation) {
+    if (!currentConversation && user?.email) {
       console.log('ChatInterface: Creating new conversation');
       createNewConversation();
     }
-  }, [currentConversation, createNewConversation]);
+  }, [currentConversation, createNewConversation, user?.email]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
