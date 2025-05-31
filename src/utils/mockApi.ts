@@ -5,6 +5,7 @@ interface AgentApiResponse {
   response?: string;
   message?: string;
   error?: string;
+  clientes_nuevos_mes_actual?: number;
 }
 
 export const mockApiCall = async (
@@ -24,10 +25,10 @@ export const mockApiCall = async (
   
   const startTime = Date.now();
   
-  // API real de Azure
-  const apiUrl = 'https://jarvis-api-agente-sql.azurewebsites.net/query';
+  // Usar función edge de Supabase como proxy para evitar problemas de CORS
+  const proxyUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/azure-agent-proxy`;
   
-  console.log('mockApiCall: Using Azure API URL:', apiUrl);
+  console.log('mockApiCall: Using Supabase proxy URL:', proxyUrl);
   
   // Preparar el body según el formato requerido
   const requestBody = {
@@ -38,12 +39,13 @@ export const mockApiCall = async (
   console.log('mockApiCall: Request body:', requestBody);
   
   try {
-    console.log('mockApiCall: Making POST request to Azure API...');
+    console.log('mockApiCall: Making POST request through Supabase proxy...');
     
-    const response = await fetch(apiUrl, {
+    const response = await fetch(proxyUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify(requestBody)
     });
@@ -55,16 +57,21 @@ export const mockApiCall = async (
     if (!response.ok) {
       const errorText = await response.text();
       console.error('mockApiCall: Response not ok, error text:', errorText);
-      throw new Error(`Error en la API de Azure: ${response.status} - ${response.statusText}. Details: ${errorText}`);
+      throw new Error(`Error en el proxy de Supabase: ${response.status} - ${response.statusText}. Details: ${errorText}`);
     }
 
     const apiData: AgentApiResponse = await response.json();
-    console.log('mockApiCall: Azure API response data:', apiData);
+    console.log('mockApiCall: Azure API response data through proxy:', apiData);
     
     const processingTime = Date.now() - startTime;
     
     // Procesar la respuesta de la API
-    const responseText = apiData.response || apiData.message || 'Respuesta recibida del agente';
+    let responseText = apiData.response || apiData.message || 'Respuesta recibida del agente';
+    
+    // Si hay un error en la respuesta de la API
+    if (apiData.error) {
+      responseText = `❌ Error del agente: ${apiData.error}`;
+    }
     
     console.log('mockApiCall: Final response text created successfully');
     
@@ -72,8 +79,15 @@ export const mockApiCall = async (
     let tableData = null;
     let chartData = null;
     
-    // Aquí puedes agregar lógica para detectar y procesar datos tabulares o de gráficos
-    // según el formato que devuelva tu API
+    // Verificar si hay datos numéricos para crear una tabla
+    if (apiData.clientes_nuevos_mes_actual !== undefined) {
+      tableData = {
+        headers: ['Métrica', 'Valor'],
+        rows: [
+          ['Clientes nuevos mes actual', apiData.clientes_nuevos_mes_actual.toString()]
+        ]
+      };
+    }
     
     return {
       text: responseText,
@@ -96,7 +110,7 @@ export const mockApiCall = async (
     const errorMessage = `❌ Error al conectar con el agente maestro: ${error instanceof Error ? error.message : 'Error desconocido'}. 
 
 Detalles del error:
-- Endpoint: ${apiUrl}
+- Proxy: ${proxyUrl}
 - Método: POST
 - Tipo de error: ${typeof error}
 - Constructor: ${error instanceof Error ? error.constructor.name : 'Desconocido'}
