@@ -1,5 +1,6 @@
+
 import { useState } from 'react';
-import { Search, MessageSquare, Archive, Trash2, Edit3, Calendar, Tag } from 'lucide-react';
+import { Search, MessageSquare, Archive, Trash2, Edit3, Calendar, Tag, X } from 'lucide-react';
 import { useConversation } from '../contexts/ConversationContext';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -36,10 +37,19 @@ export const ConversationHistory: React.FC<ConversationHistoryProps> = ({ onClos
   };
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-800">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-800 relative">
+      {/* Close button */}
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 z-10 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+        aria-label="Cerrar historial"
+      >
+        <X className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+      </button>
+
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex flex-col gap-3 mb-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center pr-8">
             <MessageSquare className="h-5 w-5 mr-2" />
             Historial de Conversaciones
           </h2>
