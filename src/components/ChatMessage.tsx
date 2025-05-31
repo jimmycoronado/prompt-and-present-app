@@ -1,3 +1,4 @@
+
 import { User, Clock, Download, Copy, ThumbsUp, ThumbsDown } from "lucide-react";
 import { ChatMessage as ChatMessageType } from "../types/chat";
 import { DataTable } from "./DataTable";
@@ -200,21 +201,19 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
             {/* Actions for Assistant Messages */}
             {!isUser && message.content && (
               <div className="mt-3 flex items-center space-x-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                {/* Copy Button for Agent Messages - Left of feedback buttons */}
-                {isHovered && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleCopyText();
-                    }}
-                    className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
-                    aria-label="Copiar mensaje"
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                )}
+                {/* Copy Button for Agent Messages - Always visible */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCopyText();
+                  }}
+                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  aria-label="Copiar mensaje"
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
                 
                 <div className="flex space-x-1">
                   <Button
@@ -255,9 +254,9 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
             )}
           </div>
 
-          {/* Copy Button for User Messages - Bottom left corner outside bubble */}
+          {/* Copy Button for User Messages - To the left and just below bubble */}
           {isUser && isHovered && message.content && (
-            <div className="absolute -bottom-2 left-0">
+            <div className="absolute top-full left-0 mt-1">
               <Button
                 variant="ghost"
                 size="sm"
