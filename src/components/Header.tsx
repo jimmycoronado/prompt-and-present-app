@@ -2,6 +2,7 @@
 import { Moon, Sun, Menu } from "lucide-react";
 import { useTheme } from "../contexts/ThemeContext";
 import { Button } from "./ui/button";
+import { UserMenu } from "./UserMenu";
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -36,6 +37,8 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
         >
           {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
         </Button>
+
+        <UserMenu />
 
         <Button
           variant="ghost"

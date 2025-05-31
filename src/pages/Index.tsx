@@ -7,6 +7,8 @@ import { Header } from "../components/Header";
 import { ThemeProvider } from "../contexts/ThemeContext";
 import { ConversationProvider, useConversation } from "../contexts/ConversationContext";
 import { SettingsProvider } from "../contexts/SettingsContext";
+import { ProtectedRoute } from "../components/ProtectedRoute";
+import { UserMenu } from "../components/UserMenu";
 
 const IndexContent = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -17,16 +19,14 @@ const IndexContent = () => {
   const hasActiveConversation = currentConversation !== null;
 
   const handleNewChat = () => {
-    // Cerrar el panel lateral después de crear un nuevo chat
     setSidePanelOpen(false);
   };
 
-  // Show loading state while restoring conversation
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 rounded-full mx-auto mb-4 bg-white p-2 overflow-hidden border border-gray-200">
+          <div className="w-16 h-16 rounded-full mx-auto mb-4 bg-skandia-green p-2 overflow-hidden border border-gray-200">
             <img 
               src="https://www.skandia.com.mx/mercadeo/2021/campana/Sami/Mail/Sami/Thinking2.gif" 
               alt="Sami Logo" 
@@ -70,13 +70,15 @@ const IndexContent = () => {
 
 const Index = () => {
   return (
-    <ThemeProvider>
-      <SettingsProvider>
-        <ConversationProvider>
-          <IndexContent />
-        </ConversationProvider>
-      </SettingsProvider>
-    </ThemeProvider>
+    <ProtectedRoute>
+      <ThemeProvider>
+        <SettingsProvider>
+          <ConversationProvider>
+            <IndexContent />
+          </ConversationProvider>
+        </SettingsProvider>
+      </ThemeProvider>
+    </ProtectedRoute>
   );
 };
 

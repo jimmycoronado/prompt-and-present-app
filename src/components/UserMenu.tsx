@@ -18,10 +18,9 @@ export const UserMenu: React.FC = () => {
 
   if (!user) return null;
 
-  // Para usuarios de Azure, el nombre puede estar en diferentes campos
   const displayName = user.user_metadata?.full_name || 
                      user.user_metadata?.name || 
-                     user.user_metadata?.preferred_username ||
+                     user.name ||
                      'Usuario';
 
   const initials = displayName
@@ -40,7 +39,7 @@ export const UserMenu: React.FC = () => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-blue-600 text-white text-xs">
+            <AvatarFallback className="bg-skandia-green text-white text-xs">
               {initials}
             </AvatarFallback>
           </Avatar>
