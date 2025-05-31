@@ -23,7 +23,6 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   hasActiveConversation 
 }) => {
   const [activeView, setActiveView] = useState<'main' | 'chats' | 'templates'>('main');
-  const [searchQuery, setSearchQuery] = useState('');
   const { createNewConversation } = useConversation();
 
   const handleNewChat = () => {
