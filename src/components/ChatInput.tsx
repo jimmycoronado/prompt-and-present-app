@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Send, File, Paperclip } from "lucide-react";
 import { Button } from "./ui/button";
@@ -222,7 +221,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             onPaste={handlePaste}
             placeholder="Escribe tu mensaje aquí... (Enter para enviar, Shift+Enter para nueva línea)"
             disabled={disabled}
-            className={`min-h-[44px] max-h-[200px] resize-none pr-12 rounded-lg border-gray-300 dark:border-gray-600 focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-gray-300 dark:focus:border-gray-600 transition-all ${
+            className={`min-h-[44px] max-h-[200px] resize-none pr-12 rounded-lg border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-0 focus:border-gray-300 dark:focus:border-gray-600 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 transition-all ${
               hasTemplateVariables ? 'border-orange-300 dark:border-orange-600' : ''
             }`}
             aria-label="Mensaje"
