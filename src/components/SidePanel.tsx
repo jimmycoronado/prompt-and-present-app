@@ -4,6 +4,7 @@ import { PanelLeft, Search, MessageSquare, FileText, Edit3, Plus, X } from 'luci
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { ScrollArea } from './ui/scroll-area';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { ConversationHistory } from './ConversationHistory';
 import { PromptTemplates } from './PromptTemplates';
 import { useConversation } from '../contexts/ConversationContext';
@@ -42,29 +43,45 @@ export const SidePanel: React.FC<SidePanelProps> = ({
 
   if (!isOpen) {
     return (
-      <div className="fixed left-4 top-20 z-50 flex flex-col gap-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onToggle}
-          className="h-10 w-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700"
-          aria-label="Abrir panel lateral"
-        >
-          <PanelLeft className="h-5 w-5" />
-        </Button>
-        
-        {hasActiveConversation && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleNewChat}
-            className="h-10 w-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700"
-            aria-label="Nuevo chat"
-          >
-            <Edit3 className="h-5 w-5" />
-          </Button>
-        )}
-      </div>
+      <TooltipProvider>
+        <div className="fixed left-4 top-20 z-50 flex flex-col gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onToggle}
+                className="h-10 w-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                aria-label="Abrir panel lateral"
+              >
+                <PanelLeft className="h-5 w-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Abrir barra lateral</p>
+            </TooltipContent>
+          </Tooltip>
+          
+          {hasActiveConversation && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleNewChat}
+                  className="h-10 w-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                  aria-label="Nuevo chat"
+                >
+                  <Edit3 className="h-5 w-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Nuevo chat</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+      </TooltipProvider>
     );
   }
 
