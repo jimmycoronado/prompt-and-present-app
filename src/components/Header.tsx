@@ -3,25 +3,31 @@ import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserMenu } from './UserMenu';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, Menu, Moon, Sun } from 'lucide-react';
+import { Menu, Moon, Sun, Edit3 } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { DynamicBanner } from './DynamicBanner';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useConversation } from '@/contexts/ConversationContext';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
-  onToggleSidePanel?: () => void;
   onBannerAction?: (automaticReply: string) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
   onToggleSidebar, 
-  onToggleSidePanel, 
   onBannerAction 
 }) => {
   const { user } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const { createNewConversation, currentConversation } = useConversation();
   const isMobile = useIsMobile();
+
+  const handleNewChat = () => {
+    createNewConversation();
+  };
+
+  const hasActiveConversation = currentConversation !== null;
 
   return (
     <header className={`bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 ${isMobile ? 'flex-shrink-0' : ''}`}>
@@ -62,7 +68,6 @@ export const Header: React.FC<HeaderProps> = ({
             variant="ghost"
             size="icon"
             onClick={toggleTheme}
-            className="hidden sm:flex"
           >
             {isDark ? (
               <Sun className="h-5 w-5" />
@@ -71,14 +76,15 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </Button>
 
-          {onToggleSidePanel && (
+          {/* Botón de nueva conversación - solo en móvil */}
+          {isMobile && hasActiveConversation && (
             <Button
               variant="ghost"
               size="icon"
-              onClick={onToggleSidePanel}
-              className="hidden sm:flex"
+              onClick={handleNewChat}
+              className="md:hidden"
             >
-              <MessageSquare className="h-5 w-5" />
+              <Edit3 className="h-5 w-5" />
             </Button>
           )}
 

@@ -8,6 +8,7 @@ import { ConversationHistory } from './ConversationHistory';
 import { PromptTemplates } from './PromptTemplates';
 import { useConversation } from '../contexts/ConversationContext';
 import { PromptTemplate } from '../types/templates';
+import { useIsMobile } from '../hooks/use-mobile';
 
 interface SidePanelProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
 }) => {
   const [activeView, setActiveView] = useState<'main' | 'chats' | 'templates'>('main');
   const { createNewConversation } = useConversation();
+  const isMobile = useIsMobile();
 
   const handleNewChat = () => {
     createNewConversation();
@@ -54,7 +56,8 @@ export const SidePanel: React.FC<SidePanelProps> = ({
           <PanelLeft className="h-5 w-5" />
         </Button>
         
-        {hasActiveConversation && (
+        {/* Solo mostrar botón de nuevo chat en desktop cuando no esté en móvil */}
+        {hasActiveConversation && !isMobile && (
           <Button
             variant="ghost"
             size="icon"
@@ -101,16 +104,18 @@ export const SidePanel: React.FC<SidePanelProps> = ({
         <div className="flex-1 overflow-hidden">
           {activeView === 'main' && (
             <div className="flex flex-col h-full">
-              {/* Botón Nuevo Chat */}
-              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                <Button
-                  onClick={handleNewChat}
-                  className="w-full bg-skandia-green hover:bg-skandia-green/90 text-white"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nuevo chat
-                </Button>
-              </div>
+              {/* Botón Nuevo Chat - solo en desktop */}
+              {!isMobile && (
+                <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                  <Button
+                    onClick={handleNewChat}
+                    className="w-full bg-skandia-green hover:bg-skandia-green/90 text-white"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Nuevo chat
+                  </Button>
+                </div>
+              )}
 
               {/* Opciones principales */}
               <div className="p-4 space-y-2">

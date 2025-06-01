@@ -54,7 +54,6 @@ const IndexContent = () => {
     <div className={`${isMobile ? 'h-[100dvh] overflow-hidden' : 'min-h-screen'} bg-gray-50 dark:bg-gray-900 transition-colors duration-200 flex flex-col`}>
       <Header 
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} 
-        onToggleSidePanel={() => setSidePanelOpen(!sidePanelOpen)}
         onBannerAction={handleBannerAction}
       />
       
