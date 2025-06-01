@@ -95,7 +95,7 @@ export const AuthPage: React.FC = () => {
             Dali AI
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Inicia sesión con tu cuenta corporativa de Skandia
+            Inicia sesión con tu correo Skandia
           </p>
         </div>
 
@@ -103,13 +103,13 @@ export const AuthPage: React.FC = () => {
           <CardHeader>
             <CardTitle>Autenticación Corporativa</CardTitle>
             <CardDescription>
-              Usa tu cuenta de Skandia para acceder a Dali AI
+              Usa tu correo Skandia para acceder a Dali AI
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Button 
               onClick={handleAzureSignIn} 
-              className="w-full bg-[#0078d4] hover:bg-[#106ebe] text-white"
+              className="w-full bg-[#00C83C] hover:bg-[#009E2F] text-white"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -125,13 +125,13 @@ export const AuthPage: React.FC = () => {
                     <path d="M11.03 11.97H0V23h11.03V11.97z" fill="#00a4ef"/>
                     <path d="M23 11.97H11.97V23H23V11.97z" fill="#ffb900"/>
                   </svg>
-                  Iniciar Sesión con Cuenta Skandia
+                  Inicia Sesión con tu correo Skandia
                 </>
               )}
             </Button>
             
             <div className="text-xs text-center text-gray-500 mt-4">
-              Al iniciar sesión, aceptas el uso de tu cuenta corporativa para acceder a Dali AI
+              Al iniciar sesión, aceptas el uso de tu cuenta Skandia para acceder a Dali AI
             </div>
           </CardContent>
         </Card>
