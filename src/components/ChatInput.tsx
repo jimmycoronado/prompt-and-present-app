@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Send, File, Paperclip } from "lucide-react";
 import { Button } from "./ui/button";
@@ -280,9 +279,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               onPaste={handlePaste}
               placeholder="Escribe tu mensaje aquí..."
               disabled={disabled}
-              className={`min-h-[44px] max-h-[200px] w-full resize-none rounded-lg border-gray-300 dark:border-gray-600 outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none focus:shadow-none focus-visible:shadow-none ${
+              className={`min-h-[44px] max-h-[200px] w-full resize-none rounded-lg border-gray-300 dark:border-gray-600 outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none focus:shadow-none focus-visible:shadow-none text-base ${
                 hasTemplateVariables ? 'border-orange-300 dark:border-orange-600' : ''
               }`}
+              style={{ fontSize: '16px' }}
               aria-label="Mensaje"
               aria-describedby="send-button"
             />
@@ -295,7 +295,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           </div>
 
           {/* Buttons Row */}
-          <div className="flex items-center justify-between space-x-2">
+          <div className="flex items-center justify-between space-x-2 min-w-0">
             {/* File Upload Button - Left */}
             <Button
               type="button"
@@ -311,7 +311,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             </Button>
 
             {/* Voice Record and Send Buttons - Right */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 flex-shrink-0">
               <VoiceRecordButton
                 onTranscription={handleVoiceTranscription}
                 disabled={disabled}
