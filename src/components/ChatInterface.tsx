@@ -295,9 +295,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         </div>
       )}
 
-      {/* Action Bar */}
-      <div className="border-b border-gray-200 dark:border-gray-700 p-3">
-      </div>
+      
 
       {/* Messages Area */}
       <main className="flex-1 overflow-y-auto p-4 space-y-4" role="main" aria-label="Conversación">
