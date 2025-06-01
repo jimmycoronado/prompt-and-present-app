@@ -130,7 +130,7 @@ export const AuthPage: React.FC = () => {
             </Button>
             
             <div className="text-xs text-center text-gray-500 mt-4">
-              Al iniciar sesión, aceptas el uso de tu cuenta Skandia para acceder a Dali AI
+              Al iniciar sesión, aceptas el uso de tu cuenta corporativa de Skandia
             </div>
           </CardContent>
         </Card>
