@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { MessageSquare, Menu, Moon, Sun } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { DynamicBanner } from './DynamicBanner';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -20,9 +21,10 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const { user } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const isMobile = useIsMobile();
 
   return (
-    <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+    <header className={`bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 ${isMobile ? 'flex-shrink-0' : ''}`}>
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center space-x-4">
           <Button
@@ -84,10 +86,19 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Banner para pantallas medianas y pequeñas - debajo del header */}
-      <div className="px-4 pb-3 lg:hidden">
-        <DynamicBanner onClose={() => {}} onBannerAction={onBannerAction} />
-      </div>
+      {/* Banner para pantallas medianas y pequeñas - con altura fija */}
+      {!isMobile && (
+        <div className="px-4 pb-3 lg:hidden">
+          <DynamicBanner onClose={() => {}} onBannerAction={onBannerAction} />
+        </div>
+      )}
+      
+      {/* Banner para móviles - posición absoluta para no afectar el layout */}
+      {isMobile && (
+        <div className="absolute top-full left-0 right-0 z-10 px-4 py-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+          <DynamicBanner onClose={() => {}} onBannerAction={onBannerAction} />
+        </div>
+      )}
     </header>
   );
 };

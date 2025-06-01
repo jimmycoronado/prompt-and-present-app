@@ -1,3 +1,4 @@
+
 import { useState, useRef } from "react";
 import { ChatInterface } from "../components/ChatInterface";
 import { Sidebar } from "../components/Sidebar";
@@ -51,12 +52,15 @@ const IndexContent = () => {
   }
 
   return (
-    <div className={`${isMobile ? 'h-screen' : 'min-h-screen'} bg-gray-50 dark:bg-gray-900 transition-colors duration-200 flex flex-col`}>
+    <div className={`${isMobile ? 'h-screen' : 'min-h-screen'} bg-gray-50 dark:bg-gray-900 transition-colors duration-200 flex flex-col relative`}>
       <Header 
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} 
         onToggleSidePanel={() => setSidePanelOpen(!sidePanelOpen)}
         onBannerAction={handleBannerAction}
       />
+      
+      {/* Espaciador para el banner móvil */}
+      {isMobile && <div className="h-16" />}
       
       <SidePanel 
         isOpen={sidePanelOpen}
