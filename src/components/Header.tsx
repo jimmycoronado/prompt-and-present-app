@@ -49,7 +49,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Banner dinámico en el centro - solo en pantallas grandes */}
-        <div className="hidden lg:flex justify-center px-4 py-0">
+        <div className="hidden lg:flex justify-center px-4 py-1">
           <div className="w-full max-w-4xl">
             <DynamicBanner onClose={() => {}} onBannerAction={onBannerAction} />
           </div>
