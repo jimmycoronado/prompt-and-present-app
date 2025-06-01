@@ -36,7 +36,7 @@ const IndexContent = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className={`${isMobile ? 'h-screen' : 'min-h-screen'} bg-gray-50 dark:bg-gray-900 flex items-center justify-center`}>
         <div className="text-center">
           <div className="w-16 h-16 rounded-full mx-auto mb-4 bg-skandia-green p-2 overflow-hidden border border-gray-200">
             <img 
@@ -52,7 +52,7 @@ const IndexContent = () => {
   }
 
   return (
-    <div className={`${isMobile ? 'h-screen' : 'min-h-screen'} bg-gray-50 dark:bg-gray-900 transition-colors duration-200 flex flex-col overflow-hidden`}>
+    <div className={`${isMobile ? 'h-screen max-h-screen' : 'min-h-screen'} bg-gray-50 dark:bg-gray-900 transition-colors duration-200 flex flex-col overflow-hidden`}>
       <Header 
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} 
         onToggleSidePanel={() => setSidePanelOpen(!sidePanelOpen)}
@@ -69,6 +69,7 @@ const IndexContent = () => {
       <div className="flex flex-1 overflow-hidden min-h-0">
         <div className="flex-1 flex flex-col overflow-hidden min-h-0">
           <ChatInterface 
+            ref={chatInterfaceRef}
             onSelectMessage={setSelectedMessage}
             selectedMessage={selectedMessage}
           />
