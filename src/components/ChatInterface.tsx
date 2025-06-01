@@ -302,9 +302,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             {/* Removed Historial and Plantillas buttons */}
           </div>
 
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-500">Usuario: {userEmail}</span>
-          </div>
+
         </div>
       </div>
 
