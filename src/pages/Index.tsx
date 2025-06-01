@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { ChatInterface } from "../components/ChatInterface";
 import { Sidebar } from "../components/Sidebar";
@@ -39,7 +40,10 @@ const IndexContent = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-      <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+      <Header 
+        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} 
+        onToggleSidePanel={() => setSidePanelOpen(!sidePanelOpen)}
+      />
       
       <SidePanel 
         isOpen={sidePanelOpen}
@@ -48,7 +52,7 @@ const IndexContent = () => {
         hasActiveConversation={hasActiveConversation}
       />
       
-      <div className="flex h-[calc(100vh-5.5rem)]">
+      <div className="flex h-[calc(100vh-4rem)]">
         <div className="flex-1 flex flex-col">
           <ChatInterface 
             onSelectMessage={setSelectedMessage}
