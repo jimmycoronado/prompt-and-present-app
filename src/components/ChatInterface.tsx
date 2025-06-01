@@ -298,8 +298,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       {/* Action Bar */}
       <div className="border-b border-gray-200 dark:border-gray-700 p-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            {/* Removed Historial and Plantillas buttons */}
+        </div>
       </div>
 
       {/* Messages Area */}
