@@ -43,7 +43,7 @@ export const Header: React.FC<HeaderProps> = ({
               />
             </div>
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-              Super Sami
+              Dali AI
             </h1>
           </div>
         </div>

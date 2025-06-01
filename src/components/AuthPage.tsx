@@ -40,7 +40,7 @@ export const AuthPage: React.FC = () => {
         console.log('Sign in successful');
         toast({
           title: "Inicio de sesión exitoso",
-          description: "Bienvenido a Super Sami",
+          description: "Te damos la bienvenida a Dali AI",
         });
         // La redirección se manejará automáticamente por el useEffect
         // pero agregamos un timeout como respaldo
@@ -92,10 +92,10 @@ export const AuthPage: React.FC = () => {
             />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Super Sami
+            Dali AI
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Inicia sesión con tu cuenta corporativa de Microsoft
+            Inicia sesión con tu cuenta corporativa de Skandia
           </p>
         </div>
 
@@ -103,7 +103,7 @@ export const AuthPage: React.FC = () => {
           <CardHeader>
             <CardTitle>Autenticación Corporativa</CardTitle>
             <CardDescription>
-              Usa tu cuenta de Microsoft para acceder a Super Sami
+              Usa tu cuenta de Skandia para acceder a Dali AI
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -125,13 +125,13 @@ export const AuthPage: React.FC = () => {
                     <path d="M11.03 11.97H0V23h11.03V11.97z" fill="#00a4ef"/>
                     <path d="M23 11.97H11.97V23H23V11.97z" fill="#ffb900"/>
                   </svg>
-                  Iniciar Sesión con Microsoft
+                  Iniciar Sesión con Cuenta Skandia
                 </>
               )}
             </Button>
             
             <div className="text-xs text-center text-gray-500 mt-4">
-              Al iniciar sesión, aceptas el uso de tu cuenta corporativa para acceder a Super Sami
+              Al iniciar sesión, aceptas el uso de tu cuenta corporativa para acceder a Dali AI
             </div>
           </CardContent>
         </Card>
