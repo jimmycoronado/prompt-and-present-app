@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { ChatInterface } from "../components/ChatInterface";
 import { Sidebar } from "../components/Sidebar";
@@ -52,7 +51,7 @@ const IndexContent = () => {
   }
 
   return (
-    <div className={`${isMobile ? 'h-screen max-h-screen' : 'min-h-screen'} bg-gray-50 dark:bg-gray-900 transition-colors duration-200 flex flex-col overflow-hidden`}>
+    <div className={`${isMobile ? 'h-screen' : 'min-h-screen'} bg-gray-50 dark:bg-gray-900 transition-colors duration-200 flex flex-col`}>
       <Header 
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} 
         onToggleSidePanel={() => setSidePanelOpen(!sidePanelOpen)}
@@ -66,8 +65,8 @@ const IndexContent = () => {
         hasActiveConversation={hasActiveConversation}
       />
       
-      <div className="flex flex-1 overflow-hidden min-h-0">
-        <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+      <div className={`flex flex-1 ${isMobile ? 'min-h-0' : 'overflow-hidden min-h-0'}`}>
+        <div className="flex-1 flex flex-col min-h-0">
           <ChatInterface 
             ref={chatInterfaceRef}
             onSelectMessage={setSelectedMessage}

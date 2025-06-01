@@ -1,5 +1,4 @@
-
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import { File, Download } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
@@ -19,10 +18,14 @@ interface ChatInterfaceProps {
   selectedMessage: ChatMessageType | null;
 }
 
-export const ChatInterface: React.FC<ChatInterfaceProps> = ({ 
+export interface ChatInterfaceRef {
+  handleBannerMessage: (message: string) => void;
+}
+
+export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
   onSelectMessage, 
   selectedMessage 
-}) => {
+}, ref) => {
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [showHistory, setShowHistory] = useState(false);
@@ -283,6 +286,16 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     );
   }
 
+  const handleBannerMessage = (content: string) => {
+    console.log('ChatInterface: handleBannerMessage called with:', content);
+    handleSendMessage(content);
+  };
+
+  // Expose the function to parent components
+  useImperativeHandle(ref, () => ({
+    handleBannerMessage
+  }));
+
   return (
     <div className="flex flex-col h-full relative">
       {/* Global drag overlay */}
@@ -294,8 +307,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           </div>
         </div>
       )}
-
-      
 
       {/* Messages Area */}
       <main className="flex-1 overflow-y-auto p-4 space-y-4" role="main" aria-label="Conversación">
@@ -385,4 +396,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       </div>
     </div>
   );
-};
+});
+
+ChatInterface.displayName = 'ChatInterface';
