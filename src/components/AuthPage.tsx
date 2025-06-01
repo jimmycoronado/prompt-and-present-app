@@ -95,7 +95,7 @@ export const AuthPage: React.FC = () => {
             Dali AI
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Inicia sesión con tu correo Skandia
+           Más que un asistente. Tu copiloto en Skandia.
           </p>
         </div>
 
