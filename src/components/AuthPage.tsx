@@ -101,9 +101,9 @@ export const AuthPage: React.FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Autenticación Corporativa</CardTitle>
+            <CardTitle>Dali AI - Data Analytics & Literacy</CardTitle>
             <CardDescription>
-              Usa tu correo Skandia para acceder a Dali AI
+              Autenticación Corporativa
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -124,7 +124,7 @@ export const AuthPage: React.FC = () => {
                     alt="Skandia Logo"
                     className="w-11 h-11 mr-1"
                     />
-                  Iniciar Sesión
+                  Inicia sesión con tu correo de Skandia
                 </>
               )}
             </Button>
