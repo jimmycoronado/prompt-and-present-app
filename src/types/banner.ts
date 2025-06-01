@@ -1,16 +1,27 @@
 
+export interface ApiBannerResponse {
+  Id: number;
+  CutOffDate: string;
+  Email: string;
+  MessageOrder: number;
+  Title: string;
+  MessageText: string;
+  IconLink: string | null;
+  ButtonText: string;
+  AutomaticReply: string;
+  HEXBubbleColor: string;
+}
+
 export interface BannerData {
   id: string;
-  type: 'commission' | 'birthday' | 'risk' | 'opportunity' | 'performance' | 'task';
+  messageOrder: number;
   title: string;
   message: string;
-  value?: string | number;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  actionText?: string;
-  actionUrl?: string;
-  icon?: string;
-  color?: 'blue' | 'green' | 'yellow' | 'red' | 'purple' | 'indigo';
-  expiresAt?: Date;
+  iconUrl?: string;
+  buttonText: string;
+  automaticReply: string;
+  backgroundColor: string;
+  textColor: string;
 }
 
 export interface UserBannerConfig {
@@ -18,5 +29,4 @@ export interface UserBannerConfig {
   enabled: boolean;
   rotationInterval: number; // seconds
   maxBanners: number;
-  bannerTypes: BannerData['type'][];
 }

@@ -1,74 +1,76 @@
 
 import { useState, useEffect } from 'react';
-import { BannerData } from '../types/banner';
+import { BannerData, ApiBannerResponse } from '../types/banner';
 import { useAuth } from '../contexts/AuthContext';
 
-// Mock data generator - esto se conectaría a tu API real
-const generateMockBanners = (userEmail: string): BannerData[] => {
-  const userName = userEmail.split('@')[0];
+// Helper function to determine text color based on background color
+const getTextColor = (hexColor: string): string => {
+  // Remove # if present
+  const hex = hexColor.replace('#', '');
   
+  // Parse RGB values
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  
+  // Calculate luminance
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  
+  // Return white for dark backgrounds, dark for light backgrounds
+  return luminance > 0.5 ? '#1f2937' : '#ffffff';
+};
+
+// Transform API response to internal format
+const transformApiBanner = (apiBanner: ApiBannerResponse): BannerData => ({
+  id: apiBanner.Id.toString(),
+  messageOrder: apiBanner.MessageOrder,
+  title: apiBanner.Title,
+  message: apiBanner.MessageText,
+  iconUrl: apiBanner.IconLink || undefined,
+  buttonText: apiBanner.ButtonText,
+  automaticReply: apiBanner.AutomaticReply,
+  backgroundColor: apiBanner.HEXBubbleColor,
+  textColor: getTextColor(apiBanner.HEXBubbleColor)
+});
+
+// Mock data generator - esto se reemplazará con la llamada real al API
+const generateMockBanners = (userEmail: string): ApiBannerResponse[] => {
   return [
     {
-      id: '1',
-      type: 'commission',
-      title: 'Comisiones del Mes',
-      message: `¡Excelente trabajo ${userName}! Has generado`,
-      value: '$85,340 MXN',
-      priority: 'high',
-      actionText: 'Ver detalle',
-      icon: 'TrendingUp',
-      color: 'green'
+      Id: 1,
+      CutOffDate: "2025-05-31T00:00:00.000Z",
+      Email: userEmail,
+      MessageOrder: 1,
+      Title: "Comisiones del Mes",
+      MessageText: "¡Excelente trabajo! Has generado $85,340 MXN",
+      IconLink: "https://cdn-icons-png.flaticon.com/512/2921/2921222.png",
+      ButtonText: "Ver detalle",
+      AutomaticReply: "Hola DALI, muéstrame el detalle de mis comisiones del mes actual",
+      HEXBubbleColor: "#10B981"
     },
     {
-      id: '2',
-      type: 'birthday',
-      title: 'Cumpleaños Hoy',
-      message: 'Tienes 8 clientes cumpliendo años. ¡Oportunidad perfecta para contactar!',
-      priority: 'medium',
-      actionText: 'Ver lista',
-      icon: 'Calendar',
-      color: 'blue'
+      Id: 2,
+      CutOffDate: "2025-05-31T00:00:00.000Z",
+      Email: userEmail,
+      MessageOrder: 2,
+      Title: "Cumpleaños Hoy",
+      MessageText: "Tienes 8 clientes cumpliendo años. ¡Oportunidad perfecta para contactar!",
+      IconLink: "https://cdn-icons-png.flaticon.com/512/3176/3176366.png",
+      ButtonText: "Ver lista",
+      AutomaticReply: "Hola DALI, muéstrame la lista de clientes que cumplen años hoy",
+      HEXBubbleColor: "#3B82F6"
     },
     {
-      id: '3',
-      type: 'risk',
-      title: 'Clientes en Riesgo',
-      message: '3 clientes no han sido contactados en 30+ días',
-      priority: 'urgent',
-      actionText: 'Revisar',
-      icon: 'AlertTriangle',
-      color: 'red'
-    },
-    {
-      id: '4',
-      type: 'opportunity',
-      title: 'Nuevas Oportunidades',
-      message: '12 prospectos calificados esperan seguimiento',
-      priority: 'high',
-      actionText: 'Ver prospectos',
-      icon: 'Target',
-      color: 'purple'
-    },
-    {
-      id: '5',
-      type: 'performance',
-      title: 'Meta del Mes',
-      message: 'Estás al 78% de tu meta mensual',
-      value: '22 días restantes',
-      priority: 'medium',
-      actionText: 'Ver progreso',
-      icon: 'BarChart3',
-      color: 'indigo'
-    },
-    {
-      id: '6',
-      type: 'task',
-      title: 'Tareas Pendientes',
-      message: 'Tienes 5 tareas importantes para hoy',
-      priority: 'medium',
-      actionText: 'Ver tareas',
-      icon: 'CheckSquare',
-      color: 'yellow'
+      Id: 3,
+      CutOffDate: "2025-05-31T00:00:00.000Z",
+      Email: userEmail,
+      MessageOrder: 3,
+      Title: "Clientes en Riesgo",
+      MessageText: "3 clientes no han sido contactados en 30+ días",
+      IconLink: "https://cdn-icons-png.flaticon.com/512/564/564619.png",
+      ButtonText: "Revisar",
+      AutomaticReply: "Hola DALI, muéstrame los clientes que están en riesgo por falta de contacto",
+      HEXBubbleColor: "#EF4444"
     }
   ];
 };
@@ -81,10 +83,15 @@ export const useBannerData = () => {
 
   useEffect(() => {
     if (user) {
-      // Simular carga de datos
+      // Simular carga de datos - aquí se hará la llamada real al API
       setTimeout(() => {
-        const mockBanners = generateMockBanners(user.email);
-        setBanners(mockBanners);
+        const mockApiResponse = generateMockBanners(user.email);
+        // Ordenar por MessageOrder y transformar
+        const sortedBanners = mockApiResponse
+          .sort((a, b) => a.MessageOrder - b.MessageOrder)
+          .map(transformApiBanner);
+        
+        setBanners(sortedBanners);
         setIsLoading(false);
       }, 1000);
     }

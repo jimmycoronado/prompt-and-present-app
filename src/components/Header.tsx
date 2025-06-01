@@ -10,9 +10,14 @@ import { DynamicBanner } from './DynamicBanner';
 interface HeaderProps {
   onToggleSidebar: () => void;
   onToggleSidePanel?: () => void;
+  onBannerAction?: (automaticReply: string) => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onToggleSidePanel }) => {
+export const Header: React.FC<HeaderProps> = ({ 
+  onToggleSidebar, 
+  onToggleSidePanel, 
+  onBannerAction 
+}) => {
   const { user } = useAuth();
   const { isDark, toggleTheme } = useTheme();
 
@@ -43,9 +48,9 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onToggleSidePan
           </div>
         </div>
 
-        {/* Banner dinámico en el centro */}
-        <div className="flex-1 max-w-2xl mx-4 hidden sm:block">
-          <DynamicBanner onClose={() => {}} />
+        {/* Banner dinámico en el centro - solo en pantallas grandes */}
+        <div className="flex-1 max-w-2xl mx-4 hidden lg:block">
+          <DynamicBanner onClose={() => {}} onBannerAction={onBannerAction} />
         </div>
 
         <div className="flex items-center space-x-2">
@@ -77,9 +82,9 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onToggleSidePan
         </div>
       </div>
 
-      {/* Banner para móviles - debajo del header */}
-      <div className="px-4 pb-3 sm:hidden">
-        <DynamicBanner onClose={() => {}} />
+      {/* Banner para pantallas medianas y pequeñas - debajo del header */}
+      <div className="px-4 pb-3 lg:hidden">
+        <DynamicBanner onClose={() => {}} onBannerAction={onBannerAction} />
       </div>
     </header>
   );

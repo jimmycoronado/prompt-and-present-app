@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { ChatInterface } from "../components/ChatInterface";
 import { Sidebar } from "../components/Sidebar";
 import { SidePanel } from "../components/SidePanel";
@@ -14,11 +14,22 @@ const IndexContent = () => {
   const [sidePanelOpen, setSidePanelOpen] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const { currentConversation, isLoading } = useConversation();
+  
+  // Ref para acceder a las funciones del ChatInterface
+  const chatInterfaceRef = useRef<any>(null);
 
   const hasActiveConversation = currentConversation !== null;
 
   const handleNewChat = () => {
     setSidePanelOpen(false);
+  };
+
+  const handleBannerAction = (automaticReply: string) => {
+    console.log('Banner action received in Index:', automaticReply);
+    // Acceder a la función de envío de mensaje del ChatInterface
+    if (chatInterfaceRef.current?.handleBannerMessage) {
+      chatInterfaceRef.current.handleBannerMessage(automaticReply);
+    }
   };
 
   if (isLoading) {
@@ -43,6 +54,7 @@ const IndexContent = () => {
       <Header 
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} 
         onToggleSidePanel={() => setSidePanelOpen(!sidePanelOpen)}
+        onBannerAction={handleBannerAction}
       />
       
       <SidePanel 
@@ -52,9 +64,10 @@ const IndexContent = () => {
         hasActiveConversation={hasActiveConversation}
       />
       
-      <div className="flex h-[calc(100vh-4rem)]">
+      <div className="flex h-[calc(100vh-var(--header-height,4rem))]">
         <div className="flex-1 flex flex-col">
           <ChatInterface 
+            ref={chatInterfaceRef}
             onSelectMessage={setSelectedMessage}
             selectedMessage={selectedMessage}
           />
