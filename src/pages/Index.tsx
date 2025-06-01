@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { ChatInterface } from "../components/ChatInterface";
 import { Sidebar } from "../components/Sidebar";
@@ -36,7 +35,7 @@ const IndexContent = () => {
 
   if (isLoading) {
     return (
-      <div className={`${isMobile ? 'h-screen' : 'min-h-screen'} bg-gray-50 dark:bg-gray-900 flex items-center justify-center`}>
+      <div className={`${isMobile ? 'h-screen overflow-hidden' : 'min-h-screen'} bg-gray-50 dark:bg-gray-900 flex items-center justify-center`}>
         <div className="text-center">
           <div className="w-16 h-16 rounded-full mx-auto mb-4 bg-skandia-green p-2 overflow-hidden border border-gray-200">
             <img 
@@ -52,7 +51,7 @@ const IndexContent = () => {
   }
 
   return (
-    <div className={`${isMobile ? 'h-screen' : 'min-h-screen'} bg-gray-50 dark:bg-gray-900 transition-colors duration-200 flex flex-col relative`}>
+    <div className={`${isMobile ? 'h-screen overflow-hidden' : 'min-h-screen'} bg-gray-50 dark:bg-gray-900 transition-colors duration-200 flex flex-col relative`}>
       <Header 
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} 
         onToggleSidePanel={() => setSidePanelOpen(!sidePanelOpen)}
