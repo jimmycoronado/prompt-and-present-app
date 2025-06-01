@@ -35,7 +35,7 @@ const IndexContent = () => {
 
   if (isLoading) {
     return (
-      <div className={`${isMobile ? 'h-screen overflow-hidden' : 'min-h-screen'} bg-gray-50 dark:bg-gray-900 flex items-center justify-center`}>
+      <div className={`${isMobile ? 'h-[100dvh] overflow-hidden' : 'min-h-screen'} bg-gray-50 dark:bg-gray-900 flex items-center justify-center`}>
         <div className="text-center">
           <div className="w-16 h-16 rounded-full mx-auto mb-4 bg-skandia-green p-2 overflow-hidden border border-gray-200">
             <img 
@@ -51,15 +51,12 @@ const IndexContent = () => {
   }
 
   return (
-    <div className={`${isMobile ? 'h-screen overflow-hidden' : 'min-h-screen'} bg-gray-50 dark:bg-gray-900 transition-colors duration-200 flex flex-col relative`}>
+    <div className={`${isMobile ? 'h-[100dvh] overflow-hidden' : 'min-h-screen'} bg-gray-50 dark:bg-gray-900 transition-colors duration-200 flex flex-col`}>
       <Header 
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} 
         onToggleSidePanel={() => setSidePanelOpen(!sidePanelOpen)}
         onBannerAction={handleBannerAction}
       />
-      
-      {/* Espaciador para el banner móvil */}
-      {isMobile && <div className="h-16" />}
       
       <SidePanel 
         isOpen={sidePanelOpen}
@@ -68,8 +65,8 @@ const IndexContent = () => {
         hasActiveConversation={hasActiveConversation}
       />
       
-      <div className={`flex flex-1 ${isMobile ? 'min-h-0' : 'overflow-hidden min-h-0'}`}>
-        <div className="flex-1 flex flex-col min-h-0">
+      <div className={`flex flex-1 ${isMobile ? 'min-h-0 overflow-hidden' : 'overflow-hidden min-h-0'}`}>
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
           <ChatInterface 
             ref={chatInterfaceRef}
             onSelectMessage={setSelectedMessage}

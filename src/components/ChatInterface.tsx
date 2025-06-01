@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import { File, Download } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
@@ -12,6 +13,7 @@ import { useSettings } from "../contexts/SettingsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ChatInterfaceProps {
   onSelectMessage: (message: ChatMessageType | null) => void;
@@ -34,6 +36,7 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
   const [isDragOver, setIsDragOver] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   // Get user email from auth context
   const { user } = useAuth();
@@ -297,7 +300,7 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
   }));
 
   return (
-    <div className="flex flex-col h-full relative">
+    <div className={`flex flex-col ${isMobile ? 'h-full max-h-full overflow-hidden' : 'h-full'} relative`}>
       {/* Global drag overlay */}
       {isDragOver && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-orange-50/90 dark:bg-orange-900/40 border-4 border-dashed border-orange-400 dark:border-orange-300">
@@ -309,7 +312,11 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
       )}
 
       {/* Messages Area */}
-      <main className="flex-1 overflow-y-auto p-4 space-y-4" role="main" aria-label="Conversación">
+      <main 
+        className={`flex-1 ${isMobile ? 'overflow-y-auto max-h-full' : 'overflow-y-auto'} p-4 space-y-4`} 
+        role="main" 
+        aria-label="Conversación"
+      >
         {messages.length === 0 && (
           <div className="text-center py-12">
             <div className="w-16 h-16 rounded-full mx-auto mb-4 bg-white p-2 overflow-hidden border border-gray-200">
@@ -360,7 +367,7 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
 
       {/* File Upload Area */}
       {uploadedFiles.length > 0 && (
-        <div className="border-t border-gray-200 dark:border-gray-700 p-4 animate-fade-in" aria-label="Archivos seleccionados">
+        <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 p-4 animate-fade-in" aria-label="Archivos seleccionados">
           <div className="flex flex-wrap gap-2">
             {uploadedFiles.map((file, index) => (
               <div
@@ -382,7 +389,7 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
       )}
 
       {/* Input Area */}
-      <div className="border-t border-gray-200 dark:border-gray-700 p-4">
+      <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 p-4">
         <div className="max-w-4xl mx-auto">
           <ChatInput 
             onSendMessage={handleSendMessage} 
