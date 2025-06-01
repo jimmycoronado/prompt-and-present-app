@@ -296,37 +296,38 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
           {/* Buttons Row */}
           <div className="flex items-center justify-between space-x-2">
+            {/* File Upload Button - Left */}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={handleFileButtonClick}
+              disabled={disabled}
+              className="text-gray-500 hover:text-orange-500 hover:bg-gray-100 rounded-lg h-11 w-11 flex-shrink-0 transition-colors"
+              aria-label="Adjuntar archivo"
+              title="Adjuntar archivo (PDF, imágenes, Excel, CSV)"
+            >
+              <Paperclip className="h-5 w-5" />
+            </Button>
+
+            {/* Voice Record and Send Buttons - Right */}
             <div className="flex items-center space-x-2">
-              {/* File Upload Button */}
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={handleFileButtonClick}
-                disabled={disabled}
-                className="text-gray-500 hover:text-orange-500 hover:bg-gray-100 rounded-lg h-11 w-11 flex-shrink-0 transition-colors"
-                aria-label="Adjuntar archivo"
-                title="Adjuntar archivo (PDF, imágenes, Excel, CSV)"
-              >
-                <Paperclip className="h-5 w-5" />
-              </Button>
-              
               <VoiceRecordButton
                 onTranscription={handleVoiceTranscription}
                 disabled={disabled}
               />
+              
+              <Button
+                type="submit"
+                disabled={(!message.trim() && !hasFiles) || disabled}
+                size="icon"
+                className="bg-skandia-green hover:bg-skandia-green/90 text-white rounded-lg h-11 w-11 transition-all hover:scale-105"
+                aria-label="Enviar mensaje"
+                id="send-button"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
             </div>
-
-            <Button
-              type="submit"
-              disabled={(!message.trim() && !hasFiles) || disabled}
-              size="icon"
-              className="bg-skandia-green hover:bg-skandia-green/90 text-white rounded-lg h-11 w-11 transition-all hover:scale-105"
-              aria-label="Enviar mensaje"
-              id="send-button"
-            >
-              <Send className="h-4 w-4" />
-            </Button>
           </div>
         </div>
       )}
