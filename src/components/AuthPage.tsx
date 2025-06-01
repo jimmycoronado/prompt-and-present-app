@@ -119,12 +119,11 @@ export const AuthPage: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <svg className="w-5 h-5 mr-2" viewBox="0 0 23 23" fill="currentColor">
-                    <path d="M11.03 0H0v11.03h11.03V0z" fill="#f25022"/>
-                    <path d="M23 0H11.97v11.03H23V0z" fill="#7fba00"/>
-                    <path d="M11.03 11.97H0V23h11.03V11.97z" fill="#00a4ef"/>
-                    <path d="M23 11.97H11.97V23H23V11.97z" fill="#ffb900"/>
-                  </svg>
+                  <img
+                    src="https://aistudiojarvis0534199251.blob.core.windows.net/skandia-icons/logo%20secundario%20negativo.png"  // 🔁 Cambia este link si tienes otro logo
+                    alt="Skandia Logo"
+                    className="w-5 h-5 mr-2"
+                    />
                   Inicia Sesión con tu correo Skandia
                 </>
               )}
