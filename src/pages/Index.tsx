@@ -1,21 +1,17 @@
-
 import { useState } from "react";
 import { ChatInterface } from "../components/ChatInterface";
 import { Sidebar } from "../components/Sidebar";
 import { SidePanel } from "../components/SidePanel";
 import { Header } from "../components/Header";
-import { DynamicBanner } from "../components/DynamicBanner";
 import { ThemeProvider } from "../contexts/ThemeContext";
 import { ConversationProvider, useConversation } from "../contexts/ConversationContext";
 import { SettingsProvider } from "../contexts/SettingsContext";
 import { ProtectedRoute } from "../components/ProtectedRoute";
-import { UserMenu } from "../components/UserMenu";
 
 const IndexContent = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidePanelOpen, setSidePanelOpen] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(null);
-  const [bannerVisible, setBannerVisible] = useState(true);
   const { currentConversation, isLoading } = useConversation();
 
   const hasActiveConversation = currentConversation !== null;
@@ -43,10 +39,6 @@ const IndexContent = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-      {bannerVisible && (
-        <DynamicBanner onClose={() => setBannerVisible(false)} />
-      )}
-      
       <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
       
       <SidePanel 
