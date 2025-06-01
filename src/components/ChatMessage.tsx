@@ -120,8 +120,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
           ) : (
             <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
               <img 
-                src="https://www.skandia.com.mx/mercadeo/2021/campana/Sami/Mail/Sami/Thinking2.gif" 
-                alt="Sami"
+                src="https://aistudiojarvis0534199251.blob.core.windows.net/skandia-icons/DaliLogo.jpg" 
+                alt="Dali AI Logo"
                 className="w-6 h-6 object-contain"
               />
             </div>

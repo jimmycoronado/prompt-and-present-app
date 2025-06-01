@@ -303,8 +303,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           <div className="text-center py-12">
             <div className="w-16 h-16 rounded-full mx-auto mb-4 bg-white p-2 overflow-hidden border border-gray-200">
               <img 
-                src="https://www.skandia.com.mx/mercadeo/2021/campana/Sami/Mail/Sami/Thinking2.gif" 
-                alt="Sami Logo" 
+                src="https://aistudiojarvis0534199251.blob.core.windows.net/skandia-icons/DaliLogo.jpg" 
+                alt="Dali AI Logo" 
                 className="w-full h-full object-contain animate-pulse"
               />
             </div>
