@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { ChatInterface } from "../components/ChatInterface";
 import { Sidebar } from "../components/Sidebar";
