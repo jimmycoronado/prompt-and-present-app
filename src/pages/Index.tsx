@@ -1,3 +1,4 @@
+
 import { useState, useRef } from "react";
 import { ChatInterface } from "../components/ChatInterface";
 import { Sidebar } from "../components/Sidebar";
@@ -7,12 +8,14 @@ import { ThemeProvider } from "../contexts/ThemeContext";
 import { ConversationProvider, useConversation } from "../contexts/ConversationContext";
 import { SettingsProvider } from "../contexts/SettingsContext";
 import { ProtectedRoute } from "../components/ProtectedRoute";
+import { useIsMobile } from "../hooks/use-mobile";
 
 const IndexContent = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidePanelOpen, setSidePanelOpen] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const { currentConversation, isLoading } = useConversation();
+  const isMobile = useIsMobile();
   
   // Ref para acceder a las funciones del ChatInterface
   const chatInterfaceRef = useRef<any>(null);
@@ -49,7 +52,7 @@ const IndexContent = () => {
   }
 
   return (
-    <div className="h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200 flex flex-col overflow-hidden">
+    <div className={`${isMobile ? 'h-screen' : 'min-h-screen'} bg-gray-50 dark:bg-gray-900 transition-colors duration-200 flex flex-col overflow-hidden`}>
       <Header 
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} 
         onToggleSidePanel={() => setSidePanelOpen(!sidePanelOpen)}
@@ -63,7 +66,7 @@ const IndexContent = () => {
         hasActiveConversation={hasActiveConversation}
       />
       
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden min-h-0">
         <div className="flex-1 flex flex-col overflow-hidden min-h-0">
           <ChatInterface 
             onSelectMessage={setSelectedMessage}
