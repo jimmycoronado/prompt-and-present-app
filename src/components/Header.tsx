@@ -18,62 +18,65 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onToggleSidePan
 
   return (
     <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-      <div className="flex items-center justify-between p-4">
-        <div className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onToggleSidebar}
-            className="md:hidden"
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-          
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-full bg-skandia-green p-1 overflow-hidden">
-              <img 
-                src="https://www.skandia.com.mx/mercadeo/2021/campana/Sami/Mail/Sami/Thinking2.gif" 
-                alt="Sami Logo" 
-                className="w-full h-full object-contain"
-              />
-            </div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-              Super Sami
-            </h1>
-          </div>
-        </div>
-
-        {/* Banner dinámico en el centro */}
-        <div className="flex-1 mx-8 hidden lg:block">
-          <DynamicBanner onClose={() => {}} />
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleTheme}
-            className="hidden sm:flex"
-          >
-            {isDark ? (
-              <Sun className="h-5 w-5" />
-            ) : (
-              <Moon className="h-5 w-5" />
-            )}
-          </Button>
-
-          {onToggleSidePanel && (
+      <div className="flex flex-col">
+        {/* Primera fila: Logo y controles */}
+        <div className="flex items-center justify-between p-4">
+          <div className="flex items-center space-x-4">
             <Button
               variant="ghost"
               size="icon"
-              onClick={onToggleSidePanel}
+              onClick={onToggleSidebar}
+              className="md:hidden"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+            
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 rounded-full bg-skandia-green p-1 overflow-hidden">
+                <img 
+                  src="https://www.skandia.com.mx/mercadeo/2021/campana/Sami/Mail/Sami/Thinking2.gif" 
+                  alt="Sami Logo" 
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                Super Sami
+              </h1>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
               className="hidden sm:flex"
             >
-              <MessageSquare className="h-5 w-5" />
+              {isDark ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
             </Button>
-          )}
 
-          {user && <UserMenu />}
+            {onToggleSidePanel && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onToggleSidePanel}
+                className="hidden sm:flex"
+              >
+                <MessageSquare className="h-5 w-5" />
+              </Button>
+            )}
+
+            {user && <UserMenu />}
+          </div>
+        </div>
+
+        {/* Segunda fila: Banner dinámico - siempre visible */}
+        <div className="px-4 pb-3">
+          <DynamicBanner onClose={() => {}} />
         </div>
       </div>
     </header>
