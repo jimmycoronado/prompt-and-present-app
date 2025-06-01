@@ -33,14 +33,29 @@ export const Header: React.FC<HeaderProps> = ({
     <header className={`bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 ${isMobile ? 'flex-shrink-0' : ''}`}>
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onToggleSidebar}
-            className="md:hidden"
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
+          {/* Botón de sidebar - solo en móvil, al lado del logo */}
+          {isMobile && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onToggleSidebar}
+              className="md:hidden"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          )}
+
+          {/* Botón de sidebar para desktop */}
+          {!isMobile && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onToggleSidebar}
+              className="hidden md:flex"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          )}
           
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 rounded-full bg-skandia-green p-1 overflow-hidden">
@@ -64,6 +79,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         <div className="flex items-center space-x-2">
+          {/* Botón de tema - siempre visible */}
           <Button
             variant="ghost"
             size="icon"
@@ -76,7 +92,7 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </Button>
 
-          {/* Botón de nueva conversación - solo en móvil */}
+          {/* Botón de nueva conversación - solo en móvil cuando hay conversación activa */}
           {isMobile && hasActiveConversation && (
             <Button
               variant="ghost"
