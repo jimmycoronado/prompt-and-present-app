@@ -49,7 +49,7 @@ const IndexContent = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <div className="h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200 flex flex-col overflow-hidden">
       <Header 
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} 
         onToggleSidePanel={() => setSidePanelOpen(!sidePanelOpen)}
@@ -63,8 +63,8 @@ const IndexContent = () => {
         hasActiveConversation={hasActiveConversation}
       />
       
-      <div className="flex h-[calc(100vh-var(--header-height,4rem))]">
-        <div className="flex-1 flex flex-col">
+      <div className="flex flex-1 overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden">
           <ChatInterface 
             ref={chatInterfaceRef}
             onSelectMessage={setSelectedMessage}
