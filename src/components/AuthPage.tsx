@@ -122,7 +122,7 @@ export const AuthPage: React.FC = () => {
                   <img
                     src="https://aistudiojarvis0534199251.blob.core.windows.net/skandia-icons/logo%20secundario.png"  // 🔁 Cambia este link si tienes otro logo
                     alt="Skandia Logo"
-                    className="w-9 h-9 mr-2"
+                    className="w-11 h-11 mr-1"
                     />
                   Inicia Sesión con tu correo Skandia
                 </>
