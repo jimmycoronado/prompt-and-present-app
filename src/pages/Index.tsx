@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
 import { ChatInterface } from "../components/ChatInterface";
-import { Sidebar } from "../components/Sidebar";
 import { SidePanel } from "../components/SidePanel";
 import { Header } from "../components/Header";
 import { ThemeProvider } from "../contexts/ThemeContext";
@@ -11,8 +10,6 @@ import { useIsMobile } from "../hooks/use-mobile";
 
 const IndexContent = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sidePanelOpen, setSidePanelOpen] = useState(false);
-  const [selectedMessage, setSelectedMessage] = useState(null);
   const { currentConversation, isLoading } = useConversation();
   const isMobile = useIsMobile();
   
@@ -22,7 +19,7 @@ const IndexContent = () => {
   const hasActiveConversation = currentConversation !== null;
 
   const handleNewChat = () => {
-    setSidePanelOpen(false);
+    // Función para nuevo chat desde el SidePanel
   };
 
   const handleBannerAction = (automaticReply: string) => {
@@ -58,8 +55,8 @@ const IndexContent = () => {
       />
       
       <SidePanel 
-        isOpen={sidePanelOpen}
-        onToggle={() => setSidePanelOpen(!sidePanelOpen)}
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen(!sidebarOpen)}
         onNewChat={handleNewChat}
         hasActiveConversation={hasActiveConversation}
       />
@@ -68,16 +65,10 @@ const IndexContent = () => {
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
           <ChatInterface 
             ref={chatInterfaceRef}
-            onSelectMessage={setSelectedMessage}
-            selectedMessage={selectedMessage}
+            onSelectMessage={() => {}}
+            selectedMessage={null}
           />
         </div>
-        
-        <Sidebar 
-          isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-          selectedMessage={selectedMessage}
-        />
       </div>
     </div>
   );
