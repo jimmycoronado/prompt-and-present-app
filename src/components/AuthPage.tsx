@@ -109,7 +109,7 @@ export const AuthPage: React.FC = () => {
           <CardContent className="space-y-4">
             <Button 
               onClick={handleAzureSignIn} 
-              className="w-full bg-[#00C83C] hover:bg-[#009E2F] text-white"
+              className="w-full bg-[#C8C8C8] hover:bg-[#9F9F9F] text-white"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -120,9 +120,9 @@ export const AuthPage: React.FC = () => {
               ) : (
                 <>
                   <img
-                    src="https://aistudiojarvis0534199251.blob.core.windows.net/skandia-icons/logo%20secundario%20negativo.png"  // 🔁 Cambia este link si tienes otro logo
+                    src="https://aistudiojarvis0534199251.blob.core.windows.net/skandia-icons/logo%20secundario.png"  // 🔁 Cambia este link si tienes otro logo
                     alt="Skandia Logo"
-                    className="w-5 h-5 mr-2"
+                    className="w-full h-full object-contain"
                     />
                   Inicia Sesión con tu correo Skandia
                 </>
