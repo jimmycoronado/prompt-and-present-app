@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut, User, Settings } from 'lucide-react';
+import { LogOut, ExternalLink } from 'lucide-react';
 
 export const UserMenu: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -55,6 +55,10 @@ export const UserMenu: React.FC = () => {
     await signOut();
   };
 
+  const handleViewAccount = () => {
+    window.open('https://myaccount.microsoft.com/', '_blank');
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -81,13 +85,9 @@ export const UserMenu: React.FC = () => {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <User className="mr-2 h-4 w-4" />
-          <span>Perfil</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Settings className="mr-2 h-4 w-4" />
-          <span>Configuración</span>
+        <DropdownMenuItem onClick={handleViewAccount}>
+          <ExternalLink className="mr-2 h-4 w-4" />
+          <span>Ver cuenta</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>
