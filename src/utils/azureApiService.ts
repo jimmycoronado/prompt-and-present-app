@@ -14,10 +14,12 @@ export const callAzureAgentApi = async (
   message: string, 
   files: File[], 
   settings: AISettings,
-  userEmail: string
+  userEmail: string,
+  accessToken?: string | null
 ): Promise<AzureApiResponse> => {
   console.log('azureApiService: Starting call to Azure API with message:', message);
   console.log('azureApiService: User email:', userEmail);
+  console.log('azureApiService: Access token present:', !!accessToken);
   console.log('azureApiService: Files count:', files.length);
   
   const startTime = Date.now();
@@ -25,10 +27,14 @@ export const callAzureAgentApi = async (
   // Preparar el body para tu API
   const requestBody = {
     pregunta: message,
-    correo: userEmail
+    correo: userEmail,
+    EntraToken: accessToken || ''
   };
 
-  console.log('azureApiService: Request body:', requestBody);
+  console.log('azureApiService: Request body:', {
+    ...requestBody,
+    EntraToken: accessToken ? accessToken.substring(0, 20) + '...' : 'empty'
+  });
 
   try {
     // Intentar conexión directa primero (ahora que CORS está configurado)

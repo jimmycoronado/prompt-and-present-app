@@ -22,6 +22,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
+  accessToken: string | null;
   loading: boolean;
   signInWithAzure: () => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -44,7 +45,34 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({ children }
   const { instance, accounts, inProgress } = useMsal();
   const isAuthenticated = useIsAuthenticated();
   const [user, setUser] = useState<User | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Function to acquire access token silently
+  const acquireAccessToken = async (account: AccountInfo) => {
+    try {
+      const response = await instance.acquireTokenSilent({
+        ...loginRequest,
+        account: account,
+      });
+      console.log('✅ Access token acquired:', response.accessToken.substring(0, 20) + '...');
+      return response.accessToken;
+    } catch (error) {
+      console.error('❌ Failed to acquire access token silently:', error);
+      try {
+        // If silent acquisition fails, try popup
+        const response = await instance.acquireTokenPopup({
+          ...loginRequest,
+          account: account,
+        });
+        console.log('✅ Access token acquired via popup:', response.accessToken.substring(0, 20) + '...');
+        return response.accessToken;
+      } catch (popupError) {
+        console.error('❌ Failed to acquire access token via popup:', popupError);
+        return null;
+      }
+    }
+  };
 
   useEffect(() => {
     console.log('🔄 Auth state changed:', { 
@@ -82,9 +110,15 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({ children }
         console.log('✅ Setting NEW user data:', userData);
         console.log('🔄 Previous user data was:', user);
         setUser(userData);
+
+        // Acquire access token
+        acquireAccessToken(account).then(token => {
+          setAccessToken(token);
+        });
       } else {
         console.log('❌ No authentication or accounts, setting user to null');
         setUser(null);
+        setAccessToken(null);
       }
       setLoading(false);
     } else {
@@ -97,13 +131,26 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({ children }
     console.log('👤 USER STATE CHANGED:', user);
   }, [user]);
 
+  // Log whenever access token changes
+  useEffect(() => {
+    console.log('🔑 ACCESS TOKEN CHANGED:', accessToken ? accessToken.substring(0, 20) + '...' : null);
+  }, [accessToken]);
+
   const signInWithAzure = async () => {
     try {
       console.log('🚀 Starting loginPopup...');
       // Clear any existing user data before login
       setUser(null);
+      setAccessToken(null);
       const result: AuthenticationResult = await instance.loginPopup(loginRequest);
       console.log('✅ Login successful:', result);
+      
+      // Set access token immediately after login
+      if (result.accessToken) {
+        setAccessToken(result.accessToken);
+        console.log('🔑 Access token set from login result:', result.accessToken.substring(0, 20) + '...');
+      }
+      
       return { error: null };
     } catch (error) {
       console.error('❌ Login failed:', error);
@@ -116,6 +163,7 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({ children }
       console.log('🚪 Starting logout...');
       await instance.logoutPopup();
       setUser(null);
+      setAccessToken(null);
       console.log('✅ Logout successful');
     } catch (error) {
       console.error('❌ Logout failed:', error);
@@ -124,6 +172,7 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({ children }
 
   const value = {
     user,
+    accessToken,
     loading,
     signInWithAzure,
     signOut

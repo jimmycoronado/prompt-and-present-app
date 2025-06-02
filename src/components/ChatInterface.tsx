@@ -1,5 +1,3 @@
-
-
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import { File, Download } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
@@ -39,8 +37,8 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  // Get user email from auth context
-  const { user } = useAuth();
+  // Get user email and access token from auth context
+  const { user, accessToken } = useAuth();
   const userEmail = user?.email || "usuario@dominio.com";
 
   const { 
@@ -84,6 +82,7 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
 
     console.log('ChatInterface: START handleSendMessage with content:', content);
     console.log('ChatInterface: Using authenticated user email for Azure API:', userEmail);
+    console.log('ChatInterface: Using access token for Azure API:', !!accessToken);
 
     const userMessage: ChatMessageType = {
       id: Date.now().toString(),
@@ -113,8 +112,8 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
     }, 100);
 
     try {
-      console.log('ChatInterface: Calling Azure API with authenticated user email:', userEmail);
-      const response = await callAzureAgentApi(content, uploadedFiles, aiSettings, userEmail);
+      console.log('ChatInterface: Calling Azure API with authenticated user email and access token:', userEmail, !!accessToken);
+      const response = await callAzureAgentApi(content, uploadedFiles, aiSettings, userEmail, accessToken);
       console.log('ChatInterface: Received Azure API response:', response);
       
       const aiMessage: ChatMessageType = {
@@ -411,4 +410,3 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
 });
 
 ChatInterface.displayName = 'ChatInterface';
-
