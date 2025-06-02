@@ -95,7 +95,7 @@ export const AuthPage: React.FC = () => {
             Dali AI
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-           Más que un asistente. Tu copiloto en Skandia.
+           Más que un asistente, tu copiloto en Skandia.
           </p>
         </div>
 
@@ -129,8 +129,27 @@ export const AuthPage: React.FC = () => {
               )}
             </Button>
             
-            <div className="text-xs text-center text-gray-500 mt-4">
-              Al iniciar sesión, aceptas el uso de tu cuenta corporativa de Skandia
+            <div className="text-[10px] text-center text-gray-500 mt-4">
+              Al iniciar sesión, aceptas nuestra{" "}
+              <a
+                href="https://www.skandia.co/autorizacion-de-tratamiento-de-datos-personales"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+                style={{ color: "#00C83C" }}
+                >
+                política
+              </a>{" "}
+              de tratamiento de datos, así como nuestros{" "}
+              <a
+                href="https://www.skandia.co/terminos-y-condiciones-canales-de-servicio/terminos-y-condiciones-del-chat"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+                style={{ color: "#00C83C" }}
+                >
+                términos y condiciones
+              </a>.
             </div>
           </CardContent>
         </Card>
