@@ -67,7 +67,7 @@ export const AuthPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="w-32 h-20 mx-auto mb-4 rounded-lg overflow-hidden">
+          <div className="w-80 h-48 mx-auto mb-4 rounded-lg overflow-hidden">
             <video 
               src="https://aistudiojarvis0534199251.blob.core.windows.net/skandia-icons/Dali_.mp4"
               autoPlay
@@ -86,8 +86,8 @@ export const AuthPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          {/* Video en lugar del logo circular */}
-          <div className="w-40 h-24 mx-auto mb-6 rounded-lg overflow-hidden shadow-lg">
+          {/* Video principal más grande */}
+          <div className="w-full max-w-sm h-32 mx-auto mb-6 rounded-lg overflow-hidden shadow-lg">
             <video 
               src="https://aistudiojarvis0534199251.blob.core.windows.net/skandia-icons/Dali_.mp4"
               autoPlay
