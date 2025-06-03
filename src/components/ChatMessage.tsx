@@ -118,7 +118,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
               </AvatarFallback>
             </Avatar>
           ) : (
-            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-transparent overflow-hidden">
               <img 
                 src="https://aistudiojarvis0534199251.blob.core.windows.net/skandia-icons/DaliLogo.gif" 
                 alt="Dali AI Logo"
