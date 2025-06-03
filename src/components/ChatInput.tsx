@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { Send, File, Paperclip } from "lucide-react";
 import { Button } from "./ui/button";
@@ -29,6 +30,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const lastInitialValueRef = useRef(initialValue);
   const isMobile = useIsMobile();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const hasFiles = uploadedFiles.length > 0;
 
@@ -108,6 +110,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const validateAndProcessFiles = (files: FileList | null) => {
     if (!files) return;
     
+    console.log('ChatInput: Processing', files.length, 'files');
+    
     const validFiles = Array.from(files).filter(file => {
       const validTypes = [
         'application/pdf',
@@ -118,24 +122,34 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'text/csv'
       ];
-      return validTypes.includes(file.type) && file.size <= 10 * 1024 * 1024; // 10MB limit
+      const isValidType = validTypes.includes(file.type);
+      const isValidSize = file.size <= 10 * 1024 * 1024; // 10MB limit
+      
+      console.log('ChatInput: File validation:', file.name, 'type:', file.type, 'valid type:', isValidType, 'valid size:', isValidSize);
+      
+      return isValidType && isValidSize;
     });
     
+    console.log('ChatInput: Valid files after filtering:', validFiles.length);
+    
     if (validFiles.length > 0) {
+      console.log('ChatInput: Calling onFilesSelected with', validFiles.length, 'files');
       onFilesSelected?.(validFiles);
     }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('ChatInput: File input changed, files:', e.target.files?.length);
     validateAndProcessFiles(e.target.files);
     // Reset the input so the same file can be selected again
     e.target.value = '';
   };
 
-  // Drag and drop handlers
+  // Drag and drop handlers - only for the input container
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    console.log('ChatInput: Drag over, disabled:', disabled);
     if (!disabled) {
       setIsDragOver(true);
     }
@@ -144,12 +158,17 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDragOver(false);
+    // Only hide drag state if leaving the container
+    if (containerRef.current && !containerRef.current.contains(e.relatedTarget as Node)) {
+      console.log('ChatInput: Drag leave');
+      setIsDragOver(false);
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    console.log('ChatInput: Drop event, files:', e.dataTransfer.files.length);
     setIsDragOver(false);
     
     if (!disabled) {
@@ -159,6 +178,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   // Paste handler for Ctrl+V
   const handlePaste = (e: React.ClipboardEvent) => {
+    console.log('ChatInput: Paste event');
     const items = e.clipboardData?.items;
     if (!items || disabled) return;
 
@@ -169,11 +189,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         const file = item.getAsFile();
         if (file) {
           files.push(file);
+          console.log('ChatInput: Found file in paste:', file.name);
         }
       }
     }
 
     if (files.length > 0) {
+      console.log('ChatInput: Preventing default paste and processing', files.length, 'files');
       e.preventDefault(); // Prevent default paste behavior for files
       const fileList = new DataTransfer();
       files.forEach(file => fileList.items.add(file));
@@ -196,7 +218,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       
       {/* Desktop Layout - Horizontal */}
       {!isMobile && (
-        <div className="flex items-end space-x-2">
+        <div 
+          ref={containerRef}
+          className="flex items-end space-x-2"
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
           {/* File Upload Button */}
           <Button
             type="button"
@@ -215,9 +243,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             className={`flex-1 relative transition-all duration-200 ${
               isDragOver ? 'ring-2 ring-blue-400 ring-opacity-50 bg-blue-50 dark:bg-blue-900/20' : ''
             }`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
           >
             <Textarea
               ref={textareaRef}
@@ -261,15 +286,18 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
       {/* Mobile Layout - Vertical */}
       {isMobile && (
-        <div className="space-y-3">
+        <div 
+          ref={containerRef}
+          className="space-y-3"
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
           {/* Textarea Area */}
           <div 
             className={`relative transition-all duration-200 ${
               isDragOver ? 'ring-2 ring-blue-400 ring-opacity-50 bg-blue-50 dark:bg-blue-900/20' : ''
             }`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
           >
             <Textarea
               ref={textareaRef}
