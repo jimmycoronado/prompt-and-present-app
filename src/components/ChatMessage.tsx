@@ -122,7 +122,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
               <img 
                 src="https://aistudiojarvis0534199251.blob.core.windows.net/skandia-icons/DaliLogo.gif" 
                 alt="Dali AI Logo"
-                className="w-6 h-6 object-contain"
+                className="w-full h-full object-contain"
               />
             </div>
           )}
