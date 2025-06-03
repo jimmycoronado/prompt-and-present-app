@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import { File, Download } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
@@ -363,7 +362,7 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
       >
         {messages.length === 0 && (
           <div className="text-center py-12">
-            <div className="w-16 h-16 rounded-full mx-auto mb-4 bg-white p-2 overflow-hidden border border-gray-200">
+            <div className="w-16 h-16 rounded-full mx-auto mb-4 overflow-hidden">
               <img 
                 src="https://aistudiojarvis0534199251.blob.core.windows.net/skandia-icons/DaliLogo.gif" 
                 alt="Dali AI Logo" 
