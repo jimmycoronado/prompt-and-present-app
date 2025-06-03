@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import { File, Download } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
@@ -143,7 +144,7 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
       }
     };
 
-    // Add event listeners (removed paste handler)
+    // Add event listeners
     document.addEventListener('dragover', handleGlobalDragOver);
     document.addEventListener('dragleave', handleGlobalDragLeave);
     document.addEventListener('drop', handleGlobalDrop);
@@ -333,7 +334,7 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
   return (
     <div 
       ref={mainContainerRef}
-      className={`flex flex-col ${isMobile ? 'h-full max-h-full overflow-hidden' : 'h-full'} relative ${
+      className={`flex flex-col h-full relative ${
         isDragOver ? 'bg-blue-50 dark:bg-blue-900/20' : ''
       }`}
     >
@@ -354,12 +355,11 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
         </div>
       )}
 
-      {/* Messages Area */}
+      {/* Messages Area - Now with proper flex-1 and overflow */}
       <main 
-        className={`flex-1 ${isMobile ? 'overflow-y-auto max-h-full pb-4' : 'overflow-y-auto'} p-4 space-y-4`} 
+        className="flex-1 overflow-y-auto p-4 space-y-4" 
         role="main" 
         aria-label="Conversación"
-        style={isMobile ? { paddingBottom: '140px' } : {}}
       >
         {messages.length === 0 && (
           <div className="text-center py-12">
@@ -412,8 +412,8 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
         <div ref={messagesEndRef} />
       </main>
 
-      {/* Input Area Container - Fixed at bottom on mobile */}
-      <div className={`${isMobile ? 'fixed bottom-0 left-0 right-0 z-40 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700' : 'flex-shrink-0 border-t border-gray-200 dark:border-gray-700'}`}>
+      {/* Input Area Container - Fixed at bottom on mobile, normal flow on desktop */}
+      <div className={`${isMobile ? 'fixed bottom-0 left-0 right-0 z-40 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700' : 'flex-shrink-0 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900'}`}>
         {/* File Upload Area */}
         {uploadedFiles.length > 0 && (
           <div className="p-4 pb-2 animate-fade-in" aria-label="Archivos seleccionados">

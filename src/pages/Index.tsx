@@ -1,3 +1,4 @@
+
 import { useState, useRef } from "react";
 import { ChatInterface } from "../components/ChatInterface";
 import { SidePanel } from "../components/SidePanel";
@@ -48,11 +49,14 @@ const IndexContent = () => {
   }
 
   return (
-    <div className={`${isMobile ? 'h-[100dvh] overflow-hidden' : 'min-h-screen'} bg-gray-50 dark:bg-gray-900 transition-colors duration-200 flex flex-col`}>
-      <Header 
-        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} 
-        onBannerAction={handleBannerAction}
-      />
+    <div className={`${isMobile ? 'h-[100dvh] overflow-hidden' : 'h-screen'} bg-gray-50 dark:bg-gray-900 transition-colors duration-200 flex flex-col`}>
+      {/* Header fijo */}
+      <div className="flex-shrink-0">
+        <Header 
+          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} 
+          onBannerAction={handleBannerAction}
+        />
+      </div>
       
       <SidePanel 
         isOpen={sidebarOpen}
@@ -61,7 +65,8 @@ const IndexContent = () => {
         hasActiveConversation={hasActiveConversation}
       />
       
-      <div className={`flex flex-1 ${isMobile ? 'min-h-0 overflow-hidden' : 'overflow-hidden min-h-0'}`}>
+      {/* Contenido principal con altura calculada */}
+      <div className={`flex flex-1 ${isMobile ? 'min-h-0 overflow-hidden' : 'overflow-hidden'}`} style={!isMobile ? { height: 'calc(100vh - 80px)' } : {}}>
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
           <ChatInterface 
             ref={chatInterfaceRef}
