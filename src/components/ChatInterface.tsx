@@ -33,7 +33,9 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
   const [showHistory, setShowHistory] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
   const [templateContent, setTemplateContent] = useState("");
+  const [isDragOver, setIsDragOver] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const mainContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -67,6 +69,120 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
       createNewConversation();
     }
   }, [currentConversation, createNewConversation]);
+
+  // File validation helper
+  const validateAndProcessFiles = (files: FileList | null) => {
+    if (!files) return;
+    
+    console.log('ChatInterface: Processing', files.length, 'files');
+    
+    const validFiles = Array.from(files).filter(file => {
+      const validTypes = [
+        'application/pdf',
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'text/csv'
+      ];
+      const isValidType = validTypes.includes(file.type);
+      const isValidSize = file.size <= 10 * 1024 * 1024; // 10MB limit
+      
+      console.log('ChatInterface: File validation:', file.name, 'type:', file.type, 'valid type:', isValidType, 'valid size:', isValidSize);
+      
+      return isValidType && isValidSize;
+    });
+    
+    console.log('ChatInterface: Valid files after filtering:', validFiles.length);
+    
+    if (validFiles.length > 0) {
+      console.log('ChatInterface: Adding', validFiles.length, 'files to uploaded files');
+      setUploadedFiles(prev => [...prev, ...validFiles]);
+      toast({
+        title: "Archivos agregados",
+        description: `Se agregaron ${validFiles.length} archivo(s) para enviar`
+      });
+    } else if (files.length > 0) {
+      toast({
+        title: "Archivos no válidos",
+        description: "Solo se permiten archivos PDF, imágenes, Excel y CSV (máximo 10MB)",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Global drag and drop handlers
+  useEffect(() => {
+    const handleGlobalDragOver = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('ChatInterface: Global drag over');
+      if (!isLoading) {
+        setIsDragOver(true);
+      }
+    };
+
+    const handleGlobalDragLeave = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      // Only hide drag state if leaving the entire window
+      if (!e.relatedTarget || (e.relatedTarget as Element).nodeName === 'HTML') {
+        console.log('ChatInterface: Global drag leave');
+        setIsDragOver(false);
+      }
+    };
+
+    const handleGlobalDrop = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('ChatInterface: Global drop event, files:', e.dataTransfer?.files.length);
+      setIsDragOver(false);
+      
+      if (!isLoading && e.dataTransfer?.files) {
+        validateAndProcessFiles(e.dataTransfer.files);
+      }
+    };
+
+    // Global paste handler
+    const handleGlobalPaste = (e: ClipboardEvent) => {
+      console.log('ChatInterface: Global paste event');
+      const items = e.clipboardData?.items;
+      if (!items || isLoading) return;
+
+      const files: File[] = [];
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.kind === 'file') {
+          const file = item.getAsFile();
+          if (file) {
+            files.push(file);
+            console.log('ChatInterface: Found file in paste:', file.name);
+          }
+        }
+      }
+
+      if (files.length > 0) {
+        console.log('ChatInterface: Processing', files.length, 'files from paste');
+        const fileList = new DataTransfer();
+        files.forEach(file => fileList.items.add(file));
+        validateAndProcessFiles(fileList.files);
+      }
+    };
+
+    // Add event listeners
+    document.addEventListener('dragover', handleGlobalDragOver);
+    document.addEventListener('dragleave', handleGlobalDragLeave);
+    document.addEventListener('drop', handleGlobalDrop);
+    document.addEventListener('paste', handleGlobalPaste);
+
+    return () => {
+      document.removeEventListener('dragover', handleGlobalDragOver);
+      document.removeEventListener('dragleave', handleGlobalDragLeave);
+      document.removeEventListener('drop', handleGlobalDrop);
+      document.removeEventListener('paste', handleGlobalPaste);
+    };
+  }, [isLoading, toast]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -244,7 +360,29 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
   }));
 
   return (
-    <div className={`flex flex-col ${isMobile ? 'h-full max-h-full overflow-hidden' : 'h-full'} relative`}>
+    <div 
+      ref={mainContainerRef}
+      className={`flex flex-col ${isMobile ? 'h-full max-h-full overflow-hidden' : 'h-full'} relative ${
+        isDragOver ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+      }`}
+    >
+      {/* Global Drag Overlay */}
+      {isDragOver && (
+        <div className="fixed inset-0 z-50 bg-blue-500 bg-opacity-20 flex items-center justify-center pointer-events-none">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-lg border-2 border-dashed border-blue-400">
+            <div className="text-center">
+              <File className="w-12 h-12 text-blue-500 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                Suelta los archivos aquí
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                PDF, imágenes, Excel o CSV (máximo 10MB)
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Messages Area */}
       <main 
         className={`flex-1 ${isMobile ? 'overflow-y-auto max-h-full pb-4' : 'overflow-y-auto'} p-4 space-y-4`} 
@@ -266,6 +404,9 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
             </h3>
             <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-4">
               Puedes hacerme preguntas, subir archivos para analizar, o pedirme que genere gráficas y tablas de datos.
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-500 max-w-md mx-auto">
+              Arrastra archivos a cualquier parte de la pantalla o usa Ctrl+V para pegar
             </p>
           </div>
         )}
