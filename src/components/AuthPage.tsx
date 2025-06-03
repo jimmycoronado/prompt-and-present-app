@@ -98,7 +98,7 @@ export const AuthPage: React.FC = () => {
             />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Dali AI
+            Dali AI - Data Literacy + Artificial Intelligence
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
            Más que un asistente, tu copiloto en Skandia.
@@ -107,7 +107,7 @@ export const AuthPage: React.FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Dali AI - Data Analytics & Literacy</CardTitle>
+            <CardTitle>Ingresa acá a Dali AI</CardTitle>
             <CardDescription>
               Autenticación Corporativa
             </CardDescription>
