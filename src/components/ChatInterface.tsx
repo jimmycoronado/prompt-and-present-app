@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import { File, Download } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
@@ -112,7 +111,7 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
     }
   };
 
-  // Global drag and drop handlers
+  // Global drag and drop handlers (without paste)
   useEffect(() => {
     const handleGlobalDragOver = (e: DragEvent) => {
       e.preventDefault();
@@ -144,43 +143,15 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
       }
     };
 
-    // Global paste handler
-    const handleGlobalPaste = (e: ClipboardEvent) => {
-      console.log('ChatInterface: Global paste event');
-      const items = e.clipboardData?.items;
-      if (!items || isLoading) return;
-
-      const files: File[] = [];
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-        if (item.kind === 'file') {
-          const file = item.getAsFile();
-          if (file) {
-            files.push(file);
-            console.log('ChatInterface: Found file in paste:', file.name);
-          }
-        }
-      }
-
-      if (files.length > 0) {
-        console.log('ChatInterface: Processing', files.length, 'files from paste');
-        const fileList = new DataTransfer();
-        files.forEach(file => fileList.items.add(file));
-        validateAndProcessFiles(fileList.files);
-      }
-    };
-
-    // Add event listeners
+    // Add event listeners (removed paste handler)
     document.addEventListener('dragover', handleGlobalDragOver);
     document.addEventListener('dragleave', handleGlobalDragLeave);
     document.addEventListener('drop', handleGlobalDrop);
-    document.addEventListener('paste', handleGlobalPaste);
 
     return () => {
       document.removeEventListener('dragover', handleGlobalDragOver);
       document.removeEventListener('dragleave', handleGlobalDragLeave);
       document.removeEventListener('drop', handleGlobalDrop);
-      document.removeEventListener('paste', handleGlobalPaste);
     };
   }, [isLoading, toast]);
 
