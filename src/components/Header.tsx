@@ -62,7 +62,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 rounded-full bg-skandia-green p-1 overflow-hidden">
               <img 
-                src="https://aistudiojarvis0534199251.blob.core.windows.net/skandia-icons/DaliLogo.jpg" 
+                src="https://aistudiojarvis0534199251.blob.core.windows.net/skandia-icons/DaliLogo.gif" 
                 alt="Dali AI Logo" 
                 className="w-full h-full object-contain"
               />
