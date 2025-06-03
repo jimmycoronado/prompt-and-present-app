@@ -362,11 +362,11 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
       >
         {messages.length === 0 && (
           <div className="text-center py-12">
-            <div className="w-16 h-16 rounded-full mx-auto mb-4 overflow-hidden">
+            <div className="w-16 h-16 rounded-full mx-auto mb-4 bg-transparent overflow-hidden">
               <img 
                 src="https://aistudiojarvis0534199251.blob.core.windows.net/skandia-icons/DaliLogo.gif" 
                 alt="Dali AI Logo" 
-                className="w-full h-full object-contain animate-pulse"
+                className="w-full h-full object-contain"
               />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
