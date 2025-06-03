@@ -67,11 +67,13 @@ export const AuthPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="w-16 h-16 rounded-full mx-auto mb-4 bg-skandia-green p-2 overflow-hidden">
-            <img 
-              src="https://aistudiojarvis0534199251.blob.core.windows.net/skandia-icons/DaliLogo.jpg" 
-              alt="Dali AI Logo" 
-              className="w-full h-full object-contain"
+          <div className="w-32 h-20 mx-auto mb-4 rounded-lg overflow-hidden">
+            <video 
+              src="https://aistudiojarvis0534199251.blob.core.windows.net/skandia-icons/Dali_.mp4"
+              autoPlay
+              loop
+              muted
+              className="w-full h-full object-cover"
             />
           </div>
           <p className="text-gray-600 dark:text-gray-400">Verificando autenticación...</p>
@@ -84,11 +86,15 @@ export const AuthPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-full mx-auto mb-4 bg-skandia-green p-2 overflow-hidden">
-            <img 
-              src="https://aistudiojarvis0534199251.blob.core.windows.net/skandia-icons/DaliLogo.jpg" 
-              alt="Dali AI Logo" 
-              className="w-full h-full object-contain"
+          {/* Video en lugar del logo circular */}
+          <div className="w-40 h-24 mx-auto mb-6 rounded-lg overflow-hidden shadow-lg">
+            <video 
+              src="https://aistudiojarvis0534199251.blob.core.windows.net/skandia-icons/Dali_.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover"
             />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -120,7 +126,7 @@ export const AuthPage: React.FC = () => {
               ) : (
                 <>
                   <img
-                    src="https://aistudiojarvis0534199251.blob.core.windows.net/skandia-icons/logo%20secundario.png"  // 🔁 Cambia este link si tienes otro logo
+                    src="https://aistudiojarvis0534199251.blob.core.windows.net/skandia-icons/logo%20secundario.png"
                     alt="Skandia Logo"
                     className="w-11 h-11 mr-1"
                     />
