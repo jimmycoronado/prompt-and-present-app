@@ -66,7 +66,7 @@ export const ChatMessage = ({ message, isSelected, onClick }: ChatMessageProps) 
               <img 
                 src="https://aistudiojarvis0534199251.blob.core.windows.net/skandia-icons/DaliLogo.gif" 
                 alt="Dali AI Avatar" 
-                className="w-full h-full object-contain rounded-full bg-transparent"
+                className="w-full h-full object-contain"
               />
             </div>
           )}
@@ -126,14 +126,18 @@ export const ChatMessage = ({ message, isSelected, onClick }: ChatMessageProps) 
             {/* Chart */}
             {message.chart && (
               <div className="mt-4">
-                <DataChart chartData={message.chart} />
+                <DataChart chartConfig={message.chart} />
               </div>
             )}
 
             {/* Video preview */}
             {message.videoPreview && (
               <div className="mt-4">
-                <VideoPreview video={message.videoPreview} />
+                <VideoPreview 
+                  src={message.videoPreview.url}
+                  title={message.videoPreview.title}
+                  description={message.videoPreview.description}
+                />
               </div>
             )}
 
