@@ -1,13 +1,14 @@
 
 import { useState } from 'react';
-import { PanelLeft, Search, MessageSquare, FileText, Edit3, Plus, X } from 'lucide-react';
+import { PanelLeft, Search, MessageSquare, FileText, Edit3, Plus, X, User } from 'lucide-react';
 import { Button } from './ui/button';
-import { Input } from './ui/input';
 import { ScrollArea } from './ui/scroll-area';
 import { ConversationHistory } from './ConversationHistory';
 import { PromptTemplates } from './PromptTemplates';
+import { PersonalityManager } from './PersonalityManager';
 import { useConversation } from '../contexts/ConversationContext';
 import { PromptTemplate } from '../types/templates';
+import { Personality } from '../types/personalities';
 import { useIsMobile } from '../hooks/use-mobile';
 
 interface SidePanelProps {
@@ -23,7 +24,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   onNewChat,
   hasActiveConversation 
 }) => {
-  const [activeView, setActiveView] = useState<'main' | 'chats' | 'templates'>('main');
+  const [activeView, setActiveView] = useState<'main' | 'chats' | 'templates' | 'personalities'>('main');
   const { createNewConversation } = useConversation();
   const isMobile = useIsMobile();
 
@@ -35,6 +36,12 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   const handleSelectTemplate = (template: PromptTemplate) => {
     // TODO: Implement template selection logic
     console.log('Selected template:', template);
+    setActiveView('main');
+  };
+
+  const handleSelectPersonality = (personality: Personality) => {
+    // TODO: Implement personality selection logic
+    console.log('Selected personality:', personality);
     setActiveView('main');
   };
 
@@ -145,6 +152,18 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                     <div className="text-xs text-gray-500">Prompts predefinidos</div>
                   </div>
                 </Button>
+
+                <Button
+                  variant="ghost"
+                  onClick={() => setActiveView('personalities')}
+                  className="w-full justify-start h-12"
+                >
+                  <User className="h-4 w-4 mr-3" />
+                  <div className="text-left">
+                    <div className="font-medium">Personalidades</div>
+                    <div className="text-xs text-gray-500">Agentes personalizados</div>
+                  </div>
+                </Button>
               </div>
             </div>
           )}
@@ -170,6 +189,15 @@ export const SidePanel: React.FC<SidePanelProps> = ({
             <div className="h-full">
               <PromptTemplates 
                 onSelectTemplate={handleSelectTemplate}
+                onClose={handleBackToMain}
+              />
+            </div>
+          )}
+
+          {activeView === 'personalities' && (
+            <div className="h-full">
+              <PersonalityManager 
+                onSelectPersonality={handleSelectPersonality}
                 onClose={handleBackToMain}
               />
             </div>
