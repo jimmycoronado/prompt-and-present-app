@@ -73,7 +73,7 @@ export const AuthPage: React.FC = () => {
               autoPlay
               loop
               muted
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           </div>
           <p className="text-gray-600 dark:text-gray-400">Verificando autenticación...</p>
@@ -84,17 +84,17 @@ export const AuthPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-2xl">
         <div className="text-center mb-8">
-          {/* Video principal más grande */}
-          <div className="w-full max-w-sm h-32 mx-auto mb-6 rounded-lg overflow-hidden shadow-lg">
+          {/* Video principal más grande y completo */}
+          <div className="w-full max-w-2xl h-64 mx-auto mb-6 rounded-lg overflow-hidden shadow-lg bg-black">
             <video 
               src="https://aistudiojarvis0534199251.blob.core.windows.net/skandia-icons/Dali_.mp4"
               autoPlay
               loop
               muted
               playsInline
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -105,60 +105,62 @@ export const AuthPage: React.FC = () => {
           </p>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Ingresa acá a Dali AI</CardTitle>
-            <CardDescription>
-              Autenticación Corporativa
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Button 
-              onClick={handleAzureSignIn} 
-              className="w-full bg-[#C8C8C8] hover:bg-[#9F9F9F] text-white"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Iniciando sesión...
-                </>
-              ) : (
-                <>
-                  <img
-                    src="https://aistudiojarvis0534199251.blob.core.windows.net/skandia-icons/logo%20secundario.png"
-                    alt="Skandia Logo"
-                    className="w-11 h-11 mr-1"
-                    />
-                  Inicia sesión con tu correo de Skandia
-                </>
-              )}
-            </Button>
-            
-            <div className="text-[10px] text-center text-gray-500 mt-4">
-              Al iniciar sesión, aceptas nuestra{" "}
-              <a
-                href="https://www.skandia.co/autorizacion-de-tratamiento-de-datos-personales"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline"
-                style={{ color: "#00C83C" }}
-                >
-                política
-              </a>{" "}
-              de tratamiento de datos, así como nuestros{" "}
-              <a
-                href="https://www.skandia.co/terminos-y-condiciones-canales-de-servicio/terminos-y-condiciones-del-chat"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline"
-                style={{ color: "#00C83C" }}
-                >
-                términos y condiciones
-              </a>.
-            </div>
-          </CardContent>
-        </Card>
+        <div className="max-w-md mx-auto">
+          <Card>
+            <CardHeader>
+              <CardTitle>Ingresa acá a Dali AI</CardTitle>
+              <CardDescription>
+                Autenticación Corporativa
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button 
+                onClick={handleAzureSignIn} 
+                className="w-full bg-[#C8C8C8] hover:bg-[#9F9F9F] text-white"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Iniciando sesión...
+                  </>
+                ) : (
+                  <>
+                    <img
+                      src="https://aistudiojarvis0534199251.blob.core.windows.net/skandia-icons/logo%20secundario.png"
+                      alt="Skandia Logo"
+                      className="w-11 h-11 mr-1"
+                      />
+                    Inicia sesión con tu correo de Skandia
+                  </>
+                )}
+              </Button>
+              
+              <div className="text-[10px] text-center text-gray-500 mt-4">
+                Al iniciar sesión, aceptas nuestra{" "}
+                <a
+                  href="https://www.skandia.co/autorizacion-de-tratamiento-de-datos-personales"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                  style={{ color: "#00C83C" }}
+                  >
+                  política
+                </a>{" "}
+                de tratamiento de datos, así como nuestros{" "}
+                <a
+                  href="https://www.skandia.co/terminos-y-condiciones-canales-de-servicio/terminos-y-condiciones-del-chat"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                  style={{ color: "#00C83C" }}
+                  >
+                  términos y condiciones
+                </a>.
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
