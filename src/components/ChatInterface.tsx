@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import { File, Download } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
@@ -354,9 +355,11 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
         </div>
       )}
 
-      {/* Messages Area - Now with proper flex-1 and overflow */}
+      {/* Messages Area - Adjusted padding for mobile when loading */}
       <main 
-        className="flex-1 overflow-y-auto p-4 space-y-4" 
+        className={`flex-1 overflow-y-auto p-4 space-y-4 ${
+          isMobile && isLoading ? 'pb-32' : ''
+        }`}
         role="main" 
         aria-label="Conversación"
       >
