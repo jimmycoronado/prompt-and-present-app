@@ -18,14 +18,15 @@ serve(async (req) => {
     console.log('Azure Agent Proxy: Received request:', { pregunta, correo })
     
     // Make request to Azure API
-    const azureResponse = await fetch('https://jarvis-api-agente-sql.azurewebsites.net/query', {
+    const azureResponse = await fetch('https://skcoaimultiagentdev.azurewebsites.net/base-madre', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         pregunta,
-        correo
+        correo,
+        EntraToken
       })
     })
 
