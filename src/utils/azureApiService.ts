@@ -73,12 +73,16 @@ export const callAzureAgentApi = async (
     console.error('azureApiService: Direct API failed, trying proxy:', directError);
     
     try {
-      // Usar el proxy de Supabase como fallback
+      // Usar el proxy de Supabase como fallback con URL completa
       console.log('azureApiService: Attempting connection via Supabase proxy...');
-      const proxyResponse = await fetch('/functions/v1/azure-agent-proxy', {
+      const proxyUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/azure-agent-proxy`;
+      console.log('azureApiService: Proxy URL:', proxyUrl);
+      
+      const proxyResponse = await fetch(proxyUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify(requestBody)
       });
