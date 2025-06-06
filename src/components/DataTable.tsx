@@ -72,44 +72,46 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
         </Button>
       </div>
 
-      {/* Scrollable table container */}
-      <ScrollArea className="h-[400px] w-full">
-        <div className="min-w-full">
-          <Table>
-            <TableHeader className="sticky top-0 bg-gray-50 dark:bg-gray-700 z-10">
-              <TableRow>
-                {data.headers.map((header, index) => (
-                  <TableHead
-                    key={index}
-                    className="px-3 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider border-r border-gray-200 dark:border-gray-600 last:border-r-0 min-w-[100px] whitespace-nowrap"
-                  >
-                    {header}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {currentRows.map((row, rowIndex) => (
-                <TableRow
-                  key={startIndex + rowIndex}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                >
-                  {row.map((cell, cellIndex) => (
-                    <TableCell
-                      key={cellIndex}
-                      className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-gray-600 last:border-r-0 min-w-[100px] max-w-[200px] truncate"
-                      title={String(cell)}
+      {/* Scrollable table container with explicit dimensions */}
+      <div className="relative">
+        <ScrollArea className="h-[400px] w-full">
+          <div className="w-max min-w-full">
+            <Table>
+              <TableHeader className="sticky top-0 bg-gray-50 dark:bg-gray-700 z-10">
+                <TableRow>
+                  {data.headers.map((header, index) => (
+                    <TableHead
+                      key={index}
+                      className="px-3 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider border-r border-gray-200 dark:border-gray-600 last:border-r-0 w-[150px] whitespace-nowrap"
                     >
-                      {cell}
-                    </TableCell>
+                      {header}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+              </TableHeader>
+              <TableBody>
+                {currentRows.map((row, rowIndex) => (
+                  <TableRow
+                    key={startIndex + rowIndex}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                  >
+                    {row.map((cell, cellIndex) => (
+                      <TableCell
+                        key={cellIndex}
+                        className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-gray-600 last:border-r-0 w-[150px] whitespace-nowrap overflow-hidden text-ellipsis"
+                        title={String(cell)}
+                      >
+                        {cell}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      </div>
 
       {/* Pagination controls */}
       {totalPages > 1 && (
