@@ -19,6 +19,9 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
   const endIndex = startIndex + rowsPerPage;
   const currentRows = data.rows.slice(startIndex, endIndex);
 
+  // Determinar si necesitamos scroll horizontal
+  const needsHorizontalScroll = data.headers.length > 3;
+
   const handlePreviousPage = () => {
     setCurrentPage(prev => Math.max(prev - 1, 1));
   };
@@ -63,15 +66,16 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
         </Button>
       </div>
 
-      {/* Table container with horizontal scroll */}
-      <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
-        <table className="w-full text-sm">
+      {/* Table container - conditional scroll behavior */}
+      <div className={`max-h-[400px] overflow-y-auto ${needsHorizontalScroll ? 'overflow-x-auto' : 'overflow-x-hidden'}`}>
+        <table className={`w-full text-sm ${needsHorizontalScroll ? 'table-fixed' : ''}`} style={needsHorizontalScroll ? { minWidth: `${data.headers.length * 150}px` } : {}}>
           <thead className="sticky top-0 bg-gray-50 dark:bg-gray-700 z-10">
             <tr>
               {data.headers.map((header, index) => (
                 <th
                   key={index}
-                  className="px-3 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider border-r border-gray-200 dark:border-gray-600 last:border-r-0 whitespace-nowrap min-w-[120px]"
+                  className={`px-3 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider border-r border-gray-200 dark:border-gray-600 last:border-r-0 ${needsHorizontalScroll ? 'whitespace-nowrap' : ''}`}
+                  style={needsHorizontalScroll ? { width: '150px', minWidth: '150px' } : {}}
                 >
                   {header}
                 </th>
@@ -87,7 +91,8 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
                 {row.map((cell, cellIndex) => (
                   <td
                     key={cellIndex}
-                    className="px-3 py-2 text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-gray-600 last:border-r-0 whitespace-nowrap min-w-[120px] max-w-[200px] overflow-hidden text-ellipsis"
+                    className={`px-3 py-2 text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-gray-600 last:border-r-0 ${needsHorizontalScroll ? 'whitespace-nowrap overflow-hidden text-ellipsis' : ''}`}
+                    style={needsHorizontalScroll ? { width: '150px', minWidth: '150px' } : {}}
                     title={String(cell)}
                   >
                     {cell}
