@@ -38,8 +38,19 @@ serve(async (req) => {
       throw new Error(`Azure API error: ${azureResponse.status} - ${errorText}`)
     }
 
-    const data = await azureResponse.json()
-    console.log('Azure Agent Proxy: Azure API response data:', data)
+    // Try to parse as JSON first
+    const responseText = await azureResponse.text()
+    console.log('Azure Agent Proxy: Raw response text:', responseText)
+    
+    let data
+    try {
+      data = JSON.parse(responseText)
+    } catch (parseError) {
+      console.log('Azure Agent Proxy: Response is not JSON, treating as text:', parseError)
+      data = { text: responseText }
+    }
+    
+    console.log('Azure Agent Proxy: Parsed response data:', data)
 
     return new Response(
       JSON.stringify(data),

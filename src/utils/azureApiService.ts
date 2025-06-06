@@ -55,9 +55,18 @@ export const callAzureAgentApi = async (
       throw new Error(`API Error: ${response.status} - ${errorText}`);
     }
 
-    const apiData = await response.json();
-    console.log('azureApiService: API response data:', apiData);
+    const responseText = await response.text();
+    console.log('azureApiService: Direct API raw response:', responseText);
     
+    let apiData;
+    try {
+      apiData = JSON.parse(responseText);
+    } catch (parseError) {
+      console.log('azureApiService: Response is not JSON, treating as text');
+      apiData = { text: responseText };
+    }
+    
+    console.log('azureApiService: Direct API parsed data:', apiData);
     return processApiResponse(apiData, startTime);
     
   } catch (directError) {
@@ -102,6 +111,25 @@ export const callAzureAgentApi = async (
 
 function processApiResponse(apiData: any, startTime: number): AzureApiResponse {
   const processingTime = Date.now() - startTime;
+  
+  // Manejar respuesta con campo "detail" cuando no hay datos
+  if (apiData && typeof apiData === 'object' && apiData.detail) {
+    console.log('azureApiService: Processing response with detail field:', apiData.detail);
+    
+    // Verificar si es una respuesta exitosa sin datos
+    if (apiData.detail.includes('200') && apiData.detail.includes('no hay datos')) {
+      return {
+        text: 'No se encontraron datos que coincidan con la consulta realizada.',
+        processingTime
+      };
+    }
+    
+    // Para otros casos con detail, usar el contenido del detail
+    return {
+      text: apiData.detail,
+      processingTime
+    };
+  }
   
   // Procesar la respuesta completa para extraer todos los tipos de contenido
   let responseText = '';
