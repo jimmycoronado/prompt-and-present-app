@@ -66,42 +66,46 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
         </Button>
       </div>
 
-      {/* Table container - conditional scroll behavior */}
-      <div className={`max-h-[400px] overflow-y-auto ${needsHorizontalScroll ? 'overflow-x-auto' : 'overflow-x-hidden'}`}>
-        <table className={`w-full text-sm ${needsHorizontalScroll ? 'table-fixed' : ''}`} style={needsHorizontalScroll ? { minWidth: `${data.headers.length * 150}px` } : {}}>
-          <thead className="sticky top-0 bg-gray-50 dark:bg-gray-700 z-10">
-            <tr>
-              {data.headers.map((header, index) => (
-                <th
-                  key={index}
-                  className={`px-3 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider border-r border-gray-200 dark:border-gray-600 last:border-r-0 ${needsHorizontalScroll ? 'whitespace-nowrap' : ''}`}
-                  style={needsHorizontalScroll ? { width: '150px', minWidth: '150px' } : {}}
-                >
-                  {header}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="bg-white dark:bg-gray-800">
-            {currentRows.map((row, rowIndex) => (
-              <tr
-                key={startIndex + rowIndex}
-                className="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50"
-              >
-                {row.map((cell, cellIndex) => (
-                  <td
-                    key={cellIndex}
-                    className={`px-3 py-2 text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-gray-600 last:border-r-0 ${needsHorizontalScroll ? 'whitespace-nowrap overflow-hidden text-ellipsis' : ''}`}
-                    style={needsHorizontalScroll ? { width: '150px', minWidth: '150px' } : {}}
-                    title={String(cell)}
+      {/* Table container */}
+      <div className={`max-h-[400px] overflow-y-auto ${needsHorizontalScroll ? 'overflow-x-auto' : ''}`}>
+        <div className={needsHorizontalScroll ? 'min-w-max' : 'w-full'}>
+          <table className="w-full text-sm">
+            <thead className="sticky top-0 bg-gray-50 dark:bg-gray-700 z-10">
+              <tr>
+                {data.headers.map((header, index) => (
+                  <th
+                    key={index}
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider border-r border-gray-200 dark:border-gray-600 last:border-r-0 whitespace-nowrap"
+                    style={needsHorizontalScroll ? { minWidth: '200px' } : {}}
                   >
-                    {cell}
-                  </td>
+                    {header}
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
+              {currentRows.map((row, rowIndex) => (
+                <tr
+                  key={startIndex + rowIndex}
+                  className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                >
+                  {row.map((cell, cellIndex) => (
+                    <td
+                      key={cellIndex}
+                      className="px-4 py-3 text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-gray-600 last:border-r-0 whitespace-nowrap"
+                      style={needsHorizontalScroll ? { minWidth: '200px' } : {}}
+                      title={String(cell)}
+                    >
+                      <div className="max-w-[200px] overflow-hidden text-ellipsis">
+                        {cell}
+                      </div>
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Pagination controls */}
