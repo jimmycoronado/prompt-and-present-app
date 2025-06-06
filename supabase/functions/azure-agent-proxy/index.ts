@@ -32,12 +32,6 @@ serve(async (req) => {
 
     console.log('Azure Agent Proxy: Azure API response status:', azureResponse.status)
 
-    if (!azureResponse.ok) {
-      const errorText = await azureResponse.text()
-      console.error('Azure Agent Proxy: Azure API error:', errorText)
-      throw new Error(`Azure API error: ${azureResponse.status} - ${errorText}`)
-    }
-
     // Try to parse as JSON first
     const responseText = await azureResponse.text()
     console.log('Azure Agent Proxy: Raw response text:', responseText)
@@ -51,6 +45,25 @@ serve(async (req) => {
     }
     
     console.log('Azure Agent Proxy: Parsed response data:', data)
+
+    // Check if this is the "no data" response case
+    if (data && typeof data === 'object' && data.detail && 
+        (data.detail.includes('La consulta fue exitosa pero no hay datos') || 
+         data.detail.includes('200:') && data.detail.includes('no hay datos'))) {
+      console.log('Azure Agent Proxy: Detected "no data" response, treating as success')
+      return new Response(
+        JSON.stringify(data),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
+      )
+    }
+
+    // For other responses, check if the original request failed
+    if (!azureResponse.ok && azureResponse.status !== 500) {
+      console.error('Azure Agent Proxy: Azure API error:', responseText)
+      throw new Error(`Azure API error: ${azureResponse.status} - ${responseText}`)
+    }
 
     return new Response(
       JSON.stringify(data),

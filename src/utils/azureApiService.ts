@@ -1,3 +1,4 @@
+
 import { AISettings } from "../types/settings";
 
 interface AzureApiResponse {
@@ -48,12 +49,6 @@ export const callAzureAgentApi = async (
 
     console.log('azureApiService: Direct API response status:', response.status);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('azureApiService: Direct API error:', errorText);
-      throw new Error(`API Error: ${response.status} - ${errorText}`);
-    }
-
     const responseText = await response.text();
     console.log('azureApiService: Direct API raw response:', responseText);
     
@@ -66,6 +61,21 @@ export const callAzureAgentApi = async (
     }
     
     console.log('azureApiService: Direct API parsed data:', apiData);
+
+    // Check if this is a "no data" response - treat as success
+    if (apiData && typeof apiData === 'object' && apiData.detail && 
+        (apiData.detail.includes('La consulta fue exitosa pero no hay datos') || 
+         (apiData.detail.includes('200:') && apiData.detail.includes('no hay datos')))) {
+      console.log('azureApiService: Detected "no data" response from direct API, treating as success');
+      return processApiResponse(apiData, startTime);
+    }
+
+    // Only throw error if it's not the "no data" case and the response is not ok
+    if (!response.ok) {
+      console.error('azureApiService: Direct API error:', responseText);
+      throw new Error(`API Error: ${response.status} - ${responseText}`);
+    }
+    
     return processApiResponse(apiData, startTime);
     
   } catch (directError) {
@@ -88,14 +98,38 @@ export const callAzureAgentApi = async (
 
       console.log('azureApiService: Proxy response status:', proxyResponse.status);
 
-      if (!proxyResponse.ok) {
-        const errorText = await proxyResponse.text();
-        console.error('azureApiService: Proxy error:', errorText);
-        throw new Error(`Proxy Error: ${proxyResponse.status} - ${errorText}`);
+      const proxyResponseText = await proxyResponse.text();
+      console.log('azureApiService: Proxy raw response:', proxyResponseText);
+
+      let apiData;
+      try {
+        apiData = JSON.parse(proxyResponseText);
+      } catch (parseError) {
+        console.log('azureApiService: Proxy response is not JSON, treating as text');
+        apiData = { text: proxyResponseText };
       }
 
-      const apiData = await proxyResponse.json();
       console.log('azureApiService: Proxy response data:', apiData);
+
+      // Check if this is a "no data" response even if it came through error handling
+      if (apiData && typeof apiData === 'object') {
+        // Check if the error message contains the "no data" response
+        if ((apiData.error && apiData.error.includes('La consulta fue exitosa pero no hay datos')) ||
+            (apiData.detail && apiData.detail.includes('La consulta fue exitosa pero no hay datos'))) {
+          console.log('azureApiService: Detected "no data" response from proxy error, treating as success');
+          // Extract the actual detail message
+          const detailMatch = apiData.error ? apiData.error.match(/\{"detail":"([^"]+)"\}/) : null;
+          if (detailMatch) {
+            return processApiResponse({ detail: detailMatch[1] }, startTime);
+          }
+          return processApiResponse({ detail: 'La consulta fue exitosa pero no hay datos.' }, startTime);
+        }
+      }
+
+      if (!proxyResponse.ok) {
+        console.error('azureApiService: Proxy error:', proxyResponseText);
+        throw new Error(`Proxy Error: ${proxyResponse.status} - ${proxyResponseText}`);
+      }
       
       return processApiResponse(apiData, startTime);
       
