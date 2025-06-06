@@ -54,7 +54,7 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
   };
 
   return (
-    <div className="w-full border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 shadow-sm">
+    <div className="w-full max-w-full border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
       {/* Header with title and export button */}
       <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
         <div className="flex items-center space-x-2">
@@ -72,43 +72,47 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
         </Button>
       </div>
 
-      {/* Scrollable table container with explicit dimensions */}
-      <div className="relative">
-        <ScrollArea className="h-[400px] w-full">
-          <div className="w-max min-w-full">
-            <Table>
-              <TableHeader className="sticky top-0 bg-gray-50 dark:bg-gray-700 z-10">
-                <TableRow>
-                  {data.headers.map((header, index) => (
-                    <TableHead
-                      key={index}
-                      className="px-3 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider border-r border-gray-200 dark:border-gray-600 last:border-r-0 w-[150px] whitespace-nowrap"
-                    >
+      {/* Scrollable table container */}
+      <div className="relative w-full">
+        <ScrollArea className="h-[400px] w-full overflow-auto">
+          <Table className="w-max" style={{ minWidth: `${data.headers.length * 150}px` }}>
+            <TableHeader className="sticky top-0 bg-gray-50 dark:bg-gray-700 z-10">
+              <TableRow>
+                {data.headers.map((header, index) => (
+                  <TableHead
+                    key={index}
+                    className="px-3 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider border-r border-gray-200 dark:border-gray-600 last:border-r-0"
+                    style={{ width: '150px', minWidth: '150px' }}
+                  >
+                    <div className="whitespace-nowrap overflow-hidden text-ellipsis">
                       {header}
-                    </TableHead>
+                    </div>
+                  </TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {currentRows.map((row, rowIndex) => (
+                <TableRow
+                  key={startIndex + rowIndex}
+                  className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                >
+                  {row.map((cell, cellIndex) => (
+                    <TableCell
+                      key={cellIndex}
+                      className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-gray-600 last:border-r-0"
+                      style={{ width: '150px', minWidth: '150px' }}
+                      title={String(cell)}
+                    >
+                      <div className="whitespace-nowrap overflow-hidden text-ellipsis">
+                        {cell}
+                      </div>
+                    </TableCell>
                   ))}
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {currentRows.map((row, rowIndex) => (
-                  <TableRow
-                    key={startIndex + rowIndex}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                  >
-                    {row.map((cell, cellIndex) => (
-                      <TableCell
-                        key={cellIndex}
-                        className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-gray-600 last:border-r-0 w-[150px] whitespace-nowrap overflow-hidden text-ellipsis"
-                        title={String(cell)}
-                      >
-                        {cell}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+              ))}
+            </TableBody>
+          </Table>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </div>
