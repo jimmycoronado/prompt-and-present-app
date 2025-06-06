@@ -13,9 +13,9 @@ serve(async (req) => {
   }
 
   try {
-    const { pregunta, correo } = await req.json()
+    const { pregunta, correo, EntraToken } = await req.json()
     
-    console.log('Azure Agent Proxy: Received request:', { pregunta, correo })
+    console.log('Azure Agent Proxy: Received request:', { pregunta, correo, EntraToken: EntraToken ? EntraToken.substring(0, 20) + '...' : 'empty' })
     
     // Make request to Azure API
     const azureResponse = await fetch('https://skcoaimultiagentdev.azurewebsites.net/base-madre', {
