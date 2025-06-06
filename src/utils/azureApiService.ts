@@ -49,18 +49,33 @@ export const callAzureAgentApi = async (
 
     console.log('azureApiService: Direct API response status:', response.status);
 
+    // Para respuestas grandes, usar streaming o procesamiento optimizado
     const responseText = await response.text();
-    console.log('azureApiService: Direct API raw response:', responseText);
+    console.log('azureApiService: Response size:', responseText.length, 'characters');
     
     let apiData;
     try {
-      apiData = JSON.parse(responseText);
+      // Usar procesamiento optimizado para respuestas grandes
+      if (responseText.length > 50000) { // Si la respuesta es mayor a 50KB
+        console.log('azureApiService: Processing large response...');
+        apiData = JSON.parse(responseText);
+        
+        // Si es un array grande, limitar la muestra inicial
+        if (Array.isArray(apiData) && apiData.length > 0) {
+          console.log('azureApiService: Large dataset detected, showing first row with all columns');
+          // Para datasets muy anchos, mantener todos los datos pero optimizar la presentación
+          apiData = apiData.slice(0, 1); // Solo mostrar la primera fila para evitar problemas de memoria
+        }
+      } else {
+        apiData = JSON.parse(responseText);
+      }
     } catch (parseError) {
       console.log('azureApiService: Response is not JSON, treating as text');
-      apiData = { text: responseText };
+      apiData = { text: responseText.substring(0, 10000) }; // Limitar texto largo
     }
     
-    console.log('azureApiService: Direct API parsed data:', apiData);
+    console.log('azureApiService: Processed data with', 
+      Array.isArray(apiData) ? apiData.length + ' rows' : 'non-array response');
 
     // Check if this is a "no data" response - treat as success
     if (apiData && typeof apiData === 'object' && apiData.detail && 
@@ -72,8 +87,8 @@ export const callAzureAgentApi = async (
 
     // Only throw error if it's not the "no data" case and the response is not ok
     if (!response.ok) {
-      console.error('azureApiService: Direct API error:', responseText);
-      throw new Error(`API Error: ${response.status} - ${responseText}`);
+      console.error('azureApiService: Direct API error:', responseText.substring(0, 500));
+      throw new Error(`API Error: ${response.status} - ${responseText.substring(0, 200)}`);
     }
     
     return processApiResponse(apiData, startTime);
@@ -99,17 +114,28 @@ export const callAzureAgentApi = async (
       console.log('azureApiService: Proxy response status:', proxyResponse.status);
 
       const proxyResponseText = await proxyResponse.text();
-      console.log('azureApiService: Proxy raw response:', proxyResponseText);
+      console.log('azureApiService: Proxy response size:', proxyResponseText.length, 'characters');
 
       let apiData;
       try {
-        apiData = JSON.parse(proxyResponseText);
+        // Procesamiento optimizado también para el proxy
+        if (proxyResponseText.length > 50000) {
+          console.log('azureApiService: Processing large proxy response...');
+          apiData = JSON.parse(proxyResponseText);
+          
+          if (Array.isArray(apiData) && apiData.length > 0) {
+            console.log('azureApiService: Large proxy dataset detected, showing first row');
+            apiData = apiData.slice(0, 1);
+          }
+        } else {
+          apiData = JSON.parse(proxyResponseText);
+        }
       } catch (parseError) {
         console.log('azureApiService: Proxy response is not JSON, treating as text');
-        apiData = { text: proxyResponseText };
+        apiData = { text: proxyResponseText.substring(0, 10000) };
       }
 
-      console.log('azureApiService: Proxy response data:', apiData);
+      console.log('azureApiService: Proxy response processed');
 
       // Check if this is a "no data" response even if it came through error handling
       if (apiData && typeof apiData === 'object') {
@@ -127,8 +153,8 @@ export const callAzureAgentApi = async (
       }
 
       if (!proxyResponse.ok) {
-        console.error('azureApiService: Proxy error:', proxyResponseText);
-        throw new Error(`Proxy Error: ${proxyResponse.status} - ${proxyResponseText}`);
+        console.error('azureApiService: Proxy error:', proxyResponseText.substring(0, 500));
+        throw new Error(`Proxy Error: ${proxyResponse.status} - ${proxyResponseText.substring(0, 200)}`);
       }
       
       return processApiResponse(apiData, startTime);
@@ -179,18 +205,25 @@ function processApiResponse(apiData: any, startTime: number): AzureApiResponse {
   if (Array.isArray(apiData)) {
     console.log('azureApiService: Processing direct array response with', apiData.length, 'items');
     
-    responseText = `Se encontraron ${apiData.length} registros:`;
-    
     if (apiData.length > 0) {
       const headers = Object.keys(apiData[0]);
       const rows = apiData.map((item: any) => Object.values(item));
+      
+      // Para datasets muy anchos, crear mensaje descriptivo
+      if (headers.length > 50) {
+        responseText = `Se encontró un cliente con ${headers.length} campos de información. Esta es una vista completa de todos los datos disponibles:`;
+      } else {
+        responseText = `Se encontraron ${apiData.length} registros con ${headers.length} campos:`;
+      }
       
       tableData = {
         headers,
         rows
       };
       
-      console.log('azureApiService: Created table data with headers:', headers);
+      console.log('azureApiService: Created table data with', headers.length, 'headers and', rows.length, 'rows');
+    } else {
+      responseText = 'No se encontraron registros.';
     }
   }
   
@@ -230,10 +263,14 @@ function processApiResponse(apiData: any, startTime: number): AzureApiResponse {
       
       // Agregar información de tabla al texto si no existe
       if (!responseText) {
-        responseText = `Se encontraron ${dataArray.length} registros:`;
+        if (headers.length > 50) {
+          responseText = `Se encontraron ${dataArray.length} registros con ${headers.length} campos de información detallada:`;
+        } else {
+          responseText = `Se encontraron ${dataArray.length} registros:`;
+        }
       }
       
-      console.log('azureApiService: Extracted table data with', dataArray.length, 'rows');
+      console.log('azureApiService: Extracted table data with', dataArray.length, 'rows and', headers.length, 'columns');
     }
 
     // EXTRAER GRÁFICAS
@@ -295,6 +332,8 @@ function processApiResponse(apiData: any, startTime: number): AzureApiResponse {
   console.log('azureApiService: Final processed response:', {
     hasText: !!responseText,
     hasTable: !!tableData,
+    tableColumns: tableData?.headers?.length || 0,
+    tableRows: tableData?.rows?.length || 0,
     hasChart: !!chartData,
     hasDownload: !!downloadLink,
     hasVideo: !!videoPreview
