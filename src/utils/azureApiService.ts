@@ -39,7 +39,7 @@ export const callAzureAgentApi = async (
   try {
     // Intentar conexión directa primero (ahora que CORS está configurado)
     console.log('azureApiService: Attempting direct connection to Azure API...');
-    const response = await fetch('https://jarvis-api-agente-sql.azurewebsites.net/query', {
+    const response = await fetch('https://skcoaimultiagentdev.azurewebsites.net/base-madre', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
