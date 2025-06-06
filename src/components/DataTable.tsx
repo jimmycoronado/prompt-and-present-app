@@ -2,15 +2,6 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { Button } from './ui/button';
-import { ScrollArea, ScrollBar } from './ui/scroll-area';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from './ui/table';
 
 interface DataTableProps {
   data: {
@@ -72,48 +63,41 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
         </Button>
       </div>
 
-      {/* Scrollable table container with constrained width */}
-      <ScrollArea className="h-[400px] max-w-full">
-        <Table style={{ minWidth: `${data.headers.length * 150}px` }}>
-          <TableHeader className="sticky top-0 bg-gray-50 dark:bg-gray-700 z-10">
-            <TableRow>
+      {/* Table container with horizontal scroll */}
+      <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+        <table className="w-full text-sm">
+          <thead className="sticky top-0 bg-gray-50 dark:bg-gray-700 z-10">
+            <tr>
               {data.headers.map((header, index) => (
-                <TableHead
+                <th
                   key={index}
-                  className="px-3 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider border-r border-gray-200 dark:border-gray-600 last:border-r-0"
-                  style={{ width: '150px', minWidth: '150px' }}
+                  className="px-3 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider border-r border-gray-200 dark:border-gray-600 last:border-r-0 whitespace-nowrap min-w-[120px]"
                 >
-                  <div className="whitespace-nowrap overflow-hidden text-ellipsis">
-                    {header}
-                  </div>
-                </TableHead>
+                  {header}
+                </th>
               ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+            </tr>
+          </thead>
+          <tbody className="bg-white dark:bg-gray-800">
             {currentRows.map((row, rowIndex) => (
-              <TableRow
+              <tr
                 key={startIndex + rowIndex}
-                className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                className="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50"
               >
                 {row.map((cell, cellIndex) => (
-                  <TableCell
+                  <td
                     key={cellIndex}
-                    className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-gray-600 last:border-r-0"
-                    style={{ width: '150px', minWidth: '150px' }}
+                    className="px-3 py-2 text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-gray-600 last:border-r-0 whitespace-nowrap min-w-[120px] max-w-[200px] overflow-hidden text-ellipsis"
                     title={String(cell)}
                   >
-                    <div className="whitespace-nowrap overflow-hidden text-ellipsis">
-                      {cell}
-                    </div>
-                  </TableCell>
+                    {cell}
+                  </td>
                 ))}
-              </TableRow>
+              </tr>
             ))}
-          </TableBody>
-        </Table>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+          </tbody>
+        </table>
+      </div>
 
       {/* Pagination controls */}
       {totalPages > 1 && (
