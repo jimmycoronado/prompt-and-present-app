@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
@@ -79,13 +78,7 @@ export const PromptCarousel: React.FC<PromptCarouselProps> = ({
   const showNavigation = templates.length > templatesPerView;
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 py-6">
-      <div className="text-center mb-4">
-        <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300">
-          Plantillas Sugeridas
-        </h3>
-      </div>
-
+    <div className="w-full max-w-5xl mx-auto px-4 py-4">
       <div className="relative">
         {/* Templates Grid - responsive */}
         <div className={`grid gap-4 ${
@@ -96,15 +89,15 @@ export const PromptCarousel: React.FC<PromptCarouselProps> = ({
           {visibleTemplates.map((template, index) => (
             <Card 
               key={`${template.id}-${index}`}
-              className="cursor-pointer transition-all duration-200 hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 group h-24"
+              className="cursor-pointer transition-all duration-200 hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 group h-20"
               onClick={() => handleTemplateClick(template)}
             >
-              <CardContent className="p-4 h-full flex flex-col justify-between">
+              <CardContent className="p-3 h-full flex flex-col justify-between">
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2 line-clamp-1">
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-1.5 line-clamp-1">
                     {template.name}
                   </h4>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
+                  <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 leading-tight">
                     {template.content.length > 60 
                       ? `${template.content.substring(0, 60)}...`
                       : template.content
