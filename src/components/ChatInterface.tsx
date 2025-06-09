@@ -1,10 +1,10 @@
-
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import { File, Download } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
 import { ConversationHistory } from "./ConversationHistory";
 import { PromptTemplates } from "./PromptTemplates";
+import { PromptCarousel } from "./PromptCarousel";
 import { callAzureAgentApi } from "../utils/azureApiService";
 import { ChatMessage as ChatMessageType } from "../types/chat";
 import { PromptTemplate } from "../types/templates";
@@ -23,6 +23,50 @@ interface ChatInterfaceProps {
 export interface ChatInterfaceRef {
   handleBannerMessage: (message: string) => void;
 }
+
+// Default templates for the carousel
+const defaultCarouselTemplates: PromptTemplate[] = [
+  {
+    id: 'carousel-1',
+    name: 'Análisis de Datos',
+    description: 'Analiza y explica conjuntos de datos con insights detallados',
+    content: 'Explica el conjunto de datos que te voy a proporcionar. Incluye qué tipo de datos contiene, las columnas principales, posibles insights iniciales y sugerencias de análisis.',
+    category: 'data',
+    isDefault: true,
+    createdAt: new Date(),
+    usageCount: 0
+  },
+  {
+    id: 'carousel-2',
+    name: 'Comparar Opciones',
+    description: 'Compara diferentes alternativas de manera estructurada',
+    content: 'Ayúdame a comparar las siguientes opciones considerando ventajas, desventajas y proporciona una recomendación final basada en el análisis.',
+    category: 'analysis',
+    isDefault: true,
+    createdAt: new Date(),
+    usageCount: 0
+  },
+  {
+    id: 'carousel-3',
+    name: 'Resumen Ejecutivo',
+    description: 'Crea resúmenes ejecutivos profesionales',
+    content: 'Crea un resumen ejecutivo que incluya los puntos clave (3-5), recomendaciones principales, próximos pasos sugeridos y una conclusión clara.',
+    category: 'writing',
+    isDefault: true,
+    createdAt: new Date(),
+    usageCount: 0
+  },
+  {
+    id: 'carousel-4',
+    name: 'Plan Paso a Paso',
+    description: 'Desarrolla planes detallados y estructurados',
+    content: 'Crea un plan paso a paso detallado que incluya pasos específicos y ordenados, tiempo estimado para cada paso, recursos necesarios y posibles obstáculos con sus soluciones.',
+    category: 'business',
+    isDefault: true,
+    createdAt: new Date(),
+    usageCount: 0
+  }
+];
 
 export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({ 
   onSelectMessage, 
@@ -256,6 +300,11 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
     setShowTemplates(false);
   };
 
+  const handleCarouselTemplateSelect = (content: string) => {
+    console.log('ChatInterface: Carousel template selected:', content);
+    setTemplateContent(content);
+  };
+
   const handleFilesSelected = (files: File[]) => {
     console.log('ChatInterface: Files selected:', files.length);
     setUploadedFiles(prev => [...prev, ...files]);
@@ -375,10 +424,17 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               ¡Hola! ¿En qué puedo ayudarte hoy?
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-4">
+            <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-8">
               Puedes hacerme preguntas, subir archivos para analizar, o pedirme que genere gráficas y tablas de datos.
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-500 max-w-md mx-auto">
+            
+            {/* Prompt Carousel */}
+            <PromptCarousel
+              templates={defaultCarouselTemplates}
+              onSelectTemplate={handleCarouselTemplateSelect}
+            />
+            
+            <p className="text-sm text-gray-500 dark:text-gray-500 max-w-md mx-auto mt-8">
               Arrastra archivos a cualquier parte de la pantalla o usa Ctrl+V para pegar
             </p>
           </div>
