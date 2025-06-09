@@ -26,9 +26,9 @@ export interface ChatInterfaceRef {
 const defaultCarouselTemplates: PromptTemplate[] = [
   {
     id: 'carousel-1',
-    name: 'Análisis de Datos',
+    name: 'Incremento de Salarios',
     description: 'Analiza y explica conjuntos de datos con insights detallados',
-    content: 'Explica el conjunto de datos que te voy a proporcionar. Incluye qué tipo de datos contiene, las columnas principales, posibles insights iniciales y sugerencias de análisis.',
+    content: 'Dame los nombres, apellidos, teléfonos y correos de mis clientes con incremento en su salario de por lo menos el 15% en el periodo actual VS el periodo 12 meses atrás.',
     category: 'data',
     isDefault: true,
     createdAt: new Date(),
@@ -36,9 +36,9 @@ const defaultCarouselTemplates: PromptTemplate[] = [
   },
   {
     id: 'carousel-2',
-    name: 'Comparar Opciones',
+    name: 'Comisiones por Cliente',
     description: 'Compara diferentes alternativas de manera estructurada',
-    content: 'Ayúdame a comparar las siguientes opciones considerando ventajas, desventajas y proporciona una recomendación final basada en el análisis.',
+    content: 'Dame los nombres, apellidos, teléfonos y correos del top 30 de mis clientes que me generaron más comisiones en los últimos 12 meses.',
     category: 'analysis',
     isDefault: true,
     createdAt: new Date(),
