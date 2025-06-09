@@ -28,7 +28,7 @@ const defaultCarouselTemplates: PromptTemplate[] = [
     id: 'carousel-1',
     name: 'Incremento de Salarios',
     description: 'Analiza y explica conjuntos de datos con insights detallados',
-    content: 'Dame los nombres, apellidos, teléfonos y correos de mis clientes con incremento en su salario de por lo menos el 15% en el periodo actual VS el periodo 12 meses atrás.',
+    content: 'Selecciona mis clientes con incremento en su salario de por lo menos el 30% en el periodo actual VS el periodo 12 meses atrás. El salario actual debe ser mayor a 7 millones. Incluye los campos nombres, apellidos, teléfonos, correos, salario actual y el del periodo comparado.',
     category: 'data',
     isDefault: true,
     createdAt: new Date(),
