@@ -24,7 +24,7 @@ export interface ChatInterfaceRef {
   handleBannerMessage: (message: string) => void;
 }
 
-// Default templates for the carousel
+// Default templates for the carousel if no user templates exist
 const defaultCarouselTemplates: PromptTemplate[] = [
   {
     id: 'carousel-1',
@@ -101,24 +101,40 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
   useEffect(() => {
     const loadUserTemplates = () => {
       try {
+        console.log('ChatInterface: Loading user templates from localStorage');
         const savedTemplates = localStorage.getItem('promptTemplates');
+        console.log('ChatInterface: Raw saved templates:', savedTemplates);
+        
         if (savedTemplates) {
           const templates: PromptTemplate[] = JSON.parse(savedTemplates);
+          console.log('ChatInterface: Parsed templates:', templates.length, templates);
           setUserTemplates(templates);
+        } else {
+          console.log('ChatInterface: No saved templates found, will show default templates');
+          setUserTemplates([]);
         }
       } catch (error) {
-        console.error('Error loading user templates:', error);
+        console.error('ChatInterface: Error loading user templates:', error);
+        setUserTemplates([]);
       }
     };
 
     loadUserTemplates();
     
     // Listen for template changes
-    const handleStorageChange = () => loadUserTemplates();
+    const handleStorageChange = () => {
+      console.log('ChatInterface: Storage change detected, reloading templates');
+      loadUserTemplates();
+    };
     window.addEventListener('storage', handleStorageChange);
     
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
+
+  // Log when userTemplates changes
+  useEffect(() => {
+    console.log('ChatInterface: userTemplates state updated:', userTemplates.length, userTemplates);
+  }, [userTemplates]);
 
   // Log messages array changes
   useEffect(() => {
@@ -399,6 +415,10 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
     handleSendMessage(content);
   };
 
+  // Get templates to show in carousel - prefer user templates, fallback to defaults
+  const templatesToShow = userTemplates.length > 0 ? userTemplates : defaultCarouselTemplates;
+  console.log('ChatInterface: Templates to show in carousel:', templatesToShow.length, templatesToShow.map(t => t.name));
+
   // Expose the function to parent components
   useImperativeHandle(ref, () => ({
     handleBannerMessage
@@ -452,10 +472,10 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
               Puedes hacerme preguntas, subir archivos para analizar, o pedirme que genere gráficas y tablas de datos.
             </p>
             
-            {/* User Templates Carousel - only show if user has templates */}
-            {userTemplates.length > 0 && (
+            {/* Templates Carousel - show user templates or default ones */}
+            {templatesToShow.length > 0 && (
               <PromptCarousel
-                templates={userTemplates}
+                templates={templatesToShow}
                 onSelectTemplate={handleCarouselTemplateSelect}
               />
             )}
