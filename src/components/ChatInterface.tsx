@@ -465,12 +465,9 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
                 className="w-full h-full object-contain"
               />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-8">
               ¡Hola! ¿En qué puedo ayudarte hoy?
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-8">
-              Puedes hacerme preguntas, subir archivos para analizar, o pedirme que genere gráficas y tablas de datos.
-            </p>
             
             {/* Templates Carousel - show user templates or default ones */}
             {templatesToShow.length > 0 && (
@@ -479,10 +476,6 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
                 onSelectTemplate={handleCarouselTemplateSelect}
               />
             )}
-            
-            <p className="text-sm text-gray-500 dark:text-gray-500 max-w-md mx-auto mt-8">
-              Arrastra archivos a cualquier parte de la pantalla o usa Ctrl+V para pegar
-            </p>
           </div>
         )}
 
