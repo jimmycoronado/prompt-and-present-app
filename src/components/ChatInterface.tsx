@@ -78,6 +78,7 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
   const [showTemplates, setShowTemplates] = useState(false);
   const [templateContent, setTemplateContent] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
+  const [userTemplates, setUserTemplates] = useState<PromptTemplate[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const mainContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -95,6 +96,29 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
   const { aiSettings } = useSettings();
 
   const messages = currentConversation?.messages || [];
+
+  // Load user templates from localStorage
+  useEffect(() => {
+    const loadUserTemplates = () => {
+      try {
+        const savedTemplates = localStorage.getItem('promptTemplates');
+        if (savedTemplates) {
+          const templates: PromptTemplate[] = JSON.parse(savedTemplates);
+          setUserTemplates(templates);
+        }
+      } catch (error) {
+        console.error('Error loading user templates:', error);
+      }
+    };
+
+    loadUserTemplates();
+    
+    // Listen for template changes
+    const handleStorageChange = () => loadUserTemplates();
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   // Log messages array changes
   useEffect(() => {
@@ -428,11 +452,13 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
               Puedes hacerme preguntas, subir archivos para analizar, o pedirme que genere gráficas y tablas de datos.
             </p>
             
-            {/* Prompt Carousel */}
-            <PromptCarousel
-              templates={defaultCarouselTemplates}
-              onSelectTemplate={handleCarouselTemplateSelect}
-            />
+            {/* User Templates Carousel - only show if user has templates */}
+            {userTemplates.length > 0 && (
+              <PromptCarousel
+                templates={userTemplates}
+                onSelectTemplate={handleCarouselTemplateSelect}
+              />
+            )}
             
             <p className="text-sm text-gray-500 dark:text-gray-500 max-w-md mx-auto mt-8">
               Arrastra archivos a cualquier parte de la pantalla o usa Ctrl+V para pegar
