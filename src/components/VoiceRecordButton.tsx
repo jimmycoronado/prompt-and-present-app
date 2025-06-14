@@ -1,5 +1,4 @@
 
-
 import { Mic, MicOff, Loader2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { useVoiceRecording } from "../hooks/useVoiceRecording";
@@ -81,7 +80,7 @@ export const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({
         className={`h-8 w-8 transition-all rounded-full touch-manipulation active:scale-95 focus:outline-none focus:ring-0 ${
           isRecording 
             ? 'animate-pulse border border-red-300 dark:border-red-600 bg-red-500 text-white hover:bg-red-600' 
-            : 'text-gray-500 bg-white dark:bg-gray-800 dark:text-gray-400 border border-gray-300 dark:border-gray-600 hover:text-orange-500 hover:bg-gray-50 dark:hover:text-orange-500 dark:hover:bg-gray-700'
+            : 'text-gray-500 bg-white dark:bg-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 hover:text-orange-500 hover:bg-gray-50 dark:hover:text-orange-500 dark:hover:bg-gray-700'
         }`}
         style={{
           // Prevent hover states from sticking on mobile
@@ -98,7 +97,7 @@ export const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({
     );
   }
 
-  // Desktop styling (unchanged)
+  // Desktop styling - matching other buttons style
   return (
     <Button
       type="button"
@@ -108,8 +107,8 @@ export const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({
       disabled={disabled || isProcessing}
       className={`h-11 w-11 transition-all hover:scale-105 ${
         isRecording 
-          ? 'animate-pulse' 
-          : 'text-gray-500 dark:bg-gray-800 dark:text-gray-400 hover:text-orange-500 hover:bg-gray-100 dark:hover:text-orange-500 dark:hover:bg-gray-700'
+          ? 'animate-pulse bg-red-500 text-white hover:bg-red-600' 
+          : 'text-gray-500 bg-white dark:bg-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 hover:text-orange-500 hover:bg-gray-50 dark:hover:text-orange-500 dark:hover:bg-gray-700'
       }`}
       aria-label={getAriaLabel()}
       title={getAriaLabel()}
@@ -118,4 +117,3 @@ export const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({
     </Button>
   );
 };
-
