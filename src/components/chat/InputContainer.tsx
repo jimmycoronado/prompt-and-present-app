@@ -10,6 +10,7 @@ interface InputContainerProps {
   onFilesSelected: (files: File[]) => void;
   uploadedFiles: File[];
   setUploadedFiles: (files: File[] | ((prev: File[]) => File[])) => void;
+  onVoiceModeClick?: () => void;
 }
 
 export const InputContainer: React.FC<InputContainerProps> = ({
@@ -19,7 +20,8 @@ export const InputContainer: React.FC<InputContainerProps> = ({
   onTemplateContentChange,
   onFilesSelected,
   uploadedFiles,
-  setUploadedFiles
+  setUploadedFiles,
+  onVoiceModeClick
 }) => {
   const isMobile = useIsMobile();
 
@@ -58,6 +60,7 @@ export const InputContainer: React.FC<InputContainerProps> = ({
             onValueChange={onTemplateContentChange}
             onFilesSelected={onFilesSelected}
             uploadedFiles={uploadedFiles}
+            onVoiceModeClick={onVoiceModeClick}
           />
         </div>
       </div>

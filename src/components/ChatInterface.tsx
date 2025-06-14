@@ -1,7 +1,7 @@
-
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import { ConversationHistory } from "./ConversationHistory";
 import { PromptTemplates } from "./PromptTemplates";
+import { VoiceMode } from "./VoiceMode";
 import { callAzureAgentApi } from "../utils/azureApiService";
 import { ChatMessage as ChatMessageType } from "../types/chat";
 import { PromptTemplate } from "../types/templates";
@@ -74,6 +74,7 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
+  const [showVoiceMode, setShowVoiceMode] = useState(false);
   const [templateContent, setTemplateContent] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
   const [userTemplates, setUserTemplates] = useState<PromptTemplate[]>([]);
@@ -322,6 +323,37 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
     }
   };
 
+  const handleVoiceMessage = (message: ChatMessageType) => {
+    console.log('ChatInterface: Voice message received:', message);
+    
+    // Create new conversation if none exists
+    if (!currentConversation) {
+      createNewConversation();
+    }
+    
+    // Add message to conversation
+    addMessageToCurrentConversation(message);
+  };
+
+  const handleVoiceModeClick = () => {
+    console.log('ChatInterface: Voice mode clicked');
+    setShowVoiceMode(true);
+  };
+
+  const handleVoiceModeClose = () => {
+    console.log('ChatInterface: Voice mode closed');
+    setShowVoiceMode(false);
+  };
+
+  const handleVoiceError = (error: string) => {
+    console.error('ChatInterface: Voice error:', error);
+    toast({
+      title: "Error en modo de voz",
+      description: error,
+      variant: "destructive"
+    });
+  };
+
   const handleSelectTemplate = (template: PromptTemplate) => {
     console.log('ChatInterface: Template selected:', template.content);
     setTemplateContent(template.content);
@@ -408,7 +440,17 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
         onFilesSelected={handleFilesSelected}
         uploadedFiles={uploadedFiles}
         setUploadedFiles={setUploadedFiles}
+        onVoiceModeClick={handleVoiceModeClick}
       />
+
+      {/* Voice Mode Overlay */}
+      {showVoiceMode && (
+        <VoiceMode
+          onClose={handleVoiceModeClose}
+          onMessage={handleVoiceMessage}
+          onError={handleVoiceError}
+        />
+      )}
     </div>
   );
 });

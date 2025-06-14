@@ -1,6 +1,5 @@
-
 import { useState, useRef, useEffect } from "react";
-import { Send, File, Paperclip } from "lucide-react";
+import { Send, File, Paperclip, Mic } from "lucide-react";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { VoiceRecordButton } from "./VoiceRecordButton";
@@ -14,6 +13,7 @@ interface ChatInputProps {
   onValueChange?: (value: string) => void;
   onFilesSelected?: (files: File[]) => void;
   uploadedFiles?: File[];
+  onVoiceModeClick?: () => void;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({ 
@@ -22,7 +22,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   initialValue = "",
   onValueChange,
   onFilesSelected,
-  uploadedFiles = []
+  uploadedFiles = [],
+  onVoiceModeClick
 }) => {
   const [message, setMessage] = useState(initialValue);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -33,6 +34,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const hasFiles = uploadedFiles.length > 0;
+  const hasText = message.trim().length > 0;
+  const showSendButton = hasText || hasFiles;
 
   useEffect(() => {
     // Only update if initialValue actually changed and is different from current message
@@ -271,16 +274,39 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             disabled={disabled}
           />
           
-          <Button
-            type="submit"
-            disabled={(!message.trim() && !hasFiles) || disabled}
-            size="icon"
-            className="bg-skandia-green hover:bg-skandia-green/90 text-white rounded-lg h-11 w-11 transition-all hover:scale-105"
-            aria-label="Enviar mensaje"
-            id="send-button"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
+          {/* Botón de enviar o modo de voz */}
+          {showSendButton ? (
+            <Button
+              type="submit"
+              disabled={disabled}
+              size="icon"
+              className="bg-skandia-green hover:bg-skandia-green/90 text-white rounded-lg h-11 w-11 transition-all hover:scale-105"
+              aria-label="Enviar mensaje"
+              id="send-button"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          ) : (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    onClick={onVoiceModeClick}
+                    disabled={disabled}
+                    size="icon"
+                    className="bg-skandia-green hover:bg-skandia-green/90 text-white rounded-lg h-11 w-11 transition-all hover:scale-105"
+                    aria-label="Modo de voz"
+                  >
+                    <Mic className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Iniciar modo de voz</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
         </div>
       )}
 
@@ -338,23 +364,37 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               <Paperclip className="h-5 w-5" />
             </Button>
 
-            {/* Voice Record and Send Buttons - Right */}
+            {/* Voice Record and Send/Voice Mode Buttons - Right */}
             <div className="flex items-center space-x-2 flex-shrink-0">
               <VoiceRecordButton
                 onTranscription={handleVoiceTranscription}
                 disabled={disabled}
               />
               
-              <Button
-                type="submit"
-                disabled={(!message.trim() && !hasFiles) || disabled}
-                size="icon"
-                className="bg-skandia-green hover:bg-skandia-green/90 text-white rounded-lg h-11 w-11 transition-all hover:scale-105"
-                aria-label="Enviar mensaje"
-                id="send-button"
-              >
-                <Send className="h-4 w-4" />
-              </Button>
+              {/* Botón de enviar o modo de voz */}
+              {showSendButton ? (
+                <Button
+                  type="submit"
+                  disabled={disabled}
+                  size="icon"
+                  className="bg-skandia-green hover:bg-skandia-green/90 text-white rounded-lg h-11 w-11 transition-all hover:scale-105"
+                  aria-label="Enviar mensaje"
+                  id="send-button"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  onClick={onVoiceModeClick}
+                  disabled={disabled}
+                  size="icon"
+                  className="bg-skandia-green hover:bg-skandia-green/90 text-white rounded-lg h-11 w-11 transition-all hover:scale-105"
+                  aria-label="Modo de voz"
+                >
+                  <Mic className="h-4 w-4" />
+                </Button>
+              )}
             </div>
           </div>
         </div>
