@@ -74,6 +74,36 @@ export type Database = {
           },
         ]
       }
+      notification_types: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          has_amount_threshold: boolean | null
+          id: number
+          is_active: boolean | null
+          name: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          has_amount_threshold?: boolean | null
+          id?: number
+          is_active?: boolean | null
+          name: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          has_amount_threshold?: boolean | null
+          id?: number
+          is_active?: boolean | null
+          name?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -139,6 +169,44 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      user_notification_settings: {
+        Row: {
+          created_at: string
+          id: string
+          is_enabled: boolean | null
+          minimum_amount: number | null
+          notification_type_id: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean | null
+          minimum_amount?: number | null
+          notification_type_id?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean | null
+          minimum_amount?: number | null
+          notification_type_id?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_notification_settings_notification_type_id_fkey"
+            columns: ["notification_type_id"]
+            isOneToOne: false
+            referencedRelation: "notification_types"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
