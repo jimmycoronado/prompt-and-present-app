@@ -1,9 +1,8 @@
-
-
 import { Mic, MicOff, Loader2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { useVoiceRecording } from "../hooks/useVoiceRecording";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "../hooks/use-mobile";
 
 interface VoiceRecordButtonProps {
   onTranscription: (text: string) => void;
@@ -15,6 +14,7 @@ export const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({
   disabled = false
 }) => {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const { isRecording, isProcessing, toggleRecording } = useVoiceRecording({
     onTranscription,
@@ -56,6 +56,29 @@ export const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({
     return "Iniciar grabación de voz";
   };
 
+  // Mobile styling with circular design
+  if (isMobile) {
+    return (
+      <Button
+        type="button"
+        variant={getButtonVariant()}
+        size="icon"
+        onClick={handleClick}
+        disabled={disabled || isProcessing}
+        className={`h-8 w-8 transition-all hover:scale-105 rounded-full ${
+          isRecording 
+            ? 'animate-pulse border border-red-300 dark:border-red-600' 
+            : 'text-gray-500 hover:text-orange-500 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600'
+        }`}
+        aria-label={getAriaLabel()}
+        title={getAriaLabel()}
+      >
+        {getButtonIcon()}
+      </Button>
+    );
+  }
+
+  // Desktop styling (unchanged)
   return (
     <Button
       type="button"
@@ -75,4 +98,3 @@ export const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({
     </Button>
   );
 };
-

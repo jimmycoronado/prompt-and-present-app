@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Paperclip, Radio } from 'lucide-react';
 import { Button } from './ui/button';
@@ -147,13 +148,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
           {/* Bottom controls bar - same background as text area, no border */}
           <div className="flex items-center justify-between px-4 pb-3 pt-1">
-            {/* Left side - Attach button */}
+            {/* Left side - Attach button with circle */}
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="icon"
               onClick={() => fileInputRef.current?.click()}
-              className="h-8 w-8 text-gray-500 hover:text-orange-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="h-8 w-8 text-gray-500 hover:text-orange-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full border border-gray-300 dark:border-gray-600"
               aria-label="Adjuntar archivo"
             >
               <Paperclip className="h-4 w-4" />
