@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Paperclip, Radio } from 'lucide-react';
 import { Button } from './ui/button';
@@ -162,12 +161,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
             {/* Right side - Voice/Send buttons */}
             <div className="flex items-center space-x-2">
-              {!hasMessage && (
-                <VoiceRecordButton 
-                  onTranscription={handleTranscription}
-                  disabled={disabled}
-                />
-              )}
+              {/* Always show voice record button in mobile */}
+              <VoiceRecordButton 
+                onTranscription={handleTranscription}
+                disabled={disabled}
+              />
               
               {hasMessage ? (
                 <Button
@@ -183,10 +181,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 onVoiceModeClick && (
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="outline"
                     size="icon"
                     onClick={onVoiceModeClick}
-                    className="h-8 w-8 transition-all hover:scale-105 text-gray-500 hover:text-orange-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+                    className="h-8 w-8 transition-all hover:scale-105 text-gray-500 hover:text-orange-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full border border-gray-300 dark:border-gray-600"
                     aria-label="Activar modo de voz"
                     title="Modo de voz conversacional"
                   >
