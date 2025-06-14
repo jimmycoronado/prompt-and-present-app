@@ -139,35 +139,37 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
       </div>
 
       {/* Estilos CSS para las animaciones */}
-      <style jsx>{`
-        @keyframes breathe {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.05); }
-        }
-        
-        @keyframes scale-speaking {
-          0% { transform: scale(1); }
-          100% { transform: scale(1.1); }
-        }
-        
-        @keyframes scale-recording {
-          0% { transform: scale(1); }
-          100% { transform: scale(1.08); }
-        }
-        
-        @keyframes glow-recording {
-          0% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.3); }
-          100% { box-shadow: 0 0 30px rgba(34, 197, 94, 0.6); }
-        }
-        
-        .animation-delay-300 {
-          animation-delay: 0.3s;
-        }
-        
-        .animation-delay-600 {
-          animation-delay: 0.6s;
-        }
-      `}</style>
+      <style>
+        {`
+          @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+          }
+          
+          @keyframes scale-speaking {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+          }
+          
+          @keyframes scale-recording {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.08); }
+          }
+          
+          @keyframes glow-recording {
+            0% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.3); }
+            100% { box-shadow: 0 0 30px rgba(34, 197, 94, 0.6); }
+          }
+          
+          .animation-delay-300 {
+            animation-delay: 0.3s;
+          }
+          
+          .animation-delay-600 {
+            animation-delay: 0.6s;
+          }
+        `}
+      </style>
     </>
   );
 };

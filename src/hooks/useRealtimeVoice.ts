@@ -1,6 +1,5 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 
 interface AudioMessage {
   id: string;
@@ -192,9 +191,8 @@ export const useRealtimeVoice = ({ onMessage, onError }: UseRealtimeVoiceProps) 
     try {
       console.log('Connecting to realtime voice...');
       
-      // Get WebSocket URL from Supabase
-      const projectRef = supabase.supabaseUrl.split('//')[1].split('.')[0];
-      const wsUrl = `wss://${projectRef}.functions.supabase.co/realtime-voice`;
+      // Use the direct Supabase project URL
+      const wsUrl = `wss://nliwgjfaqthjdpfmmmgo.functions.supabase.co/realtime-voice`;
       
       wsRef.current = new WebSocket(wsUrl);
       
