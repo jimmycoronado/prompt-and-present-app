@@ -30,9 +30,21 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Function to auto-resize textarea
+  const autoResizeTextarea = () => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+    }
+  };
+
   useEffect(() => {
     if (initialValue !== message) {
       setMessage(initialValue);
+      // Auto-resize when content is set programmatically (from templates)
+      setTimeout(() => {
+        autoResizeTextarea();
+      }, 0);
     }
   }, [initialValue]);
 
@@ -56,10 +68,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     onValueChange?.(value);
     
     // Auto-resize textarea
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
-    }
+    autoResizeTextarea();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -87,8 +96,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     
     if (textareaRef.current) {
       textareaRef.current.focus();
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+      autoResizeTextarea();
     }
   };
 
