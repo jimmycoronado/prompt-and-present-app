@@ -26,7 +26,6 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
   const [showCaptions, setShowCaptions] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
-  const [showCameraControls, setShowCameraControls] = useState(false);
   const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
   
   // Estados simulados para la interfaz (hasta que se configure OpenAI Realtime)
@@ -202,7 +201,6 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
     
     try {
       await startCamera(newFacingMode);
-      // Removed the toast notification for camera switching
     } catch (error) {
       // If switching fails, try to restart with original facing mode
       try {
@@ -376,7 +374,7 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
           {/* Vista de la cámara del usuario - Mucho más grande como ChatGPT */}
           {isCameraEnabled && (
             <div className="absolute inset-4 md:inset-8 rounded-2xl overflow-hidden border-2 border-white/30 shadow-2xl bg-black max-w-4xl max-h-[70vh] mx-auto">
-              <div className="relative w-full h-full" onClick={handleVideoClick}>
+              <div className="relative w-full h-full">
                 {userStream ? (
                   <>
                     <video
@@ -386,27 +384,18 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
                       muted
                       className="w-full h-full object-cover scale-x-[-1]"
                     />
-                    {/* Controles de cámara superpuestos */}
-                    {showCameraControls && hasMultipleCameras && (
-                      <div className="absolute top-4 right-4 z-10">
+                    {/* Botón de cambiar cámara - siempre visible en esquina inferior derecha */}
+                    {hasMultipleCameras && (
+                      <div className="absolute bottom-4 right-4 z-10">
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleCameraSwitch();
-                          }}
+                          onClick={handleCameraSwitch}
                           className="w-12 h-12 rounded-full bg-black/50 text-white hover:bg-black/70 backdrop-blur-sm"
                           aria-label="Cambiar cámara"
                         >
                           <RotateCcw className="h-5 w-5" />
                         </Button>
-                      </div>
-                    )}
-                    {/* Indicador de toque para cambiar cámara */}
-                    {hasMultipleCameras && !showCameraControls && (
-                      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white/70 text-sm bg-black/30 px-3 py-1 rounded-full backdrop-blur-sm">
-                        Toca para cambiar cámara
                       </div>
                     )}
                   </>
