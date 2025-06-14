@@ -117,7 +117,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
             variant="ghost"
             size="icon"
             onClick={onToggle}
-            className="h-10 w-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 [&_svg]:text-gray-600 [&_svg]:hover:text-orange-500"
+            className="h-10 w-10 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 dark:text-white hover:text-orange-500 dark:hover:text-orange-500"
             aria-label="Abrir panel lateral"
             title="Abrir barra lateral"
           >
@@ -131,7 +131,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
             variant="ghost"
             size="icon"
             onClick={handleNewChat}
-            className="h-10 w-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 [&_svg]:text-gray-600 [&_svg]:hover:text-orange-500"
+            className="h-10 w-10 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 dark:text-white hover:text-orange-500 dark:hover:text-orange-500"
             aria-label="Nuevo chat"
             title="Nuevo chat"
           >
