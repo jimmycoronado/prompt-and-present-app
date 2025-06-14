@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
-import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { Carousel, CarouselContent, CarouselItem } from './ui/carousel';
 import { PromptTemplate } from '../types/templates';
+import { useIsMobile } from '../hooks/use-mobile';
 
 interface PromptCarouselProps {
   templates: PromptTemplate[];
@@ -15,9 +14,8 @@ export const PromptCarousel: React.FC<PromptCarouselProps> = ({
   templates, 
   onSelectTemplate 
 }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [templatesPerView, setTemplatesPerView] = useState(3);
+  const isMobile = useIsMobile();
 
   // Responsive templates per view
   useEffect(() => {
@@ -36,49 +34,57 @@ export const PromptCarousel: React.FC<PromptCarouselProps> = ({
     return () => window.removeEventListener('resize', updateTemplatesPerView);
   }, []);
 
-  // Auto-play functionality
-  useEffect(() => {
-    if (!isAutoPlaying || templates.length === 0) return;
-
-    const maxIndex = Math.max(0, templates.length - templatesPerView);
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => 
-        prevIndex >= maxIndex ? 0 : prevIndex + 1
-      );
-    }, 5000); // Change slide every 5 seconds
-
-    return () => clearInterval(interval);
-  }, [isAutoPlaying, templates.length, templatesPerView]);
-
-  const goToPrevious = () => {
-    setIsAutoPlaying(false);
-    const maxIndex = Math.max(0, templates.length - templatesPerView);
-    setCurrentIndex(currentIndex === 0 ? maxIndex : currentIndex - 1);
-  };
-
-  const goToNext = () => {
-    setIsAutoPlaying(false);
-    const maxIndex = Math.max(0, templates.length - templatesPerView);
-    setCurrentIndex(currentIndex >= maxIndex ? 0 : currentIndex + 1);
-  };
-
   const handleTemplateClick = (template: PromptTemplate) => {
     onSelectTemplate(template.content);
   };
 
   if (templates.length === 0) return null;
 
-  // Get visible templates based on current index and templates per view
-  const visibleTemplates = templates.slice(currentIndex, currentIndex + templatesPerView);
-  if (visibleTemplates.length < templatesPerView && templates.length > templatesPerView) {
-    // Fill remaining slots from the beginning
-    const remaining = templatesPerView - visibleTemplates.length;
-    visibleTemplates.push(...templates.slice(0, remaining));
+  // ChatGPT-style design
+  if (isMobile) {
+    return (
+      <TooltipProvider delayDuration={300}>
+        <div className="w-full px-4 py-4">
+          <Carousel
+            opts={{
+              align: "start",
+              loop: false,
+            }}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-2">
+              {templates.map((template, index) => (
+                <CarouselItem key={template.id} className="pl-2 basis-[280px]">
+                  <Card 
+                    className="cursor-pointer transition-all duration-200 hover:shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 group h-auto"
+                    onClick={() => handleTemplateClick(template)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="space-y-2">
+                        <div className="flex items-start justify-between">
+                          <h4 className="text-sm font-medium text-gray-900 dark:text-white leading-tight">
+                            {template.name}
+                          </h4>
+                        </div>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-3">
+                          {template.content.length > 120 
+                            ? `${template.content.substring(0, 120)}...`
+                            : template.content
+                          }
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+        </div>
+      </TooltipProvider>
+    );
   }
 
-  const maxIndex = Math.max(0, templates.length - templatesPerView);
-  const showNavigation = templates.length > templatesPerView;
-
+  // Desktop version - keep the existing design
   return (
     <TooltipProvider delayDuration={300}>
       <div className="w-full max-w-5xl mx-auto px-4 py-4">
@@ -89,8 +95,8 @@ export const PromptCarousel: React.FC<PromptCarouselProps> = ({
             templatesPerView === 2 ? 'grid-cols-2' :
             'grid-cols-3'
           }`}>
-            {visibleTemplates.map((template, index) => (
-              <Tooltip key={`${template.id}-${index}`}>
+            {templates.slice(0, templatesPerView).map((template, index) => (
+              <Tooltip key={template.id}>
                 <TooltipTrigger asChild>
                   <Card 
                     className="cursor-pointer transition-all duration-200 hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 group h-20"
@@ -123,64 +129,7 @@ export const PromptCarousel: React.FC<PromptCarouselProps> = ({
               </Tooltip>
             ))}
           </div>
-
-          {/* Navigation buttons */}
-          {showNavigation && (
-            <>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-4 h-8 w-8 rounded-full bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 opacity-70 hover:opacity-100"
-                onClick={goToPrevious}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-4 h-8 w-8 rounded-full bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 opacity-70 hover:opacity-100"
-                onClick={goToNext}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </>
-          )}
-
-          {/* Dots indicator */}
-          {showNavigation && (
-            <div className="flex justify-center space-x-1 mt-4">
-              {Array.from({ length: Math.ceil(templates.length / templatesPerView) }, (_, index) => (
-                <button
-                  key={index}
-                  className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
-                    Math.floor(currentIndex / templatesPerView) === index 
-                      ? 'bg-gray-400 dark:bg-gray-500' 
-                      : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'
-                  }`}
-                  onClick={() => {
-                    setCurrentIndex(index * templatesPerView);
-                    setIsAutoPlaying(false);
-                  }}
-                />
-              ))}
-            </div>
-          )}
         </div>
-
-        {/* Resume auto-play button */}
-        {!isAutoPlaying && showNavigation && (
-          <div className="text-center mt-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsAutoPlaying(true)}
-              className="text-xs text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-400 h-6"
-            >
-              Reanudar reproducción automática
-            </Button>
-          </div>
-        )}
       </div>
     </TooltipProvider>
   );
