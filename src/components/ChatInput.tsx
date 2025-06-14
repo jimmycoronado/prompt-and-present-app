@@ -30,11 +30,28 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Function to auto-resize textarea
+  // Function to auto-resize textarea with mobile compatibility
   const autoResizeTextarea = () => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+      const textarea = textareaRef.current;
+      
+      // Reset height first
+      textarea.style.height = 'auto';
+      
+      // Force a reflow for mobile browsers
+      textarea.offsetHeight;
+      
+      // Calculate new height
+      const newHeight = Math.min(textarea.scrollHeight, 120);
+      textarea.style.height = `${newHeight}px`;
+      
+      // Additional mobile-specific handling
+      if (window.innerWidth < 768) {
+        // Force another reflow on mobile
+        requestAnimationFrame(() => {
+          textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
+        });
+      }
     }
   };
 
@@ -42,8 +59,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     if (initialValue !== message) {
       setMessage(initialValue);
       // Auto-resize when content is set programmatically (from templates)
+      // Use multiple frames for mobile compatibility
       setTimeout(() => {
         autoResizeTextarea();
+        // Additional timeout for mobile browsers
+        setTimeout(() => {
+          autoResizeTextarea();
+        }, 50);
       }, 0);
     }
   }, [initialValue]);
