@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PanelLeft, Search, MessageSquare, FileText, Edit3, Plus, X, User } from 'lucide-react';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
@@ -27,6 +27,65 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   const [activeView, setActiveView] = useState<'main' | 'chats' | 'templates' | 'personalities'>('main');
   const { createNewConversation } = useConversation();
   const isMobile = useIsMobile();
+
+  // Touch gesture states
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
+  const [touchMove, setTouchMove] = useState<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      setTouchStart({ x: touch.clientX, y: touch.clientY });
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!touchStart) return;
+      
+      const touch = e.touches[0];
+      setTouchMove({ x: touch.clientX, y: touch.clientY });
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (!touchStart || !touchMove) {
+        setTouchStart(null);
+        setTouchMove(null);
+        return;
+      }
+
+      const deltaX = touchMove.x - touchStart.x;
+      const deltaY = Math.abs(touchMove.y - touchStart.y);
+      const minSwipeDistance = 50;
+      const edgeThreshold = 20; // Pixels from the edge to trigger swipe
+
+      // Check if the swipe is more horizontal than vertical
+      if (deltaY < 100) {
+        // Opening gesture: swipe right from left edge
+        if (!isOpen && touchStart.x <= edgeThreshold && deltaX > minSwipeDistance) {
+          onToggle();
+        }
+        // Closing gesture: swipe left when sidebar is open
+        else if (isOpen && deltaX < -minSwipeDistance) {
+          onToggle();
+        }
+      }
+
+      setTouchStart(null);
+      setTouchMove(null);
+    };
+
+    // Add touch event listeners to the document
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchmove', handleTouchMove, { passive: true });
+    document.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [isMobile, isOpen, onToggle, touchStart, touchMove]);
 
   const handleNewChat = () => {
     createNewConversation();
