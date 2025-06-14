@@ -1,6 +1,6 @@
 
-import { useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { X, Mic, MicOff } from 'lucide-react';
 import { Button } from './ui/button';
 import { useRealtimeVoice } from '@/hooks/useRealtimeVoice';
 import { ChatMessage } from '@/types/chat';
@@ -13,6 +13,7 @@ interface VoiceModeProps {
 
 export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onError }) => {
   const logoRef = useRef<HTMLImageElement>(null);
+  const [isMuted, setIsMuted] = useState(false);
 
   const { isConnected, isRecording, isSpeaking, connect, disconnect } = useRealtimeVoice({
     onMessage: (audioMessage) => {
@@ -48,7 +49,7 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
     if (isSpeaking) {
       // Efecto de pulsación cuando la IA habla
       logo.style.animation = 'pulse 1.5s infinite, scale-speaking 0.8s infinite alternate';
-    } else if (isRecording) {
+    } else if (isRecording && !isMuted) {
       // Efecto de ondas cuando el usuario habla
       logo.style.animation = 'scale-recording 0.6s infinite alternate, glow-recording 1s infinite alternate';
     } else if (isConnected) {
@@ -58,10 +59,11 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
       // Sin animación cuando está desconectado
       logo.style.animation = 'none';
     }
-  }, [isConnected, isRecording, isSpeaking]);
+  }, [isConnected, isRecording, isSpeaking, isMuted]);
 
   const getStatusText = () => {
     if (!isConnected) return 'Conectando...';
+    if (isMuted) return 'Micrófono silenciado';
     if (isSpeaking) return 'Dali está hablando...';
     if (isRecording) return 'Escuchando...';
     return 'Toca para hablar';
@@ -69,9 +71,16 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
 
   const getStatusColor = () => {
     if (!isConnected) return 'text-gray-500';
+    if (isMuted) return 'text-red-500';
     if (isSpeaking) return 'text-blue-500';
     if (isRecording) return 'text-green-500';
     return 'text-gray-700 dark:text-gray-300';
+  };
+
+  const handleMuteToggle = () => {
+    setIsMuted(!isMuted);
+    // Here you would implement actual microphone muting logic
+    // For now, we'll just toggle the visual state
   };
 
   return (
@@ -79,22 +88,12 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
       {/* Overlay de fondo */}
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
         <div className="relative w-full h-full flex flex-col items-center justify-center p-8">
-          {/* Botón de cerrar */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="absolute top-8 right-8 text-white hover:bg-white/20 rounded-full"
-          >
-            <X className="h-6 w-6" />
-          </Button>
-
           {/* Logo de Dali con efectos */}
           <div className="relative mb-8">
             {/* Círculos de fondo para el efecto visual */}
             <div className="absolute inset-0 -m-8">
               <div className={`w-32 h-32 rounded-full border-2 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ${
-                isRecording ? 'border-green-400 animate-ping' : 'border-transparent'
+                isRecording && !isMuted ? 'border-green-400 animate-ping' : 'border-transparent'
               }`} />
               <div className={`w-40 h-40 rounded-full border-2 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ${
                 isSpeaking ? 'border-blue-400 animate-ping animation-delay-300' : 'border-transparent'
@@ -116,21 +115,50 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
           </div>
 
           {/* Texto de estado */}
-          <div className="text-center">
+          <div className="text-center mb-16">
             <h2 className="text-2xl font-semibold text-white mb-2">Modo de Voz</h2>
             <p className={`text-lg ${getStatusColor()}`}>
               {getStatusText()}
             </p>
             
-            {isConnected && !isSpeaking && (
+            {isConnected && !isSpeaking && !isMuted && (
               <p className="text-sm text-gray-400 mt-4 max-w-md text-center">
                 Habla naturalmente con Dali. La conversación se transcribirá automáticamente.
               </p>
             )}
           </div>
 
-          {/* Indicador de conexión */}
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+          {/* Controles inferiores estilo ChatGPT */}
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex items-center space-x-4">
+            {/* Botón de micrófono */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleMuteToggle}
+              className={`w-12 h-12 rounded-full ${
+                isMuted 
+                  ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' 
+                  : 'bg-white/20 text-white hover:bg-white/30'
+              } backdrop-blur-sm transition-all`}
+              aria-label={isMuted ? "Activar micrófono" : "Silenciar micrófono"}
+            >
+              {isMuted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+            </Button>
+
+            {/* Botón de cerrar */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="w-12 h-12 rounded-full bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm transition-all"
+              aria-label="Cerrar modo de voz"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+
+          {/* Indicador de conexión - movido a esquina inferior izquierda */}
+          <div className="absolute bottom-8 left-8">
             <div className={`w-3 h-3 rounded-full ${
               isConnected ? 'bg-green-500' : 'bg-red-500'
             }`} />
