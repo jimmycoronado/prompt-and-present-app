@@ -42,6 +42,7 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
         const devices = await navigator.mediaDevices.enumerateDevices();
         const videoDevices = devices.filter(device => device.kind === 'videoinput');
         setHasMultipleCameras(videoDevices.length > 1);
+        console.log('Available cameras:', videoDevices.length);
       } catch (error) {
         console.log('Could not enumerate devices:', error);
       }
@@ -214,10 +215,15 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
   };
 
   const handleVideoClick = () => {
+    console.log('Video clicked, hasMultipleCameras:', hasMultipleCameras, 'isCameraEnabled:', isCameraEnabled);
     if (isCameraEnabled && hasMultipleCameras) {
-      setShowCameraControls(!showCameraControls);
+      setShowCameraControls(true);
+      console.log('Showing camera controls');
       // Auto-hide controls after 3 seconds
-      setTimeout(() => setShowCameraControls(false), 3000);
+      setTimeout(() => {
+        setShowCameraControls(false);
+        console.log('Hiding camera controls');
+      }, 3000);
     }
   };
 
@@ -398,7 +404,7 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
                       </div>
                     )}
                     {/* Indicador de toque para cambiar cámara */}
-                    {hasMultipleCameras && (
+                    {hasMultipleCameras && !showCameraControls && (
                       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white/70 text-sm bg-black/30 px-3 py-1 rounded-full backdrop-blur-sm">
                         Toca para cambiar cámara
                       </div>
