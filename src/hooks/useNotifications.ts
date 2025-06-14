@@ -47,18 +47,6 @@ export const useNotifications = () => {
     
     console.log('Fetching notifications for user:', user.id);
     
-    // Validar que el user.id sea un UUID válido
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(user.id)) {
-      console.error('Invalid UUID format for user.id:', user.id);
-      toast({
-        title: "Error de configuración",
-        description: "ID de usuario inválido. Por favor, cierra sesión e inicia sesión nuevamente.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
     setIsLoading(true);
     try {
       const { data, error } = await supabase
