@@ -1,9 +1,16 @@
 
 import { useEffect, useRef, useState } from 'react';
-import { X, Mic, MicOff } from 'lucide-react';
+import { X, Mic, MicOff, Camera, CameraOff, MoreVertical, Type, Image, Camera as CameraIcon, Share } from 'lucide-react';
 import { Button } from './ui/button';
 import { useRealtimeVoice } from '@/hooks/useRealtimeVoice';
 import { ChatMessage } from '@/types/chat';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
+import { useToast } from '@/hooks/use-toast';
 
 interface VoiceModeProps {
   onClose: () => void;
@@ -13,7 +20,13 @@ interface VoiceModeProps {
 
 export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onError }) => {
   const logoRef = useRef<HTMLImageElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isMuted, setIsMuted] = useState(false);
+  const [isCameraEnabled, setIsCameraEnabled] = useState(false);
+  const [userStream, setUserStream] = useState<MediaStream | null>(null);
+  const [showCaptions, setShowCaptions] = useState(false);
+  const { toast } = useToast();
 
   const { isConnected, isRecording, isSpeaking, connect, disconnect } = useRealtimeVoice({
     onMessage: (audioMessage) => {
@@ -37,8 +50,12 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
     connect();
     return () => {
       disconnect();
+      // Clean up camera stream
+      if (userStream) {
+        userStream.getTracks().forEach(track => track.stop());
+      }
     };
-  }, [connect, disconnect]);
+  }, [connect, disconnect, userStream]);
 
   // Efecto visual para el logo basado en el estado
   useEffect(() => {
@@ -47,19 +64,135 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
     const logo = logoRef.current;
     
     if (isSpeaking) {
-      // Efecto de pulsación cuando la IA habla
       logo.style.animation = 'pulse 1.5s infinite, scale-speaking 0.8s infinite alternate';
     } else if (isRecording && !isMuted) {
-      // Efecto de ondas cuando el usuario habla
       logo.style.animation = 'scale-recording 0.6s infinite alternate, glow-recording 1s infinite alternate';
     } else if (isConnected) {
-      // Efecto suave cuando está conectado pero en reposo
       logo.style.animation = 'breathe 3s infinite';
     } else {
-      // Sin animación cuando está desconectado
       logo.style.animation = 'none';
     }
   }, [isConnected, isRecording, isSpeaking, isMuted]);
+
+  const handleCameraToggle = async () => {
+    if (isCameraEnabled) {
+      // Disable camera
+      if (userStream) {
+        userStream.getTracks().forEach(track => track.stop());
+        setUserStream(null);
+      }
+      setIsCameraEnabled(false);
+    } else {
+      // Enable camera
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: 320, height: 240 },
+          audio: false
+        });
+        setUserStream(stream);
+        setIsCameraEnabled(true);
+        
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      } catch (error) {
+        console.error('Error accessing camera:', error);
+        toast({
+          title: "Error de cámara",
+          description: "No se pudo acceder a la cámara",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+
+  const handleMuteToggle = () => {
+    setIsMuted(!isMuted);
+  };
+
+  const handleFileUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      toast({
+        title: "Archivo seleccionado",
+        description: `Archivo: ${file.name}`,
+      });
+      // Here you would implement file processing logic
+    }
+  };
+
+  const handleTakePhoto = async () => {
+    if (!userStream) {
+      toast({
+        title: "Cámara no disponible",
+        description: "Activa la cámara primero para tomar una foto",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const canvas = document.createElement('canvas');
+      const video = videoRef.current!;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(video, 0, 0);
+      
+      canvas.toBlob((blob) => {
+        if (blob) {
+          toast({
+            title: "Foto capturada",
+            description: "La foto ha sido tomada exitosamente",
+          });
+          // Here you would implement photo processing logic
+        }
+      }, 'image/jpeg', 0.9);
+    } catch (error) {
+      console.error('Error taking photo:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo tomar la foto",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleShareScreen = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: false
+      });
+      
+      toast({
+        title: "Pantalla compartida",
+        description: "Se ha iniciado la compartición de pantalla",
+      });
+      
+      // Here you would implement screen sharing logic
+      stream.getTracks().forEach(track => {
+        track.onended = () => {
+          toast({
+            title: "Compartición finalizada",
+            description: "Se ha detenido la compartición de pantalla",
+          });
+        };
+      });
+    } catch (error) {
+      console.error('Error sharing screen:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo compartir la pantalla",
+        variant: "destructive"
+      });
+    }
+  };
 
   const getStatusText = () => {
     if (!isConnected) return 'Conectando...';
@@ -77,19 +210,13 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
     return 'text-gray-700 dark:text-gray-300';
   };
 
-  const handleMuteToggle = () => {
-    setIsMuted(!isMuted);
-    // Here you would implement actual microphone muting logic
-    // For now, we'll just toggle the visual state
-  };
-
   return (
     <>
       {/* Overlay de fondo */}
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
         <div className="relative w-full h-full flex flex-col items-center justify-center p-8">
-          {/* Logo de Dali con efectos */}
-          <div className="relative mb-8">
+          {/* Logo de Dali con efectos - se desplaza hacia arriba cuando la cámara está activa */}
+          <div className={`relative mb-8 transition-all duration-500 ${isCameraEnabled ? '-translate-y-16' : ''}`}>
             {/* Círculos de fondo para el efecto visual */}
             <div className="absolute inset-0 -m-8">
               <div className={`w-32 h-32 rounded-full border-2 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ${
@@ -114,6 +241,19 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
             </div>
           </div>
 
+          {/* Vista de la cámara del usuario */}
+          {isCameraEnabled && userStream && (
+            <div className="absolute bottom-32 right-8 w-48 h-36 rounded-xl overflow-hidden border-2 border-white/30 shadow-2xl">
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-full object-cover scale-x-[-1]"
+              />
+            </div>
+          )}
+
           {/* Texto de estado */}
           <div className="text-center mb-16">
             <h2 className="text-2xl font-semibold text-white mb-2">Modo de Voz</h2>
@@ -126,10 +266,34 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
                 Habla naturalmente con Dali. La conversación se transcribirá automáticamente.
               </p>
             )}
+
+            {/* Captions cuando están habilitadas */}
+            {showCaptions && (
+              <div className="mt-4 p-3 bg-black/50 rounded-lg max-w-md mx-auto">
+                <p className="text-white text-sm">
+                  {isSpeaking ? "Dali está respondiendo..." : isRecording ? "Escuchando..." : ""}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Controles inferiores estilo ChatGPT */}
           <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex items-center space-x-4">
+            {/* Botón de cámara */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleCameraToggle}
+              className={`w-12 h-12 rounded-full ${
+                isCameraEnabled 
+                  ? 'bg-blue-500/30 text-blue-400 hover:bg-blue-500/40' 
+                  : 'bg-white/20 text-white hover:bg-white/30'
+              } backdrop-blur-sm transition-all`}
+              aria-label={isCameraEnabled ? "Desactivar cámara" : "Activar cámara"}
+            >
+              {isCameraEnabled ? <CameraOff className="h-5 w-5" /> : <Camera className="h-5 w-5" />}
+            </Button>
+
             {/* Botón de micrófono */}
             <Button
               variant="ghost"
@@ -144,6 +308,55 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
             >
               {isMuted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
             </Button>
+
+            {/* Menú de opciones */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="w-12 h-12 rounded-full bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm transition-all"
+                  aria-label="Más opciones"
+                >
+                  <MoreVertical className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent 
+                align="center" 
+                side="top" 
+                className="mb-2 bg-black/80 backdrop-blur-sm border-white/20 text-white"
+              >
+                <DropdownMenuItem 
+                  onClick={() => setShowCaptions(!showCaptions)}
+                  className="hover:bg-white/10 focus:bg-white/10"
+                >
+                  <Type className="h-4 w-4 mr-2" />
+                  {showCaptions ? 'Ocultar subtítulos' : 'Mostrar subtítulos'}
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={handleFileUpload}
+                  className="hover:bg-white/10 focus:bg-white/10"
+                >
+                  <Image className="h-4 w-4 mr-2" />
+                  Cargar imagen
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={handleTakePhoto}
+                  className="hover:bg-white/10 focus:bg-white/10"
+                  disabled={!isCameraEnabled}
+                >
+                  <CameraIcon className="h-4 w-4 mr-2" />
+                  Tomar foto
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={handleShareScreen}
+                  className="hover:bg-white/10 focus:bg-white/10"
+                >
+                  <Share className="h-4 w-4 mr-2" />
+                  Compartir pantalla
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* Botón de cerrar */}
             <Button
@@ -163,6 +376,15 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
               isConnected ? 'bg-green-500' : 'bg-red-500'
             }`} />
           </div>
+
+          {/* Input oculto para cargar archivos */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
         </div>
       </div>
 
