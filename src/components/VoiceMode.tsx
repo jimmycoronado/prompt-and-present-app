@@ -522,7 +522,7 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="w-12 h-12 rounded-full bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm transition-all"
+              className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 dark:text-white hover:text-orange-500 dark:hover:text-orange-500 backdrop-blur-sm transition-all"
               aria-label="Cerrar modo de voz"
             >
               <X className="h-5 w-5" />
