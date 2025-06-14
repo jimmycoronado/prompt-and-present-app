@@ -96,7 +96,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col space-y-3">
-      <div className="flex items-end space-x-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg p-3 focus-within:ring-2 focus-within:ring-orange-500 focus-within:border-transparent transition-all">
+      <div className="flex items-end space-x-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg p-3 transition-all">
         <Button
           type="button"
           variant="ghost"
@@ -120,18 +120,16 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         />
 
         <div className="flex items-center space-x-2 flex-shrink-0">
-          {!hasMessage && (
-            <VoiceRecordButton 
-              onTranscription={handleTranscription}
-              disabled={disabled}
-            />
-          )}
+          <VoiceRecordButton 
+            onTranscription={handleTranscription}
+            disabled={disabled}
+          />
           
           {hasMessage ? (
             <Button
               type="submit"
               disabled={disabled || !message.trim()}
-              className="h-11 w-11 bg-orange-500 hover:bg-orange-600 text-white transition-all hover:scale-105"
+              className="h-11 w-11 bg-green-500 hover:bg-green-600 text-white transition-all hover:scale-105"
               size="icon"
               aria-label="Enviar mensaje"
             >
