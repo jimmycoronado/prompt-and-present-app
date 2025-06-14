@@ -2,7 +2,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { X, Mic, MicOff, Camera, CameraOff, MoreVertical, Type, Image, Camera as CameraIcon, Share } from 'lucide-react';
 import { Button } from './ui/button';
-import { useRealtimeVoice } from '@/hooks/useRealtimeVoice';
 import { ChatMessage } from '@/types/chat';
 import {
   DropdownMenu,
@@ -27,36 +26,26 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
   const [userStream, setUserStream] = useState<MediaStream | null>(null);
   const [showCaptions, setShowCaptions] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  
+  // Estados simulados para la interfaz (hasta que se configure OpenAI Realtime)
+  const [isConnected, setIsConnected] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const { toast } = useToast();
 
-  const { isConnected, isRecording, isSpeaking, connect, disconnect } = useRealtimeVoice({
-    onMessage: (audioMessage) => {
-      const chatMessage: ChatMessage = {
-        id: audioMessage.id,
-        type: audioMessage.type,
-        content: audioMessage.content,
-        timestamp: audioMessage.timestamp,
-        metadata: audioMessage.type === 'assistant' ? {
-          processingTime: 0,
-          model: 'gpt-4o-realtime',
-          tokensUsed: 0
-        } : undefined
-      };
-      onMessage(chatMessage);
-    },
-    onError
-  });
-
+  // Simulación de conexión (remover cuando se implemente OpenAI Realtime)
   useEffect(() => {
-    connect();
-    return () => {
-      disconnect();
-      // Clean up camera stream
-      if (userStream) {
-        userStream.getTracks().forEach(track => track.stop());
-      }
-    };
-  }, [connect, disconnect, userStream]);
+    console.log('VoiceMode: Simulando estado de conexión...');
+    const timer = setTimeout(() => {
+      setIsConnected(true);
+      toast({
+        title: "Modo demostración",
+        description: "La funcionalidad de voz estará disponible cuando se configure OpenAI Realtime API",
+      });
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [toast]);
 
   // Efecto visual para el logo basado en el estado
   useEffect(() => {
@@ -89,6 +78,15 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
       };
     }
   }, [isCameraEnabled, userStream]);
+
+  // Cleanup camera stream on unmount
+  useEffect(() => {
+    return () => {
+      if (userStream) {
+        userStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [userStream]);
 
   const handleCameraToggle = async () => {
     if (isCameraEnabled) {
@@ -161,6 +159,11 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
 
   const handleMuteToggle = () => {
     setIsMuted(!isMuted);
+    // Simular grabación cuando no está silenciado
+    if (isMuted) {
+      setIsRecording(true);
+      setTimeout(() => setIsRecording(false), 2000);
+    }
   };
 
   const handleFileUpload = () => {
@@ -254,7 +257,7 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
   };
 
   const getStatusText = () => {
-    if (!isConnected) return 'Conectando...';
+    if (!isConnected) return 'Modo demostración - Configura OpenAI Realtime para voz';
     if (isMuted) return 'Micrófono silenciado';
     if (isSpeaking) return 'Dali está hablando...';
     if (isRecording) return 'Escuchando...';
@@ -262,7 +265,7 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
   };
 
   const getStatusColor = () => {
-    if (!isConnected) return 'text-gray-500';
+    if (!isConnected) return 'text-yellow-500';
     if (isMuted) return 'text-red-500';
     if (isSpeaking) return 'text-blue-500';
     if (isRecording) return 'text-green-500';
@@ -450,7 +453,7 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
           {/* Indicador de conexión - movido a esquina inferior izquierda */}
           <div className="absolute bottom-8 left-8">
             <div className={`w-3 h-3 rounded-full ${
-              isConnected ? 'bg-green-500' : 'bg-red-500'
+              isConnected ? 'bg-yellow-500' : 'bg-red-500'
             }`} />
           </div>
 
