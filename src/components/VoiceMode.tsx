@@ -129,13 +129,7 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
       setUserStream(stream);
       setFacingMode(facing);
       
-      // Only show toast for initial camera activation, not for camera switching
-      if (!isCameraEnabled) {
-        toast({
-          title: "Cámara activada",
-          description: `Cámara ${facing === 'user' ? 'frontal' : 'trasera'} activada correctamente`
-        });
-      }
+      // Removed toast notification for camera activation
       
     } catch (error) {
       console.error('Error accessing camera:', error);
