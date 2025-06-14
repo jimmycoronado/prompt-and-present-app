@@ -26,6 +26,7 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
   const [isCameraEnabled, setIsCameraEnabled] = useState(false);
   const [userStream, setUserStream] = useState<MediaStream | null>(null);
   const [showCaptions, setShowCaptions] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const { isConnected, isRecording, isSpeaking, connect, disconnect } = useRealtimeVoice({
@@ -74,32 +75,84 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
     }
   }, [isConnected, isRecording, isSpeaking, isMuted]);
 
+  // Set up video stream when camera is enabled
+  useEffect(() => {
+    if (isCameraEnabled && userStream && videoRef.current) {
+      console.log('Setting up video stream');
+      videoRef.current.srcObject = userStream;
+      
+      // Ensure video plays
+      videoRef.current.onloadedmetadata = () => {
+        if (videoRef.current) {
+          videoRef.current.play().catch(console.error);
+        }
+      };
+    }
+  }, [isCameraEnabled, userStream]);
+
   const handleCameraToggle = async () => {
     if (isCameraEnabled) {
       // Disable camera
+      console.log('Disabling camera');
       if (userStream) {
-        userStream.getTracks().forEach(track => track.stop());
+        userStream.getTracks().forEach(track => {
+          console.log('Stopping track:', track.kind);
+          track.stop();
+        });
         setUserStream(null);
       }
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
       setIsCameraEnabled(false);
+      setCameraError(null);
     } else {
       // Enable camera
+      console.log('Enabling camera');
+      setCameraError(null);
+      
       try {
+        // Check if browser supports getUserMedia
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('Tu navegador no soporta acceso a la cámara');
+        }
+
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: 320, height: 240 },
+          video: { 
+            width: { ideal: 320 },
+            height: { ideal: 240 },
+            facingMode: 'user'
+          },
           audio: false
         });
+        
+        console.log('Camera stream obtained:', stream.getVideoTracks().length, 'video tracks');
         setUserStream(stream);
         setIsCameraEnabled(true);
         
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
+        toast({
+          title: "Cámara activada",
+          description: "La cámara se ha activado correctamente"
+        });
+        
       } catch (error) {
         console.error('Error accessing camera:', error);
+        setCameraError(error instanceof Error ? error.message : 'Error desconocido');
+        
+        let errorMessage = "No se pudo acceder a la cámara";
+        if (error instanceof Error) {
+          if (error.name === 'NotAllowedError') {
+            errorMessage = "Permiso de cámara denegado. Por favor, permite el acceso a la cámara.";
+          } else if (error.name === 'NotFoundError') {
+            errorMessage = "No se encontró ninguna cámara en el dispositivo.";
+          } else if (error.name === 'NotReadableError') {
+            errorMessage = "La cámara está siendo usada por otra aplicación.";
+          }
+        }
+        
         toast({
           title: "Error de cámara",
-          description: "No se pudo acceder a la cámara",
+          description: errorMessage,
           variant: "destructive"
         });
       }
@@ -126,7 +179,7 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
   };
 
   const handleTakePhoto = async () => {
-    if (!userStream) {
+    if (!userStream || !videoRef.current) {
       toast({
         title: "Cámara no disponible",
         description: "Activa la cámara primero para tomar una foto",
@@ -137,7 +190,13 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
 
     try {
       const canvas = document.createElement('canvas');
-      const video = videoRef.current!;
+      const video = videoRef.current;
+      
+      // Wait for video to be ready
+      if (video.videoWidth === 0 || video.videoHeight === 0) {
+        throw new Error('El video no está listo');
+      }
+      
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       
@@ -242,15 +301,33 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
           </div>
 
           {/* Vista de la cámara del usuario */}
-          {isCameraEnabled && userStream && (
-            <div className="absolute bottom-32 right-8 w-48 h-36 rounded-xl overflow-hidden border-2 border-white/30 shadow-2xl">
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className="w-full h-full object-cover scale-x-[-1]"
-              />
+          {isCameraEnabled && (
+            <div className="absolute bottom-32 right-8 w-48 h-36 rounded-xl overflow-hidden border-2 border-white/30 shadow-2xl bg-black">
+              {userStream ? (
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="w-full h-full object-cover scale-x-[-1]"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="text-white text-sm text-center">
+                    {cameraError ? (
+                      <>
+                        <CameraOff className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <p className="opacity-75">Error de cámara</p>
+                      </>
+                    ) : (
+                      <>
+                        <Camera className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <p className="opacity-75">Cargando cámara...</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -343,7 +420,7 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
                 <DropdownMenuItem 
                   onClick={handleTakePhoto}
                   className="hover:bg-white/10 focus:bg-white/10"
-                  disabled={!isCameraEnabled}
+                  disabled={!isCameraEnabled || !userStream}
                 >
                   <CameraIcon className="h-4 w-4 mr-2" />
                   Tomar foto
