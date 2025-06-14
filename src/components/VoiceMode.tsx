@@ -1,6 +1,5 @@
-
 import { useEffect, useRef, useState } from 'react';
-import { X, Mic, MicOff, Camera, CameraOff, MoreVertical, Type, Image, Camera as CameraIcon, Share } from 'lucide-react';
+import { X, Mic, MicOff, Camera, CameraOff, MoreVertical, Type, Image, Camera as CameraIcon, Share, RotateCcw } from 'lucide-react';
 import { Button } from './ui/button';
 import { ChatMessage } from '@/types/chat';
 import {
@@ -26,12 +25,30 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
   const [userStream, setUserStream] = useState<MediaStream | null>(null);
   const [showCaptions, setShowCaptions] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
+  const [showCameraControls, setShowCameraControls] = useState(false);
+  const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
   
   // Estados simulados para la interfaz (hasta que se configure OpenAI Realtime)
   const [isConnected, setIsConnected] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const { toast } = useToast();
+
+  // Check for multiple cameras on mount
+  useEffect(() => {
+    const checkCameras = async () => {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(device => device.kind === 'videoinput');
+        setHasMultipleCameras(videoDevices.length > 1);
+      } catch (error) {
+        console.log('Could not enumerate devices:', error);
+      }
+    };
+
+    checkCameras();
+  }, []);
 
   // Simulación de conexión (remover cuando se implemente OpenAI Realtime)
   useEffect(() => {
@@ -88,6 +105,66 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
     };
   }, [userStream]);
 
+  const startCamera = async (facing: 'user' | 'environment' = 'user') => {
+    setCameraError(null);
+    
+    try {
+      // Check if browser supports getUserMedia
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Tu navegador no soporta acceso a la cámara');
+      }
+
+      const constraints = {
+        video: { 
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          facingMode: facing
+        },
+        audio: false
+      };
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      
+      console.log('Camera stream obtained:', stream.getVideoTracks().length, 'video tracks');
+      setUserStream(stream);
+      setFacingMode(facing);
+      
+      toast({
+        title: "Cámara activada",
+        description: `Cámara ${facing === 'user' ? 'frontal' : 'trasera'} activada correctamente`
+      });
+      
+    } catch (error) {
+      console.error('Error accessing camera:', error);
+      setCameraError(error instanceof Error ? error.message : 'Error desconocido');
+      
+      let errorMessage = "No se pudo acceder a la cámara";
+      if (error instanceof Error) {
+        if (error.name === 'NotAllowedError') {
+          errorMessage = "Permiso de cámara denegado. Por favor, permite el acceso a la cámara.";
+        } else if (error.name === 'NotFoundError') {
+          errorMessage = "No se encontró ninguna cámara en el dispositivo.";
+        } else if (error.name === 'NotReadableError') {
+          errorMessage = "La cámara está siendo usada por otra aplicación.";
+        } else if (error.name === 'OverconstrainedError') {
+          // If specific facing mode fails, try with the other one
+          if (facing === 'environment') {
+            console.log('Environment camera not available, trying user camera');
+            return startCamera('user');
+          }
+        }
+      }
+      
+      toast({
+        title: "Error de cámara",
+        description: errorMessage,
+        variant: "destructive"
+      });
+      
+      throw error;
+    }
+  };
+
   const handleCameraToggle = async () => {
     if (isCameraEnabled) {
       // Disable camera
@@ -104,56 +181,49 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
       }
       setIsCameraEnabled(false);
       setCameraError(null);
+      setShowCameraControls(false);
     } else {
       // Enable camera
       console.log('Enabling camera');
-      setCameraError(null);
-      
       try {
-        // Check if browser supports getUserMedia
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          throw new Error('Tu navegador no soporta acceso a la cámara');
-        }
-
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { 
-            width: { ideal: 320 },
-            height: { ideal: 240 },
-            facingMode: 'user'
-          },
-          audio: false
-        });
-        
-        console.log('Camera stream obtained:', stream.getVideoTracks().length, 'video tracks');
-        setUserStream(stream);
+        await startCamera(facingMode);
         setIsCameraEnabled(true);
-        
-        toast({
-          title: "Cámara activada",
-          description: "La cámara se ha activado correctamente"
-        });
-        
       } catch (error) {
-        console.error('Error accessing camera:', error);
-        setCameraError(error instanceof Error ? error.message : 'Error desconocido');
-        
-        let errorMessage = "No se pudo acceder a la cámara";
-        if (error instanceof Error) {
-          if (error.name === 'NotAllowedError') {
-            errorMessage = "Permiso de cámara denegado. Por favor, permite el acceso a la cámara.";
-          } else if (error.name === 'NotFoundError') {
-            errorMessage = "No se encontró ninguna cámara en el dispositivo.";
-          } else if (error.name === 'NotReadableError') {
-            errorMessage = "La cámara está siendo usada por otra aplicación.";
-          }
-        }
-        
-        toast({
-          title: "Error de cámara",
-          description: errorMessage,
-          variant: "destructive"
-        });
+        // Error already handled in startCamera
       }
+    }
+  };
+
+  const handleCameraSwitch = async () => {
+    if (!userStream) return;
+
+    const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
+    
+    // Stop current stream
+    userStream.getTracks().forEach(track => track.stop());
+    
+    try {
+      await startCamera(newFacingMode);
+      toast({
+        title: "Cámara cambiada",
+        description: `Cambiado a cámara ${newFacingMode === 'user' ? 'frontal' : 'trasera'}`
+      });
+    } catch (error) {
+      // If switching fails, try to restart with original facing mode
+      try {
+        await startCamera(facingMode);
+      } catch (restartError) {
+        setIsCameraEnabled(false);
+        setUserStream(null);
+      }
+    }
+  };
+
+  const handleVideoClick = () => {
+    if (isCameraEnabled && hasMultipleCameras) {
+      setShowCameraControls(!showCameraControls);
+      // Auto-hide controls after 3 seconds
+      setTimeout(() => setShowCameraControls(false), 3000);
     }
   };
 
@@ -276,16 +346,16 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
     <>
       {/* Overlay de fondo */}
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-        <div className="relative w-full h-full flex flex-col items-center justify-center p-8">
+        <div className="relative w-full h-full flex flex-col items-center justify-center p-4 md:p-8">
           {/* Logo de Dali con efectos - se desplaza hacia arriba cuando la cámara está activa */}
-          <div className={`relative mb-8 transition-all duration-500 ${isCameraEnabled ? '-translate-y-16' : ''}`}>
+          <div className={`relative mb-8 transition-all duration-500 ${isCameraEnabled ? 'md:-translate-y-20 -translate-y-12' : ''}`}>
             {/* Círculos de fondo para el efecto visual */}
             <div className="absolute inset-0 -m-8">
               <div className={`w-32 h-32 rounded-full border-2 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ${
                 isRecording && !isMuted ? 'border-green-400 animate-ping' : 'border-transparent'
               }`} />
               <div className={`w-40 h-40 rounded-full border-2 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ${
-                isSpeaking ? 'border-blue-400 animate-ping animation-delay-300' : 'border-transparent'
+                isSpeaking ? 'border-blue-400 animate-ping' : 'border-transparent'
               }`} />
               <div className={`w-48 h-48 rounded-full border-2 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ${
                 isSpeaking ? 'border-blue-300 animate-ping animation-delay-600' : 'border-transparent'
@@ -303,45 +373,73 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
             </div>
           </div>
 
-          {/* Vista de la cámara del usuario */}
+          {/* Vista de la cámara del usuario - Mucho más grande como ChatGPT */}
           {isCameraEnabled && (
-            <div className="absolute bottom-32 right-8 w-48 h-36 rounded-xl overflow-hidden border-2 border-white/30 shadow-2xl bg-black">
-              {userStream ? (
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="w-full h-full object-cover scale-x-[-1]"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <div className="text-white text-sm text-center">
-                    {cameraError ? (
-                      <>
-                        <CameraOff className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                        <p className="opacity-75">Error de cámara</p>
-                      </>
-                    ) : (
-                      <>
-                        <Camera className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                        <p className="opacity-75">Cargando cámara...</p>
-                      </>
+            <div className="absolute inset-4 md:inset-8 rounded-2xl overflow-hidden border-2 border-white/30 shadow-2xl bg-black max-w-4xl max-h-[70vh] mx-auto">
+              <div className="relative w-full h-full" onClick={handleVideoClick}>
+                {userStream ? (
+                  <>
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      className="w-full h-full object-cover scale-x-[-1]"
+                    />
+                    {/* Controles de cámara superpuestos */}
+                    {showCameraControls && hasMultipleCameras && (
+                      <div className="absolute top-4 right-4 z-10">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCameraSwitch();
+                          }}
+                          className="w-12 h-12 rounded-full bg-black/50 text-white hover:bg-black/70 backdrop-blur-sm"
+                          aria-label="Cambiar cámara"
+                        >
+                          <RotateCcw className="h-5 w-5" />
+                        </Button>
+                      </div>
                     )}
+                    {/* Indicador de toque para cambiar cámara */}
+                    {hasMultipleCameras && (
+                      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white/70 text-sm bg-black/30 px-3 py-1 rounded-full backdrop-blur-sm">
+                        Toca para cambiar cámara
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <div className="text-white text-center">
+                      {cameraError ? (
+                        <>
+                          <CameraOff className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                          <p className="text-lg opacity-75 mb-2">Error de cámara</p>
+                          <p className="text-sm opacity-60">{cameraError}</p>
+                        </>
+                      ) : (
+                        <>
+                          <Camera className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                          <p className="text-lg opacity-75">Cargando cámara...</p>
+                        </>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           )}
 
           {/* Texto de estado */}
-          <div className="text-center mb-16">
+          <div className={`text-center transition-all duration-500 ${isCameraEnabled ? 'mb-4' : 'mb-16'}`}>
             <h2 className="text-2xl font-semibold text-white mb-2">Modo de Voz</h2>
             <p className={`text-lg ${getStatusColor()}`}>
               {getStatusText()}
             </p>
             
-            {isConnected && !isSpeaking && !isMuted && (
+            {isConnected && !isSpeaking && !isMuted && !isCameraEnabled && (
               <p className="text-sm text-gray-400 mt-4 max-w-md text-center">
                 Habla naturalmente con Dali. La conversación se transcribirá automáticamente.
               </p>
