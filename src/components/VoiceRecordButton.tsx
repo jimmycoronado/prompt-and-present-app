@@ -1,3 +1,4 @@
+
 import { Mic, MicOff, Loader2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { useVoiceRecording } from "../hooks/useVoiceRecording";
@@ -28,8 +29,13 @@ export const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({
     }
   });
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
     if (disabled) return;
+    
+    // Blur the button to remove focus state on mobile
+    if (isMobile && e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.blur();
+    }
     
     console.log('Voice button clicked');
     toggleRecording();
@@ -65,11 +71,15 @@ export const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({
         size="icon"
         onClick={handleClick}
         disabled={disabled || isProcessing}
-        className={`h-8 w-8 transition-all hover:scale-105 rounded-full ${
+        className={`h-8 w-8 transition-all rounded-full touch-manipulation active:scale-95 ${
           isRecording 
-            ? 'animate-pulse border border-red-300 dark:border-red-600' 
-            : 'text-gray-500 hover:text-orange-500 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600'
+            ? 'animate-pulse border border-red-300 dark:border-red-600 bg-red-500 text-white' 
+            : 'text-gray-500 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:text-orange-500 hover:bg-gray-50 dark:hover:bg-gray-700'
         }`}
+        style={{
+          // Prevent hover states from sticking on mobile
+          WebkitTapHighlightColor: 'transparent',
+        }}
         aria-label={getAriaLabel()}
         title={getAriaLabel()}
       >
