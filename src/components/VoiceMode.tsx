@@ -213,15 +213,7 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
 
   const handleVideoClick = () => {
     console.log('Video clicked, hasMultipleCameras:', hasMultipleCameras, 'isCameraEnabled:', isCameraEnabled);
-    if (isCameraEnabled && hasMultipleCameras) {
-      setShowCameraControls(true);
-      console.log('Showing camera controls');
-      // Auto-hide controls after 3 seconds
-      setTimeout(() => {
-        setShowCameraControls(false);
-        console.log('Hiding camera controls');
-      }, 3000);
-    }
+    // Removed the logic that was calling setShowCameraControls
   };
 
   const handleMuteToggle = () => {
