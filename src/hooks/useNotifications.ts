@@ -45,6 +45,20 @@ export const useNotifications = () => {
   const fetchNotifications = async () => {
     if (!user) return;
     
+    console.log('Fetching notifications for user:', user.id);
+    
+    // Validar que el user.id sea un UUID válido
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(user.id)) {
+      console.error('Invalid UUID format for user.id:', user.id);
+      toast({
+        title: "Error de configuración",
+        description: "ID de usuario inválido. Por favor, cierra sesión e inicia sesión nuevamente.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setIsLoading(true);
     try {
       const { data, error } = await supabase
@@ -53,7 +67,10 @@ export const useNotifications = () => {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
 
       // Type assertion to ensure compatibility with our Notification interface
       const typedNotifications = (data || []).map(item => ({
@@ -61,15 +78,19 @@ export const useNotifications = () => {
         type: item.type as Notification['type']
       }));
 
+      console.log('Notifications fetched successfully:', typedNotifications.length);
       setNotifications(typedNotifications);
       setUnreadCount(typedNotifications.filter(n => !n.read).length);
     } catch (error) {
       console.error('Error fetching notifications:', error);
-      toast({
-        title: "Error",
-        description: "No se pudieron cargar las notificaciones",
-        variant: "destructive"
-      });
+      // Solo mostrar toast de error si es un error real, no si simplemente no hay datos
+      if (error && typeof error === 'object' && 'code' in error) {
+        toast({
+          title: "Error",
+          description: "No se pudieron cargar las notificaciones. Revisa tu conexión.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsLoading(false);
     }
