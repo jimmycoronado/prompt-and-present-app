@@ -213,7 +213,6 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
 
   const handleVideoClick = () => {
     console.log('Video clicked, hasMultipleCameras:', hasMultipleCameras, 'isCameraEnabled:', isCameraEnabled);
-    // Removed the logic that was calling setShowCameraControls
   };
 
   const handleMuteToggle = () => {
@@ -373,7 +372,9 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
                       autoPlay
                       playsInline
                       muted
-                      className="w-full h-full object-cover scale-x-[-1]"
+                      className={`w-full h-full object-cover ${
+                        facingMode === 'user' ? 'scale-x-[-1]' : ''
+                      }`}
                     />
                     {/* Botón de cambiar cámara - siempre visible en esquina inferior derecha */}
                     {hasMultipleCameras && (

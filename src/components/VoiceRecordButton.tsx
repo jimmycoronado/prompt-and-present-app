@@ -1,4 +1,5 @@
 
+
 import { Mic, MicOff, Loader2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { useVoiceRecording } from "../hooks/useVoiceRecording";
@@ -35,6 +36,12 @@ export const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({
     // Blur the button to remove focus state on mobile
     if (isMobile && e.currentTarget instanceof HTMLElement) {
       e.currentTarget.blur();
+      // Force remove any lingering focus states
+      setTimeout(() => {
+        if (e.currentTarget instanceof HTMLElement) {
+          e.currentTarget.blur();
+        }
+      }, 100);
     }
     
     console.log('Voice button clicked');
@@ -71,14 +78,17 @@ export const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({
         size="icon"
         onClick={handleClick}
         disabled={disabled || isProcessing}
-        className={`h-8 w-8 transition-all rounded-full touch-manipulation active:scale-95 ${
+        className={`h-8 w-8 transition-all rounded-full touch-manipulation active:scale-95 focus:outline-none focus:ring-0 ${
           isRecording 
-            ? 'animate-pulse border border-red-300 dark:border-red-600 bg-red-500 text-white' 
-            : 'text-gray-500 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:text-orange-500 hover:bg-gray-50 dark:hover:bg-gray-700'
+            ? 'animate-pulse border border-red-300 dark:border-red-600 bg-red-500 text-white hover:bg-red-600' 
+            : 'text-gray-500 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:text-gray-700 hover:bg-gray-50 dark:hover:text-gray-300 dark:hover:bg-gray-700'
         }`}
         style={{
           // Prevent hover states from sticking on mobile
           WebkitTapHighlightColor: 'transparent',
+          WebkitTouchCallout: 'none',
+          WebkitUserSelect: 'none',
+          userSelect: 'none',
         }}
         aria-label={getAriaLabel()}
         title={getAriaLabel()}
@@ -108,3 +118,4 @@ export const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({
     </Button>
   );
 };
+
