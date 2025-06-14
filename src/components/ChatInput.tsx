@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Paperclip, Radio } from 'lucide-react';
 import { Button } from './ui/button';
@@ -129,10 +130,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   if (isMobile) {
     return (
       <form onSubmit={handleSubmit} className="flex flex-col space-y-3">
-        {/* Main input container with tab-like design */}
+        {/* Main input container with clean design */}
         <div className="relative bg-white dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-600 shadow-sm mx-4">
-          {/* Text area with more space */}
-          <div className="px-4 pt-4 pb-16">
+          {/* Text area */}
+          <div className="px-4 pt-4 pb-2">
             <Textarea
               ref={textareaRef}
               value={message}
@@ -145,15 +146,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             />
           </div>
 
-          {/* Bottom controls bar */}
-          <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between p-3 border-t border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 rounded-b-2xl">
+          {/* Bottom controls bar - same background as text area, no border */}
+          <div className="flex items-center justify-between px-4 pb-3 pt-1">
             {/* Left side - Attach button */}
             <Button
               type="button"
               variant="ghost"
               size="icon"
               onClick={() => fileInputRef.current?.click()}
-              className="h-9 w-9 text-gray-500 hover:text-orange-500 hover:bg-gray-100 dark:hover:bg-gray-600"
+              className="h-8 w-8 text-gray-500 hover:text-orange-500 hover:bg-gray-100 dark:hover:bg-gray-700"
               aria-label="Adjuntar archivo"
             >
               <Paperclip className="h-4 w-4" />
@@ -172,7 +173,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 <Button
                   type="submit"
                   disabled={disabled || !message.trim()}
-                  className="h-9 w-9 bg-green-500 hover:bg-green-600 text-white transition-all hover:scale-105 rounded-full"
+                  className="h-8 w-8 bg-green-500 hover:bg-green-600 text-white transition-all hover:scale-105 rounded-full"
                   size="icon"
                   aria-label="Enviar mensaje"
                 >
@@ -182,10 +183,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 onVoiceModeClick && (
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="ghost"
                     size="icon"
                     onClick={onVoiceModeClick}
-                    className="h-9 w-9 transition-all hover:scale-105 text-gray-500 hover:text-orange-500 hover:bg-gray-100 rounded-full"
+                    className="h-8 w-8 transition-all hover:scale-105 text-gray-500 hover:text-orange-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
                     aria-label="Activar modo de voz"
                     title="Modo de voz conversacional"
                   >
