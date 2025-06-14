@@ -178,7 +178,6 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ onClose, onMessage, onErro
       }
       setIsCameraEnabled(false);
       setCameraError(null);
-      setShowCameraControls(false);
     } else {
       // Enable camera
       console.log('Enabling camera');
