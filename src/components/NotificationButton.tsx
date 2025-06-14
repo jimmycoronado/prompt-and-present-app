@@ -9,19 +9,20 @@ export const NotificationButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { unreadCount, requestNotificationPermission } = useNotifications();
 
-  // Request notification permission on component mount
-  useEffect(() => {
+  // Request notification permission on first click if not already granted
+  const handleClick = async () => {
     if ('Notification' in window && Notification.permission === 'default') {
-      requestNotificationPermission();
+      await requestNotificationPermission();
     }
-  }, [requestNotificationPermission]);
+    setIsOpen(!isOpen);
+  };
 
   return (
     <div className="relative">
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleClick}
         className="relative"
       >
         <Bell className={`h-5 w-5 ${unreadCount > 0 ? 'text-orange-500' : ''}`} />

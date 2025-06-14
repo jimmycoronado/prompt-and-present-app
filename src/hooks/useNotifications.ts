@@ -24,8 +24,14 @@ export const useNotifications = () => {
   // Request notification permission
   const requestNotificationPermission = async () => {
     if ('Notification' in window) {
-      const permission = await Notification.requestPermission();
-      return permission === 'granted';
+      try {
+        const permission = await Notification.requestPermission();
+        console.log('Notification permission:', permission);
+        return permission === 'granted';
+      } catch (error) {
+        console.error('Error requesting notification permission:', error);
+        return false;
+      }
     }
     return false;
   };
@@ -43,7 +49,10 @@ export const useNotifications = () => {
 
   // Fetch notifications
   const fetchNotifications = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('No user found, skipping notifications fetch');
+      return;
+    }
     
     console.log('Fetching notifications for user:', user.id);
     
@@ -56,8 +65,16 @@ export const useNotifications = () => {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Supabase error:', error);
-        throw error;
+        console.error('Supabase error details:', error);
+        // Solo mostrar error si es un error real de conexión o permisos
+        if (error.code && error.code !== 'PGRST116') { // PGRST116 es "no rows found"
+          toast({
+            title: "Error de conexión",
+            description: "No se pudieron cargar las notificaciones. Revisa tu conexión.",
+            variant: "destructive"
+          });
+        }
+        return;
       }
 
       // Type assertion to ensure compatibility with our Notification interface
@@ -71,14 +88,12 @@ export const useNotifications = () => {
       setUnreadCount(typedNotifications.filter(n => !n.read).length);
     } catch (error) {
       console.error('Error fetching notifications:', error);
-      // Solo mostrar toast de error si es un error real, no si simplemente no hay datos
-      if (error && typeof error === 'object' && 'code' in error) {
-        toast({
-          title: "Error",
-          description: "No se pudieron cargar las notificaciones. Revisa tu conexión.",
-          variant: "destructive"
-        });
-      }
+      // Solo mostrar toast para errores de red o conexión
+      toast({
+        title: "Error de conexión",
+        description: "No se pudieron cargar las notificaciones. Revisa tu conexión.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
@@ -157,6 +172,11 @@ export const useNotifications = () => {
   // Subscribe to real-time notifications
   useEffect(() => {
     if (!user) return;
+
+    // Pedir permisos de notificación al montar el componente
+    if ('Notification' in window && Notification.permission === 'default') {
+      requestNotificationPermission();
+    }
 
     fetchNotifications();
 
