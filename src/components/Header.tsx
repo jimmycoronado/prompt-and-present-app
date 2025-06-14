@@ -2,6 +2,7 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserMenu } from './UserMenu';
+import { NotificationButton } from './NotificationButton';
 import { Button } from '@/components/ui/button';
 import { Moon, Sun, Monitor, Edit3, PanelLeft } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -102,6 +103,9 @@ export const Header: React.FC<HeaderProps> = ({
               <Edit3 className="h-5 w-5" />
             </Button>
           )}
+
+          {/* Botón de notificaciones - solo si el usuario está autenticado */}
+          {user && <NotificationButton />}
 
           {user && <UserMenu />}
         </div>
