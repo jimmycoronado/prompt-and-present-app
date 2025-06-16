@@ -188,22 +188,39 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const deleteConversation = async (id: string) => {
+    if (!userEmail) {
+      console.warn('⚠️ ConversationContext.deleteConversation: No userEmail, returning');
+      return;
+    }
+
     try {
-      console.log('ConversationContext: Deleting conversation from Azure:', id);
+      console.log('🗑️ ConversationContext: Deleting conversation from Azure:', id);
       
-      // TODO: Implement delete endpoint in Azure backend
-      // For now, just remove from local state and reload from Azure
+      // Call Azure API to delete the conversation
+      await azureConversationService.deleteConversation(id, userEmail);
+      console.log('✅ ConversationContext: Conversation deleted from Azure successfully');
       
-      const updated = conversations.filter(c => c.id !== id);
-      setConversations(updated);
+      // Update local state by removing the conversation
+      const updatedConversations = conversations.filter(c => c.id !== id);
+      setConversations(updatedConversations);
+      console.log('📝 ConversationContext: Updated local conversations list, new count:', updatedConversations.length);
       
+      // If the deleted conversation was the current one, clear it
       if (currentConversation?.id === id) {
+        console.log('🔄 ConversationContext: Deleted conversation was current, clearing current conversation');
         setCurrentConversation(null);
       }
       
-      console.log('ConversationContext: Conversation removed from local state');
+      console.log('🎉 ConversationContext: Conversation deletion completed successfully');
     } catch (error) {
-      console.error('Error deleting conversation:', error);
+      console.error('💥 ConversationContext: Error deleting conversation from Azure:', error);
+      console.error('🔍 ConversationContext: Delete error details:', {
+        conversationId: id,
+        userEmail,
+        errorType: typeof error,
+        errorMessage: error instanceof Error ? error.message : String(error)
+      });
+      throw error;
     }
   };
 

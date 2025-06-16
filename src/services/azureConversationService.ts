@@ -216,6 +216,52 @@ export class AzureConversationService {
     }
   }
 
+  // Eliminar conversación
+  async deleteConversation(conversationId: string, userEmail: string): Promise<void> {
+    const endpoint = `${API_BASE_URL}/conversations/${conversationId}?user_id=${encodeURIComponent(userEmail)}`;
+    
+    console.log('🚀 AZURE API REQUEST - DELETE CONVERSATION');
+    console.log('📍 Endpoint:', endpoint);
+    console.log('🆔 Conversation ID:', conversationId);
+    console.log('👤 User Email:', userEmail);
+    console.log('🔗 Method: DELETE');
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      console.log('📈 Response Status:', response.status);
+      console.log('📊 Response Headers:', Object.fromEntries(response.headers.entries()));
+      console.log('✅ Response OK:', response.ok);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Response Error Text:', errorText);
+        throw new Error(`Failed to delete conversation: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+
+      const result = await response.text();
+      console.log('🎉 SUCCESS Response Body:', result);
+      console.log('✅ Conversation deleted successfully');
+
+    } catch (error) {
+      console.error('💥 AZURE API ERROR - DELETE CONVERSATION:', error);
+      console.error('🔍 Error Type:', typeof error);
+      console.error('📝 Error Message:', error instanceof Error ? error.message : String(error));
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        console.error('🌐 Network Error: Unable to connect to Azure API');
+        console.error('🔗 Check if the endpoint is accessible:', endpoint);
+      }
+      
+      throw error;
+    }
+  }
+
   // Subir archivo
   async uploadFile(file: File, userEmail: string, conversationId: string): Promise<string> {
     try {
