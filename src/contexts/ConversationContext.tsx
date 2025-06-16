@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Conversation, ConversationSummary } from '../types/conversation';
 import { ChatMessage } from '../types/chat';
@@ -32,7 +31,10 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   useEffect(() => {
     if (userEmail) {
+      console.log('🔍 ConversationContext: User email detected, loading conversations:', userEmail);
       loadConversations();
+    } else {
+      console.log('⚠️ ConversationContext: No user email, skipping conversation load');
     }
   }, [userEmail]);
 
@@ -42,21 +44,68 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, [currentConversation]);
 
   const loadConversations = async () => {
-    if (!userEmail) return;
+    if (!userEmail) {
+      console.log('⚠️ ConversationContext.loadConversations: No userEmail, returning');
+      return;
+    }
     
     try {
       setIsLoading(true);
-      console.log('ConversationContext: Loading conversations from Azure API only');
+      console.log('🚀 ConversationContext.loadConversations: Starting to load conversations for user:', userEmail);
+      
       const azureConversations = await azureConversationService.listUserConversations(userEmail);
-      const summaries = azureConversations.map(conv => azureConversationService.convertToSummary(conv));
+      console.log('📋 ConversationContext.loadConversations: Raw Azure conversations received:', {
+        count: azureConversations.length,
+        conversations: azureConversations
+      });
+
+      if (azureConversations.length === 0) {
+        console.log('📭 ConversationContext.loadConversations: No conversations found in Azure for user:', userEmail);
+        setConversations([]);
+        return;
+      }
+
+      console.log('🔄 ConversationContext.loadConversations: Converting Azure conversations to summaries...');
+      const summaries = azureConversations.map((conv, index) => {
+        console.log(`📝 ConversationContext.loadConversations: Converting conversation ${index + 1}/${azureConversations.length}:`, {
+          id: conv.id,
+          title: conv.title,
+          messagesCount: conv.messages?.length || 0,
+          createdAt: conv.createdAt,
+          updatedAt: conv.updatedAt,
+          tags: conv.tags
+        });
+        
+        try {
+          const summary = azureConversationService.convertToSummary(conv);
+          console.log(`✅ ConversationContext.loadConversations: Successfully converted conversation ${conv.id} to summary:`, summary);
+          return summary;
+        } catch (error) {
+          console.error(`❌ ConversationContext.loadConversations: Error converting conversation ${conv.id}:`, error);
+          console.error('📊 ConversationContext.loadConversations: Problematic conversation data:', conv);
+          throw error;
+        }
+      });
+
+      console.log('🎉 ConversationContext.loadConversations: Successfully converted all conversations to summaries:', {
+        count: summaries.length,
+        summaries: summaries
+      });
+
       setConversations(summaries);
-      console.log('ConversationContext: Loaded', summaries.length, 'conversations from Azure');
+      console.log('💾 ConversationContext.loadConversations: Conversations state updated with', summaries.length, 'summaries');
+      
     } catch (error) {
-      console.error('Error loading conversations from Azure:', error);
-      // No fallback to localStorage - only Azure storage
+      console.error('💥 ConversationContext.loadConversations: Error loading conversations:', error);
+      console.error('🔍 ConversationContext.loadConversations: Error details:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : 'No stack trace'
+      });
       setConversations([]);
     } finally {
       setIsLoading(false);
+      console.log('🏁 ConversationContext.loadConversations: Loading process completed');
     }
   };
 
@@ -175,13 +224,45 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const searchConversations = (query: string): ConversationSummary[] => {
-    if (!query.trim()) return conversations;
+    console.log('🔍 ConversationContext.searchConversations: Searching with query:', query);
+    console.log('📋 ConversationContext.searchConversations: Available conversations to search:', {
+      count: conversations.length,
+      conversations: conversations.map(c => ({ id: c.id, title: c.title, lastMessage: c.lastMessage.substring(0, 50) }))
+    });
     
-    return conversations.filter(conv => 
-      conv.title.toLowerCase().includes(query.toLowerCase()) ||
-      conv.lastMessage.toLowerCase().includes(query.toLowerCase()) ||
-      conv.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
-    );
+    if (!query.trim()) {
+      console.log('📤 ConversationContext.searchConversations: Empty query, returning all conversations:', conversations.length);
+      return conversations;
+    }
+    
+    const filtered = conversations.filter(conv => {
+      const titleMatch = conv.title.toLowerCase().includes(query.toLowerCase());
+      const messageMatch = conv.lastMessage.toLowerCase().includes(query.toLowerCase());
+      const tagMatch = conv.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()));
+      
+      const matches = titleMatch || messageMatch || tagMatch;
+      
+      if (matches) {
+        console.log('✅ ConversationContext.searchConversations: Conversation matches query:', {
+          id: conv.id,
+          title: conv.title,
+          titleMatch,
+          messageMatch,
+          tagMatch
+        });
+      }
+      
+      return matches;
+    });
+    
+    console.log('📤 ConversationContext.searchConversations: Filtered results:', {
+      query,
+      originalCount: conversations.length,
+      filteredCount: filtered.length,
+      filtered: filtered.map(c => ({ id: c.id, title: c.title }))
+    });
+    
+    return filtered;
   };
 
   const addMessageToCurrentConversation = useCallback((message: ChatMessage) => {

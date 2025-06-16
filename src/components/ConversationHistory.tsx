@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, MessageSquare, Archive, Trash2, Edit3, Calendar, Tag } from 'lucide-react';
 import { useConversation } from '../contexts/ConversationContext';
 import { Button } from './ui/button';
@@ -20,14 +20,53 @@ export const ConversationHistory: React.FC<ConversationHistoryProps> = ({ onClos
     loadConversation, 
     deleteConversation, 
     archiveConversation,
-    searchConversations
+    searchConversations,
+    isLoading
   } = useConversation();
+
+  // Log conversations data when component mounts and when conversations change
+  useEffect(() => {
+    console.log('🏛️ ConversationHistory: Component mounted/conversations changed');
+    console.log('📊 ConversationHistory: Conversations data:', {
+      count: conversations.length,
+      isLoading,
+      conversations: conversations.map(c => ({
+        id: c.id,
+        title: c.title,
+        messageCount: c.messageCount,
+        lastMessage: c.lastMessage.substring(0, 50),
+        createdAt: c.createdAt,
+        updatedAt: c.updatedAt,
+        tags: c.tags
+      }))
+    });
+  }, [conversations, isLoading]);
 
   const filteredConversations = searchConversations(searchQuery);
 
+  // Log filtered results
+  useEffect(() => {
+    console.log('🔍 ConversationHistory: Search results updated:', {
+      searchQuery,
+      originalCount: conversations.length,
+      filteredCount: filteredConversations.length,
+      filteredConversations: filteredConversations.map(c => ({
+        id: c.id,
+        title: c.title
+      }))
+    });
+  }, [searchQuery, filteredConversations, conversations.length]);
+
   const handleLoadConversation = async (id: string) => {
+    console.log('📂 ConversationHistory: Loading conversation:', id);
     await loadConversation(id);
     onClose();
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newQuery = e.target.value;
+    console.log('🔍 ConversationHistory: Search query changed:', newQuery);
+    setSearchQuery(newQuery);
   };
 
   return (
@@ -39,18 +78,37 @@ export const ConversationHistory: React.FC<ConversationHistoryProps> = ({ onClos
           <Input
             placeholder="Buscar conversaciones..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={handleSearchChange}
             className="pl-10"
           />
+        </div>
+        {/* Debug info */}
+        <div className="mt-2 text-xs text-gray-500">
+          Debug: {conversations.length} conversaciones cargadas, {filteredConversations.length} filtradas
+          {isLoading && " (Cargando...)"}
         </div>
       </div>
 
       {/* Lista de conversaciones */}
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-3">
-          {filteredConversations.length === 0 ? (
+          {isLoading ? (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              {searchQuery ? 'No se encontraron conversaciones' : 'No hay conversaciones guardadas'}
+              Cargando conversaciones...
+            </div>
+          ) : filteredConversations.length === 0 ? (
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              {searchQuery ? (
+                <>
+                  <p>No se encontraron conversaciones para "{searchQuery}"</p>
+                  <p className="text-xs mt-2">Total disponibles: {conversations.length}</p>
+                </>
+              ) : (
+                <>
+                  <p>No hay conversaciones guardadas</p>
+                  <p className="text-xs mt-2">Verificando Azure API...</p>
+                </>
+              )}
             </div>
           ) : (
             filteredConversations.map((conversation) => (
