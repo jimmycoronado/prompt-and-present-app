@@ -11,6 +11,36 @@ export interface AzureConversation {
     role: 'user' | 'assistant';
     content: string;
     timestamp: string;
+    // Add support for structured data
+    data?: Array<Record<string, any>>;
+    chart?: {
+      type: 'bar' | 'line' | 'pie' | 'area';
+      data: Array<Record<string, any>>;
+      xAxis?: string;
+      yAxis?: string;
+    };
+    downloadLink?: {
+      url: string;
+      filename: string;
+    };
+    videoPreview?: {
+      url: string;
+      title: string;
+      thumbnail?: string;
+      duration?: string;
+      platform?: string;
+    };
+    files?: Array<{
+      name: string;
+      size: number;
+      type: string;
+      url?: string;
+    }>;
+    metadata?: {
+      processingTime: number;
+      model: string;
+      tokensUsed: number;
+    };
   }>;
   createdAt: string;
   updatedAt: string;
@@ -397,17 +427,29 @@ export class AzureConversationService {
                 fileUploadTime <= new Date(azureConv.messages[index + 1]?.timestamp || Date.now()));
       });
 
+      // Combine Azure files with message files
+      const combinedFiles = [
+        ...(msg.files || []),
+        ...messageFiles.map(file => ({
+          name: file.fileName,
+          size: 0, // No disponible en la respuesta de Azure
+          type: 'application/octet-stream', // Tipo genérico
+          url: file.url
+        }))
+      ];
+
       return {
         id: `${azureConv.id}_${index}`,
         type: msg.role === 'user' ? 'user' : 'assistant',
         content: msg.content,
         timestamp,
-        files: messageFiles.length > 0 ? messageFiles.map(file => ({
-          name: file.fileName,
-          size: 0, // No disponible en la respuesta de Azure
-          type: 'application/octet-stream', // Tipo genérico
-          url: file.url
-        })) : undefined
+        files: combinedFiles.length > 0 ? combinedFiles : undefined,
+        // Include all structured data from Azure
+        data: msg.data,
+        chart: msg.chart,
+        downloadLink: msg.downloadLink,
+        videoPreview: msg.videoPreview,
+        metadata: msg.metadata
       };
     });
 
@@ -449,7 +491,7 @@ export class AzureConversationService {
     };
   }
 
-  // Convertir conversación interna a formato de Azure
+  // Convertir conversación interna a formato de Azure - UPDATED to include all message data
   convertToAzureFormat(conversation: Conversation): Partial<AzureConversation> {
     return {
       id: conversation.id,
@@ -457,7 +499,14 @@ export class AzureConversationService {
       messages: conversation.messages.map(msg => ({
         role: msg.type === 'user' ? 'user' : 'assistant',
         content: msg.content,
-        timestamp: msg.timestamp.toISOString()
+        timestamp: msg.timestamp.toISOString(),
+        // Include all structured data
+        data: msg.data,
+        chart: msg.chart,
+        downloadLink: msg.downloadLink,
+        videoPreview: msg.videoPreview,
+        files: msg.files,
+        metadata: msg.metadata
       })),
       tags: conversation.tags,
       isArchived: conversation.isArchived,
