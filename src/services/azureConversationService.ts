@@ -250,7 +250,21 @@ export class AzureConversationService {
   // Convertir conversación de Azure a formato interno
   convertToInternalFormat(azureConv: AzureConversation, files: AzureFileInfo[] = []): Conversation {
     const messages: ChatMessage[] = azureConv.messages.map((msg, index) => {
-      const timestamp = new Date(msg.timestamp);
+      // Ensure timestamp is a proper Date object
+      let timestamp: Date;
+      if (typeof msg.timestamp === 'string') {
+        timestamp = new Date(msg.timestamp);
+        // Validate the date is valid
+        if (isNaN(timestamp.getTime())) {
+          console.warn('Invalid timestamp received from Azure:', msg.timestamp, 'using current time');
+          timestamp = new Date();
+        }
+      } else if (msg.timestamp instanceof Date) {
+        timestamp = msg.timestamp;
+      } else {
+        console.warn('Unexpected timestamp type from Azure:', typeof msg.timestamp, 'using current time');
+        timestamp = new Date();
+      }
       
       // Buscar archivos que corresponden a este mensaje
       const messageFiles = files.filter(file => {
@@ -274,12 +288,36 @@ export class AzureConversationService {
       };
     });
 
+    // Ensure conversation dates are proper Date objects
+    let createdAt: Date;
+    let updatedAt: Date;
+    
+    if (typeof azureConv.createdAt === 'string') {
+      createdAt = new Date(azureConv.createdAt);
+      if (isNaN(createdAt.getTime())) {
+        console.warn('Invalid createdAt from Azure:', azureConv.createdAt);
+        createdAt = new Date();
+      }
+    } else {
+      createdAt = azureConv.createdAt instanceof Date ? azureConv.createdAt : new Date();
+    }
+
+    if (typeof azureConv.updatedAt === 'string') {
+      updatedAt = new Date(azureConv.updatedAt);
+      if (isNaN(updatedAt.getTime())) {
+        console.warn('Invalid updatedAt from Azure:', azureConv.updatedAt);
+        updatedAt = new Date();
+      }
+    } else {
+      updatedAt = azureConv.updatedAt instanceof Date ? azureConv.updatedAt : new Date();
+    }
+
     return {
       id: azureConv.id,
       title: azureConv.title,
       messages,
-      createdAt: new Date(azureConv.createdAt),
-      updatedAt: new Date(azureConv.updatedAt),
+      createdAt,
+      updatedAt,
       tags: azureConv.tags,
       isArchived: azureConv.isArchived,
       totalTokens: azureConv.totalTokens
