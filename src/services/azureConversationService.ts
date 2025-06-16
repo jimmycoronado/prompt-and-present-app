@@ -131,9 +131,9 @@ export class AzureConversationService {
     }
   }
 
-  // Obtener conversación por ID
+  // Obtener conversación por ID - FIXED ENDPOINT URL
   async getConversation(conversationId: string, userEmail: string): Promise<AzureConversation | null> {
-    const endpoint = `${API_BASE_URL}/conversation/${conversationId}?user_id=${encodeURIComponent(userEmail)}`;
+    const endpoint = `${API_BASE_URL}/conversations/${conversationId}?user_id=${encodeURIComponent(userEmail)}`;
     
     console.log('🚀 AZURE API REQUEST - GET CONVERSATION');
     console.log('📍 Endpoint:', endpoint);
