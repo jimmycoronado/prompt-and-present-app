@@ -246,6 +246,57 @@ export class AzureConversationService {
     }
   }
 
+  // Obtener banners del usuario
+  async getUserBanners(userEmail: string): Promise<any[]> {
+    const endpoint = `${API_BASE_URL}/banner/${encodeURIComponent(userEmail)}`;
+    
+    console.log('🚀 AZURE API REQUEST - GET USER BANNERS');
+    console.log('📍 Endpoint:', endpoint);
+    console.log('👤 User Email:', userEmail);
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      console.log('📈 Response Status:', response.status);
+      console.log('📊 Response Headers:', Object.fromEntries(response.headers.entries()));
+      console.log('✅ Response OK:', response.ok);
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          console.log('📭 No banners found for user (404)');
+          return [];
+        }
+        const errorText = await response.text();
+        console.error('❌ Response Error Text:', errorText);
+        throw new Error(`Failed to get user banners: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('🎉 SUCCESS Response Body:', JSON.stringify(result, null, 2));
+      console.log('📊 Number of banners:', Array.isArray(result) ? result.length : 0);
+
+      return Array.isArray(result) ? result : [];
+    } catch (error) {
+      console.error('💥 AZURE API ERROR - GET USER BANNERS:', error);
+      console.error('🔍 Error Type:', typeof error);
+      console.error('📝 Error Message:', error instanceof Error ? error.message : String(error));
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        console.error('🌐 Network Error: Unable to connect to Azure API');
+        console.error('🔗 Check if the endpoint is accessible:', endpoint);
+      }
+      
+      // Return empty array instead of throwing to avoid breaking the UI
+      console.warn('⚠️ Returning empty banners array due to API error');
+      return [];
+    }
+  }
+
   // Convertir conversación de Azure a formato interno
   convertToInternalFormat(azureConv: AzureConversation, files: AzureFileInfo[] = []): Conversation {
     const messages: ChatMessage[] = azureConv.messages.map((msg, index) => {

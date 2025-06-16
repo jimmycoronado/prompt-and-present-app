@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Paperclip, Radio } from 'lucide-react';
 import { Button } from './ui/button';
@@ -71,6 +70,35 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       }, 0);
     }
   }, [initialValue]);
+
+  // Exposed method for banner messages
+  const sendBannerMessage = (automaticReply: string) => {
+    console.log('📝 ChatInput: Sending banner message:', automaticReply);
+    setMessage(automaticReply);
+    onValueChange?.(automaticReply);
+    
+    // Auto-resize textarea
+    setTimeout(() => {
+      autoResizeTextarea();
+      // Send the message automatically after a brief delay
+      setTimeout(() => {
+        if (automaticReply.trim()) {
+          onSendMessage(automaticReply.trim());
+          setMessage("");
+          onValueChange?.("");
+          
+          if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+          }
+        }
+      }, 100);
+    }, 0);
+  };
+
+  // Expose the method via ref
+  React.useImperativeHandle(React.forwardRef(() => ({})).current, () => ({
+    sendBannerMessage
+  }));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

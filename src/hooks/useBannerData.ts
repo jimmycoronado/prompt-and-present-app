@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { BannerData, ApiBannerResponse } from '../types/banner';
 import { useAuth } from '../contexts/AuthContext';
+import { azureConversationService } from '../services/azureConversationService';
 
 // Helper function to determine text color based on background color
 const getTextColor = (hexColor: string): string => {
@@ -33,73 +34,50 @@ const transformApiBanner = (apiBanner: ApiBannerResponse): BannerData => ({
   textColor: getTextColor(apiBanner.HEXBubbleColor)
 });
 
-// Mock data generator - esto se reemplazará con la llamada real al API
-const generateMockBanners = (userEmail: string): ApiBannerResponse[] => {
-  return [
-    {
-      Id: 1,
-      CutOffDate: "2025-05-31T00:00:00.000Z",
-      Email: userEmail,
-      MessageOrder: 1,
-      Title: "Comisiones del Mes",
-      MessageText: "¡Excelente trabajo! Has generado $85,340 MXN",
-      IconLink: "https://cdn-icons-png.flaticon.com/512/2921/2921222.png",
-      ButtonText: "Ver detalle",
-      AutomaticReply: "Hola DALI, muéstrame el detalle de mis comisiones del mes actual",
-      HEXBubbleColor: "#10B981"
-    },
-    {
-      Id: 2,
-      CutOffDate: "2025-05-31T00:00:00.000Z",
-      Email: userEmail,
-      MessageOrder: 2,
-      Title: "Cumpleaños Hoy",
-      MessageText: "Tienes 8 clientes cumpliendo años. ¡Oportunidad perfecta para contactar!",
-      IconLink: "https://cdn-icons-png.flaticon.com/512/3176/3176366.png",
-      ButtonText: "Ver lista",
-      AutomaticReply: "Hola DALI, muéstrame la lista de clientes que cumplen años hoy",
-      HEXBubbleColor: "#3B82F6"
-    },
-    {
-      Id: 3,
-      CutOffDate: "2025-05-31T00:00:00.000Z",
-      Email: userEmail,
-      MessageOrder: 3,
-      Title: "Clientes en Riesgo",
-      MessageText: "3 clientes no han sido contactados en 30+ días",
-      IconLink: "https://cdn-icons-png.flaticon.com/512/564/564619.png",
-      ButtonText: "Revisar",
-      AutomaticReply: "Hola DALI, muéstrame los clientes que están en riesgo por falta de contacto",
-      HEXBubbleColor: "#EF4444"
-    }
-  ];
-};
-
 export const useBannerData = () => {
   const { user } = useAuth();
   const [banners, setBanners] = useState<BannerData[]>([]);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Fetch banners from Azure API whenever user changes
   useEffect(() => {
-    if (user) {
-      // Simular carga de datos - aquí se hará la llamada real al API
-      setTimeout(() => {
-        const mockApiResponse = generateMockBanners(user.email);
-        // Ordenar por MessageOrder y transformar
-        const sortedBanners = mockApiResponse
+    const fetchBanners = async () => {
+      if (!user?.email) {
+        setIsLoading(false);
+        setBanners([]);
+        return;
+      }
+
+      console.log('🎌 useBannerData: Fetching banners for user:', user.email);
+      setIsLoading(true);
+
+      try {
+        const apiResponse = await azureConversationService.getUserBanners(user.email);
+        console.log('🎌 useBannerData: Received banners from API:', apiResponse);
+        
+        // Sort by MessageOrder and transform
+        const sortedBanners = apiResponse
           .sort((a, b) => a.MessageOrder - b.MessageOrder)
           .map(transformApiBanner);
         
+        console.log('🎌 useBannerData: Transformed and sorted banners:', sortedBanners);
         setBanners(sortedBanners);
+        setCurrentBannerIndex(0); // Reset to first banner when new data arrives
+      } catch (error) {
+        console.error('🎌 useBannerData: Error fetching banners:', error);
+        setBanners([]); // Set empty array on error
+      } finally {
         setIsLoading(false);
-      }, 1000);
-    }
-  }, [user]);
+      }
+    };
+
+    fetchBanners();
+  }, [user?.email]); // Depend on user email to refetch when user changes
 
   // Rotación automática de banners cada 8 segundos
   useEffect(() => {
-    if (banners.length === 0) return;
+    if (banners.length <= 1) return; // No need to rotate if 0 or 1 banner
 
     const interval = setInterval(() => {
       setCurrentBannerIndex((prev) => (prev + 1) % banners.length);
@@ -109,15 +87,21 @@ export const useBannerData = () => {
   }, [banners.length]);
 
   const goToNext = () => {
-    setCurrentBannerIndex((prev) => (prev + 1) % banners.length);
+    if (banners.length > 1) {
+      setCurrentBannerIndex((prev) => (prev + 1) % banners.length);
+    }
   };
 
   const goToPrevious = () => {
-    setCurrentBannerIndex((prev) => (prev - 1 + banners.length) % banners.length);
+    if (banners.length > 1) {
+      setCurrentBannerIndex((prev) => (prev - 1 + banners.length) % banners.length);
+    }
   };
 
   const goToBanner = (index: number) => {
-    setCurrentBannerIndex(index);
+    if (index >= 0 && index < banners.length) {
+      setCurrentBannerIndex(index);
+    }
   };
 
   const currentBanner = banners[currentBannerIndex];
