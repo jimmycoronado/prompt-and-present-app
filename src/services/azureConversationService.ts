@@ -403,6 +403,9 @@ export class AzureConversationService {
 
   // Convertir conversación de Azure a formato interno
   convertToInternalFormat(azureConv: AzureConversation, files: AzureFileInfo[] = []): Conversation {
+    // Ensure files is always an array
+    const validFiles = Array.isArray(files) ? files : [];
+    
     const messages: ChatMessage[] = azureConv.messages.map((msg, index) => {
       // Ensure timestamp is a proper Date object
       let timestamp: Date;
@@ -419,22 +422,30 @@ export class AzureConversationService {
         timestamp = new Date();
       }
       
-      // Buscar archivos que corresponden a este mensaje
-      const messageFiles = files.filter(file => {
-        const fileUploadTime = new Date(file.uploaded_at);
-        return fileUploadTime <= timestamp && 
-               (index === azureConv.messages.length - 1 || 
-                fileUploadTime <= new Date(azureConv.messages[index + 1]?.timestamp || Date.now()));
+      // Buscar archivos que corresponden a este mensaje - with proper array validation
+      const messageFiles = validFiles.filter(file => {
+        if (!file || !file.uploaded_at) return false;
+        
+        try {
+          const fileUploadTime = new Date(file.uploaded_at);
+          return fileUploadTime <= timestamp && 
+                 (index === azureConv.messages.length - 1 || 
+                  fileUploadTime <= new Date(azureConv.messages[index + 1]?.timestamp || Date.now()));
+        } catch (error) {
+          console.warn('Invalid file upload time:', file.uploaded_at);
+          return false;
+        }
       });
 
-      // Combine Azure files with message files
+      // Combine Azure files with message files - with proper validation
+      const msgFiles = Array.isArray(msg.files) ? msg.files : [];
       const combinedFiles = [
-        ...(msg.files || []),
+        ...msgFiles,
         ...messageFiles.map(file => ({
-          name: file.fileName,
+          name: file.fileName || 'unknown',
           size: 0, // No disponible en la respuesta de Azure
           type: 'application/octet-stream', // Tipo genérico
-          url: file.url
+          url: file.url || ''
         }))
       ];
 
@@ -485,9 +496,9 @@ export class AzureConversationService {
       messages,
       createdAt,
       updatedAt,
-      tags: azureConv.tags,
-      isArchived: azureConv.isArchived,
-      totalTokens: azureConv.totalTokens
+      tags: azureConv.tags || [],
+      isArchived: azureConv.isArchived || false,
+      totalTokens: azureConv.totalTokens || 0
     };
   }
 
