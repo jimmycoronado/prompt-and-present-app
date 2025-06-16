@@ -1,3 +1,4 @@
+
 import { Conversation, ConversationSummary } from '../types/conversation';
 import { ChatMessage } from '../types/chat';
 
@@ -32,10 +33,18 @@ export class AzureConversationService {
   // Crear nueva conversación
   async createConversation(userId: string, title: string): Promise<string> {
     const endpoint = `${API_BASE_URL}/conversations`;
+    
+    // Generate unique conversation ID
+    const conversationId = `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const now = new Date().toISOString();
+    
     const requestBody = {
+      id: conversationId,
       userId,
       title,
       messages: [],
+      createdAt: now,
+      updatedAt: now,
       tags: [],
       isArchived: false,
       totalTokens: 0,
@@ -45,8 +54,10 @@ export class AzureConversationService {
     console.log('🚀 AZURE API REQUEST - CREATE CONVERSATION');
     console.log('📍 Endpoint:', endpoint);
     console.log('📦 Request Body:', JSON.stringify(requestBody, null, 2));
+    console.log('🆔 Generated Conversation ID:', conversationId);
     console.log('👤 User ID:', userId);
     console.log('📝 Title:', title);
+    console.log('⏰ Created/Updated At:', now);
 
     try {
       const response = await fetch(endpoint, {
@@ -71,7 +82,7 @@ export class AzureConversationService {
       console.log('🎉 SUCCESS Response Body:', JSON.stringify(result, null, 2));
       console.log('🆔 Created Conversation ID:', result.id);
 
-      return result.id;
+      return result.id || conversationId;
     } catch (error) {
       console.error('💥 AZURE API ERROR - CREATE CONVERSATION:', error);
       console.error('🔍 Error Type:', typeof error);
