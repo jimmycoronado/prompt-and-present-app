@@ -78,6 +78,7 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
   const [templateContent, setTemplateContent] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
   const [userTemplates, setUserTemplates] = useState<PromptTemplate[]>([]);
+  const [conversationInitialized, setConversationInitialized] = useState(false);
   const mainContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -144,13 +145,23 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
     console.log('ChatInterface: Current conversation changed:', currentConversation?.id, currentConversation?.messages?.length);
   }, [currentConversation]);
 
-  // Crear nueva conversación si no existe una actual
+  // Initialize conversation once when component mounts and user is available
   useEffect(() => {
-    if (!currentConversation) {
-      console.log('ChatInterface: Creating new conversation');
-      createNewConversation();
+    if (userEmail && !conversationInitialized && !currentConversation) {
+      console.log('ChatInterface: Initializing new conversation for user:', userEmail);
+      setConversationInitialized(true);
+      
+      createNewConversation()
+        .then((conversationId) => {
+          console.log('ChatInterface: Successfully created conversation:', conversationId);
+        })
+        .catch((error) => {
+          console.error('ChatInterface: Failed to create conversation:', error);
+          // Reset the flag so it can try again
+          setConversationInitialized(false);
+        });
     }
-  }, [currentConversation, createNewConversation]);
+  }, [userEmail, conversationInitialized, currentConversation, createNewConversation]);
 
   // File validation helper
   const validateAndProcessFiles = (files: FileList | null) => {
@@ -240,16 +251,36 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
 
   const handleSendMessage = async (content: string) => {
     if (!content.trim() && uploadedFiles.length === 0) return;
-    if (!currentConversation) return;
 
     console.log('ChatInterface: START handleSendMessage with content:', content);
+    console.log('ChatInterface: Current conversation at start:', currentConversation?.id);
+
+    // Ensure we have a conversation before proceeding
+    let activeConversation = currentConversation;
+    if (!activeConversation) {
+      console.log('ChatInterface: No current conversation, creating one...');
+      try {
+        const conversationId = await createNewConversation();
+        console.log('ChatInterface: Created conversation:', conversationId);
+        // The currentConversation should be updated by the context
+        // We'll proceed with the message sending
+      } catch (error) {
+        console.error('ChatInterface: Failed to create conversation:', error);
+        toast({
+          title: "Error",
+          description: "No se pudo crear la conversación. Los mensajes se guardarán localmente.",
+          variant: "destructive"
+        });
+      }
+    }
+
     console.log('ChatInterface: Using authenticated user email for Azure API:', userEmail);
 
-    // Subir archivos primero si existen
+    // Upload files first if they exist
     const uploadedFileNames: string[] = [];
-    if (uploadedFiles.length > 0) {
+    if (uploadedFiles.length > 0 && currentConversation) {
       try {
-        console.log('ChatInterface: Uploading files to Azure:', uploadedFiles.length);
+        console.log('ChatInterface: Uploading files:', uploadedFiles.length);
         for (const file of uploadedFiles) {
           const fileName = await uploadFileToConversation(file, currentConversation.id);
           uploadedFileNames.push(fileName);
@@ -259,9 +290,11 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
         console.error('ChatInterface: Error uploading files:', error);
         toast({
           title: "Error al subir archivos",
-          description: "No se pudieron subir todos los archivos",
+          description: "Los archivos se incluirán en el mensaje pero pueden no estar disponibles en el servidor",
           variant: "destructive"
         });
+        // Continue with local file names
+        uploadedFiles.forEach(file => uploadedFileNames.push(file.name));
       }
     }
 
@@ -293,9 +326,7 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
     }, 100);
 
     try {
-      console.log('ChatInterface: Calling Azure API with conversation ID:', currentConversation.id);
-      // Aquí deberías llamar al agente maestro pasándole el conversation_id
-      // Por ahora mantengo la llamada existente
+      console.log('ChatInterface: Calling Azure API');
       const response = await callAzureAgentApi(content, uploadedFiles, aiSettings, userEmail, accessToken);
       console.log('ChatInterface: Received Azure API response:', response);
       
@@ -347,11 +378,6 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
 
   const handleVoiceMessage = (message: ChatMessageType) => {
     console.log('ChatInterface: Voice message received:', message);
-    
-    // Create new conversation if none exists
-    if (!currentConversation) {
-      createNewConversation();
-    }
     
     // Add message to conversation
     addMessageToCurrentConversation(message);
