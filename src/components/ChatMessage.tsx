@@ -1,5 +1,3 @@
-
-
 import { User, Download, Copy, ThumbsUp, ThumbsDown } from "lucide-react";
 import { ChatMessage as ChatMessageType } from "../types/chat";
 import { DataTable } from "./DataTable";
@@ -25,6 +23,23 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
   const { photoUrl } = useUserPhoto();
   const [feedback, setFeedback] = useState<'positive' | 'negative' | null>(null);
   const [isHovered, setIsHovered] = useState(false);
+
+  // Ensure timestamp is a Date object - safety check
+  const ensureValidTimestamp = (timestamp: any): Date => {
+    if (timestamp instanceof Date && !isNaN(timestamp.getTime())) {
+      return timestamp;
+    }
+    if (typeof timestamp === 'string') {
+      const date = new Date(timestamp);
+      if (!isNaN(date.getTime())) {
+        return date;
+      }
+    }
+    console.warn('Invalid timestamp in ChatMessage:', timestamp, 'using current time');
+    return new Date();
+  };
+
+  const validTimestamp = ensureValidTimestamp(message.timestamp);
 
   const handleCopyText = async () => {
     try {
@@ -307,8 +322,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
           <div className={`mt-0.5 text-xs text-gray-500 dark:text-gray-400 flex items-center ${
             isUser ? 'justify-end' : 'justify-start'
           }`}>
-            <time dateTime={message.timestamp.toISOString()}>
-              {message.timestamp.toLocaleTimeString()}
+            <time dateTime={validTimestamp.toISOString()}>
+              {validTimestamp.toLocaleTimeString()}
             </time>
           </div>
         </div>
@@ -316,4 +331,3 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
     </div>
   );
 };
-

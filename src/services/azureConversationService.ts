@@ -1,4 +1,3 @@
-
 import { Conversation, ConversationSummary } from '../types/conversation';
 import { ChatMessage } from '../types/chat';
 
@@ -259,9 +258,8 @@ export class AzureConversationService {
           console.warn('Invalid timestamp received from Azure:', msg.timestamp, 'using current time');
           timestamp = new Date();
         }
-      } else if (msg.timestamp instanceof Date) {
-        timestamp = msg.timestamp;
       } else {
+        // If it's not a string, treat it as invalid and use current time
         console.warn('Unexpected timestamp type from Azure:', typeof msg.timestamp, 'using current time');
         timestamp = new Date();
       }
@@ -299,7 +297,8 @@ export class AzureConversationService {
         createdAt = new Date();
       }
     } else {
-      createdAt = azureConv.createdAt instanceof Date ? azureConv.createdAt : new Date();
+      // If it's not a string, use current time
+      createdAt = new Date();
     }
 
     if (typeof azureConv.updatedAt === 'string') {
@@ -309,7 +308,8 @@ export class AzureConversationService {
         updatedAt = new Date();
       }
     } else {
-      updatedAt = azureConv.updatedAt instanceof Date ? azureConv.updatedAt : new Date();
+      // If it's not a string, use current time
+      updatedAt = new Date();
     }
 
     return {
