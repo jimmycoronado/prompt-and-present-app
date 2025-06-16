@@ -25,13 +25,13 @@ export const usePersistence = () => {
       setIsLoading(true);
       setError(null);
       
-      console.log('usePersistence: Initializing user persistence for:', user.email);
-      // Con Azure, la inicialización es automática cuando el usuario hace login
-      // Las conversaciones se cargan automáticamente en el ConversationContext
+      console.log('usePersistence: Initializing Azure-only persistence for:', user.email);
+      // With Azure, initialization is automatic when user logs in
+      // Conversations are loaded automatically in the ConversationContext
       setIsInitialized(true);
       
     } catch (error) {
-      console.error('Failed to initialize user persistence:', error);
+      console.error('Failed to initialize Azure persistence:', error);
       setError(error instanceof Error ? error.message : 'Failed to initialize persistence');
     } finally {
       setIsLoading(false);
@@ -43,10 +43,12 @@ export const usePersistence = () => {
     
     try {
       setError(null);
+      console.log('usePersistence: Saving conversation to Azure only:', conversation.id);
       const azureFormat = azureConversationService.convertToAzureFormat(conversation);
       await azureConversationService.updateConversation(conversation.id, user.email, azureFormat);
+      console.log('usePersistence: Conversation saved to Azure successfully');
     } catch (error) {
-      console.error('Failed to save conversation:', error);
+      console.error('Failed to save conversation to Azure:', error);
       setError(error instanceof Error ? error.message : 'Failed to save conversation');
     }
   };
@@ -56,14 +58,18 @@ export const usePersistence = () => {
     
     try {
       setError(null);
+      console.log('usePersistence: Loading conversation from Azure only:', conversationId);
       const azureConv = await azureConversationService.getConversation(conversationId, user.email);
       if (azureConv) {
         const files = await azureConversationService.getConversationFiles(conversationId, user.email);
-        return azureConversationService.convertToInternalFormat(azureConv, files);
+        const conversation = azureConversationService.convertToInternalFormat(azureConv, files);
+        console.log('usePersistence: Conversation loaded from Azure successfully');
+        return conversation;
       }
+      console.log('usePersistence: Conversation not found in Azure');
       return null;
     } catch (error) {
-      console.error('Failed to load conversation:', error);
+      console.error('Failed to load conversation from Azure:', error);
       setError(error instanceof Error ? error.message : 'Failed to load conversation');
       return null;
     }
@@ -74,11 +80,14 @@ export const usePersistence = () => {
     
     try {
       setError(null);
+      console.log('usePersistence: Getting user conversations from Azure only');
       const azureConversations = await azureConversationService.listUserConversations(user.email);
       const filtered = azureConversations.filter(conv => conv.isArchived === archived);
-      return filtered.map(conv => azureConversationService.convertToSummary(conv));
+      const summaries = filtered.map(conv => azureConversationService.convertToSummary(conv));
+      console.log('usePersistence: Retrieved', summaries.length, 'conversations from Azure');
+      return summaries;
     } catch (error) {
-      console.error('Failed to get user conversations:', error);
+      console.error('Failed to get user conversations from Azure:', error);
       setError(error instanceof Error ? error.message : 'Failed to get conversations');
       return [];
     }
@@ -94,10 +103,11 @@ export const usePersistence = () => {
     
     try {
       setError(null);
-      // TODO: Implementar endpoint de feedback en Azure
-      console.log('Message feedback saved:', { messageId, conversationId, feedback, comment });
+      console.log('usePersistence: Saving message feedback to Azure:', { messageId, conversationId, feedback });
+      // TODO: Implement feedback endpoint in Azure backend
+      console.log('Message feedback logged for Azure implementation:', { messageId, conversationId, feedback, comment });
     } catch (error) {
-      console.error('Failed to save message feedback:', error);
+      console.error('Failed to save message feedback to Azure:', error);
       setError(error instanceof Error ? error.message : 'Failed to save feedback');
     }
   };
@@ -107,10 +117,11 @@ export const usePersistence = () => {
     
     try {
       setError(null);
-      // TODO: Implementar guardado de configuraciones en Azure
-      console.log('User settings saved:', { aiSettings, appSettings });
+      console.log('usePersistence: Saving user settings to Azure:', user.email);
+      // TODO: Implement settings endpoints in Azure backend
+      console.log('User settings logged for Azure implementation:', { aiSettings, appSettings });
     } catch (error) {
-      console.error('Failed to save user settings:', error);
+      console.error('Failed to save user settings to Azure:', error);
       setError(error instanceof Error ? error.message : 'Failed to save settings');
     }
   };
@@ -120,11 +131,12 @@ export const usePersistence = () => {
     
     try {
       setError(null);
-      // TODO: Implementar carga de configuraciones desde Azure
-      console.log('Loading user settings from Azure');
+      console.log('usePersistence: Loading user settings from Azure:', user.email);
+      // TODO: Implement settings endpoints in Azure backend
+      console.log('Loading user settings from Azure - to be implemented');
       return null;
     } catch (error) {
-      console.error('Failed to load user settings:', error);
+      console.error('Failed to load user settings from Azure:', error);
       setError(error instanceof Error ? error.message : 'Failed to load settings');
       return null;
     }
@@ -135,15 +147,18 @@ export const usePersistence = () => {
     
     try {
       setError(null);
+      console.log('usePersistence: Uploading file to Azure:', file.name, conversationId);
       const fileName = await azureConversationService.uploadFile(file, user.email, conversationId);
-      return {
+      const fileData = {
         fileName,
         url: `https://skcoDaliAIDev.azurewebsites.net/api/files/${fileName}`,
         size: file.size,
         type: file.type
       };
+      console.log('usePersistence: File uploaded to Azure successfully:', fileData);
+      return fileData;
     } catch (error) {
-      console.error('Failed to upload file:', error);
+      console.error('Failed to upload file to Azure:', error);
       setError(error instanceof Error ? error.message : 'Failed to upload file');
       return null;
     }

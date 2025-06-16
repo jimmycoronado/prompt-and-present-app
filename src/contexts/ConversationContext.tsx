@@ -26,7 +26,6 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [azureAvailable, setAzureAvailable] = useState(true);
   const { user } = useAuth();
 
   const userEmail = user?.email || '';
@@ -47,23 +46,15 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     
     try {
       setIsLoading(true);
+      console.log('ConversationContext: Loading conversations from Azure API only');
       const azureConversations = await azureConversationService.listUserConversations(userEmail);
       const summaries = azureConversations.map(conv => azureConversationService.convertToSummary(conv));
       setConversations(summaries);
-      setAzureAvailable(true);
+      console.log('ConversationContext: Loaded', summaries.length, 'conversations from Azure');
     } catch (error) {
-      console.error('Error loading conversations:', error);
-      setAzureAvailable(false);
-      // Load from localStorage as fallback
-      try {
-        const localConversations = localStorage.getItem(`conversations_${userEmail}`);
-        if (localConversations) {
-          const parsed = JSON.parse(localConversations);
-          setConversations(parsed);
-        }
-      } catch (localError) {
-        console.error('Error loading local conversations:', localError);
-      }
+      console.error('Error loading conversations from Azure:', error);
+      // No fallback to localStorage - only Azure storage
+      setConversations([]);
     } finally {
       setIsLoading(false);
     }
@@ -72,65 +63,34 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const createNewConversation = async (): Promise<string> => {
     if (!userEmail) throw new Error('User not authenticated');
     
-    console.log('ConversationContext: Creating new conversation');
+    console.log('ConversationContext: Creating new conversation in Azure only');
     
-    // Generate a local conversation ID
-    const conversationId = `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    const newConversation: Conversation = {
-      id: conversationId,
-      title: 'Nueva conversación',
-      messages: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      tags: [],
-      isArchived: false,
-      totalTokens: 0
-    };
-
-    console.log('ConversationContext: Setting new conversation:', newConversation);
-    setCurrentConversation(newConversation);
-
-    // Try to save to Azure, but don't fail if it's not available
-    if (azureAvailable) {
-      try {
-        const azureConversationId = await azureConversationService.createConversation(userEmail, 'Nueva conversación');
-        // Update with Azure ID if successful
-        const updatedConversation = { ...newConversation, id: azureConversationId };
-        setCurrentConversation(updatedConversation);
-        
-        // Reload conversations list
-        await loadConversations();
-        
-        return azureConversationId;
-      } catch (error) {
-        console.error('Error creating conversation in Azure:', error);
-        setAzureAvailable(false);
-        // Continue with local conversation
-      }
-    }
-
-    // Save locally as fallback
     try {
-      const localConversations = localStorage.getItem(`conversations_${userEmail}`);
-      const conversations = localConversations ? JSON.parse(localConversations) : [];
-      const newSummary: ConversationSummary = {
-        id: conversationId,
+      // Create conversation directly in Azure
+      const azureConversationId = await azureConversationService.createConversation(userEmail, 'Nueva conversación');
+      
+      const newConversation: Conversation = {
+        id: azureConversationId,
         title: 'Nueva conversación',
-        messageCount: 0,
-        lastMessage: '',
+        messages: [],
         createdAt: new Date(),
         updatedAt: new Date(),
-        tags: []
+        tags: [],
+        isArchived: false,
+        totalTokens: 0
       };
-      conversations.unshift(newSummary);
-      localStorage.setItem(`conversations_${userEmail}`, JSON.stringify(conversations));
-      setConversations(conversations);
+
+      console.log('ConversationContext: Setting new Azure conversation:', newConversation);
+      setCurrentConversation(newConversation);
+      
+      // Reload conversations list from Azure
+      await loadConversations();
+      
+      return azureConversationId;
     } catch (error) {
-      console.error('Error saving conversation locally:', error);
+      console.error('Error creating conversation in Azure:', error);
+      throw error;
     }
-    
-    return conversationId;
   };
 
   const loadConversation = async (id: string) => {
@@ -138,28 +98,22 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     
     setIsLoading(true);
     try {
-      if (azureAvailable) {
-        const azureConv = await azureConversationService.getConversation(id, userEmail);
-        if (azureConv) {
-          // Obtener archivos de la conversación
-          const files = await azureConversationService.getConversationFiles(id, userEmail);
-          const loadedConversation = azureConversationService.convertToInternalFormat(azureConv, files);
-          setCurrentConversation(loadedConversation);
-          console.log('ConversationContext: Loaded conversation with messages:', loadedConversation.messages.length);
-          return;
-        }
-      }
+      console.log('ConversationContext: Loading conversation from Azure only:', id);
       
-      // Fallback to localStorage
-      const localConversation = localStorage.getItem(`conversation_${id}`);
-      if (localConversation) {
-        const parsed = JSON.parse(localConversation);
-        setCurrentConversation(parsed);
-        console.log('ConversationContext: Loaded local conversation with messages:', parsed.messages.length);
+      const azureConv = await azureConversationService.getConversation(id, userEmail);
+      if (azureConv) {
+        // Get conversation files
+        const files = await azureConversationService.getConversationFiles(id, userEmail);
+        const loadedConversation = azureConversationService.convertToInternalFormat(azureConv, files);
+        setCurrentConversation(loadedConversation);
+        console.log('ConversationContext: Loaded Azure conversation with messages:', loadedConversation.messages.length);
+      } else {
+        console.warn('ConversationContext: Conversation not found in Azure:', id);
+        setCurrentConversation(null);
       }
     } catch (error) {
-      console.error('Error loading conversation:', error);
-      setAzureAvailable(false);
+      console.error('Error loading conversation from Azure:', error);
+      setCurrentConversation(null);
     } finally {
       setIsLoading(false);
     }
@@ -169,55 +123,27 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!userEmail) return;
     
     try {
-      // Always save locally first
-      localStorage.setItem(`conversation_${conversation.id}`, JSON.stringify(conversation));
+      console.log('ConversationContext: Saving conversation to Azure only:', conversation.id);
       
-      if (azureAvailable) {
-        const azureFormat = azureConversationService.convertToAzureFormat(conversation);
-        await azureConversationService.updateConversation(conversation.id, userEmail, azureFormat);
-        
-        // Update the conversations list
-        await loadConversations();
-      } else {
-        // Update local conversations list
-        const localConversations = localStorage.getItem(`conversations_${userEmail}`);
-        const conversations = localConversations ? JSON.parse(localConversations) : [];
-        const existingIndex = conversations.findIndex((c: ConversationSummary) => c.id === conversation.id);
-        
-        const summary: ConversationSummary = {
-          id: conversation.id,
-          title: conversation.title,
-          messageCount: conversation.messages.length,
-          lastMessage: conversation.messages[conversation.messages.length - 1]?.content || '',
-          createdAt: conversation.createdAt,
-          updatedAt: conversation.updatedAt,
-          tags: conversation.tags
-        };
-        
-        if (existingIndex >= 0) {
-          conversations[existingIndex] = summary;
-        } else {
-          conversations.unshift(summary);
-        }
-        
-        localStorage.setItem(`conversations_${userEmail}`, JSON.stringify(conversations));
-        setConversations(conversations);
-      }
+      const azureFormat = azureConversationService.convertToAzureFormat(conversation);
+      await azureConversationService.updateConversation(conversation.id, userEmail, azureFormat);
+      
+      console.log('ConversationContext: Conversation saved to Azure successfully');
+      
+      // Update the conversations list from Azure
+      await loadConversations();
     } catch (error) {
-      console.error('Error saving conversation:', error);
-      setAzureAvailable(false);
+      console.error('Error saving conversation to Azure:', error);
+      throw error;
     }
   };
 
   const deleteConversation = async (id: string) => {
     try {
-      // Remove from local storage
-      localStorage.removeItem(`conversation_${id}`);
+      console.log('ConversationContext: Deleting conversation from Azure:', id);
       
-      if (azureAvailable) {
-        // TODO: Implementar endpoint de eliminación en el backend de Azure
-        // Por ahora, solo removemos de la lista local
-      }
+      // TODO: Implement delete endpoint in Azure backend
+      // For now, just remove from local state and reload from Azure
       
       const updated = conversations.filter(c => c.id !== id);
       setConversations(updated);
@@ -225,6 +151,8 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       if (currentConversation?.id === id) {
         setCurrentConversation(null);
       }
+      
+      console.log('ConversationContext: Conversation removed from local state');
     } catch (error) {
       console.error('Error deleting conversation:', error);
     }
@@ -234,15 +162,13 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!userEmail) return;
     
     try {
-      if (azureAvailable) {
-        // TODO: Implementar archivado en el backend de Azure
-        // Por ahora, marcamos como archivada localmente
-        const conversation = conversations.find(c => c.id === id);
-        if (conversation) {
-          // Aquí podrías llamar al endpoint de actualización
-          await loadConversations();
-        }
-      }
+      console.log('ConversationContext: Archiving conversation in Azure:', id);
+      
+      // TODO: Implement archive endpoint in Azure backend
+      // For now, reload conversations from Azure
+      await loadConversations();
+      
+      console.log('ConversationContext: Conversation archived in Azure');
     } catch (error) {
       console.error('Error archiving conversation:', error);
     }
@@ -281,9 +207,9 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       console.log('ConversationContext: Updated conversation created:', updatedConversation.id, updatedConversation.messages.length);
       
-      // Save conversation (async, but don't block UI)
+      // Save conversation to Azure only (async, but don't block UI)
       saveConversation(updatedConversation).catch(error => {
-        console.error('Error saving conversation:', error);
+        console.error('Error saving conversation to Azure:', error);
       });
 
       console.log('ConversationContext: END addMessageToCurrentConversation');
@@ -295,14 +221,17 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!userEmail) return;
     
     try {
+      console.log('ConversationContext: Updating conversation title in Azure:', id, title);
+      
       const conversation = currentConversation;
       if (conversation && conversation.id === id) {
         const updatedConversation = { ...conversation, title, updatedAt: new Date() };
         await saveConversation(updatedConversation);
         setCurrentConversation(updatedConversation);
+        console.log('ConversationContext: Conversation title updated in Azure');
       }
     } catch (error) {
-      console.error('Error updating conversation title:', error);
+      console.error('Error updating conversation title in Azure:', error);
     }
   };
 
@@ -310,22 +239,14 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!userEmail) throw new Error('User not authenticated');
     
     try {
-      if (azureAvailable) {
-        const fileName = await azureConversationService.uploadFile(file, userEmail, conversationId);
-        console.log('File uploaded to Azure:', fileName);
-        return fileName;
-      } else {
-        // Fallback: return a local reference
-        const fileName = `${Date.now()}_${file.name}`;
-        console.log('Azure not available, using local file reference:', fileName);
-        return fileName;
-      }
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      setAzureAvailable(false);
-      // Return local reference as fallback
-      const fileName = `${Date.now()}_${file.name}`;
+      console.log('ConversationContext: Uploading file to Azure:', file.name, conversationId);
+      
+      const fileName = await azureConversationService.uploadFile(file, userEmail, conversationId);
+      console.log('ConversationContext: File uploaded to Azure successfully:', fileName);
       return fileName;
+    } catch (error) {
+      console.error('Error uploading file to Azure:', error);
+      throw error;
     }
   };
 
