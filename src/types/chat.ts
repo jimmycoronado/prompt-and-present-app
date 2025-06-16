@@ -25,10 +25,20 @@ export interface ChatMessage {
     url: string;
     title: string;
     thumbnail?: string;
+    duration?: string;
+    platform?: string;
   };
   metadata?: {
     processingTime: number;
     model: string;
     tokensUsed: number;
   };
+}
+
+export interface VideoPreview {
+  url: string;
+  title: string;
+  thumbnail?: string;
+  duration?: string;
+  platform?: string;
 }
