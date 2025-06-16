@@ -1,5 +1,5 @@
 
-import React, { useRef } from "react";
+import React, { useRef, forwardRef, useImperativeHandle } from "react";
 import { ChatInput, ChatInputRef } from "../ChatInput";
 import { useIsMobile } from "../../hooks/use-mobile";
 
@@ -14,7 +14,11 @@ interface InputContainerProps {
   onVoiceModeClick?: () => void;
 }
 
-export const InputContainer: React.FC<InputContainerProps> = ({
+export interface InputContainerRef {
+  sendBannerMessage: (automaticReply: string) => void;
+}
+
+export const InputContainer = forwardRef<InputContainerRef, InputContainerProps>(({
   onSendMessage,
   isLoading,
   templateContent,
@@ -23,12 +27,12 @@ export const InputContainer: React.FC<InputContainerProps> = ({
   uploadedFiles,
   setUploadedFiles,
   onVoiceModeClick
-}) => {
+}, ref) => {
   const isMobile = useIsMobile();
   const chatInputRef = useRef<ChatInputRef>(null);
 
-  // Expose the sendBannerMessage method to parent components if needed
-  React.useImperativeHandle(React.forwardRef(() => ({})).current, () => ({
+  // Expose the sendBannerMessage method to parent components
+  useImperativeHandle(ref, () => ({
     sendBannerMessage: (automaticReply: string) => {
       chatInputRef.current?.sendBannerMessage(automaticReply);
     }
@@ -76,4 +80,6 @@ export const InputContainer: React.FC<InputContainerProps> = ({
       </div>
     </div>
   );
-};
+});
+
+InputContainer.displayName = 'InputContainer';

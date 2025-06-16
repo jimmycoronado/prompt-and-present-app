@@ -38,7 +38,7 @@ export const useBannerData = () => {
   const { user } = useAuth();
   const [banners, setBanners] = useState<BannerData[]>([]);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Fetch banners from Azure API whenever user changes
   useEffect(() => {
@@ -65,8 +65,8 @@ export const useBannerData = () => {
         setBanners(sortedBanners);
         setCurrentBannerIndex(0); // Reset to first banner when new data arrives
       } catch (error) {
-        console.error('🎌 useBannerData: Error fetching banners:', error);
-        setBanners([]); // Set empty array on error
+        console.log('🎌 useBannerData: Error fetching banners (silently handled):', error);
+        setBanners([]); // Set empty array on error - no user notification needed
       } finally {
         setIsLoading(false);
       }
