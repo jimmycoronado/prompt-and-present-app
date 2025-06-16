@@ -60,11 +60,11 @@ export const callAzureAgentApi = async (
         console.log('azureApiService: Processing large response...');
         apiData = JSON.parse(responseText);
         
-        // Si es un array grande, limitar la muestra inicial
-        if (Array.isArray(apiData) && apiData.length > 0) {
-          console.log('azureApiService: Large dataset detected, showing first row with all columns');
-          // Para datasets muy anchos, mantener todos los datos pero optimizar la presentación
-          apiData = apiData.slice(0, 1); // Solo mostrar la primera fila para evitar problemas de memoria
+        // Si es un array grande, limitamos para la UI pero conservamos una muestra representativa
+        if (Array.isArray(apiData) && apiData.length > 100) {
+          console.log('azureApiService: Large dataset detected, limiting to first 100 rows for UI performance');
+          // Conservar los primeros 100 elementos para mostrar en la tabla
+          apiData = apiData.slice(0, 100);
         }
       } else {
         apiData = JSON.parse(responseText);
@@ -74,8 +74,10 @@ export const callAzureAgentApi = async (
       apiData = { text: responseText.substring(0, 10000) }; // Limitar texto largo
     }
     
-    console.log('azureApiService: Processed data with', 
-      Array.isArray(apiData) ? apiData.length + ' rows' : 'non-array response');
+    console.log('azureApiService: Processed data type:', Array.isArray(apiData) ? 'array' : typeof apiData);
+    console.log('azureApiService: Data sample:', Array.isArray(apiData) ? 
+      `Array with ${apiData.length} items, first item keys: ${apiData[0] ? Object.keys(apiData[0]).join(', ') : 'none'}` : 
+      'Non-array data');
 
     // Check if this is a "no data" response - treat as success
     if (apiData && typeof apiData === 'object' && apiData.detail && 
@@ -123,9 +125,9 @@ export const callAzureAgentApi = async (
           console.log('azureApiService: Processing large proxy response...');
           apiData = JSON.parse(proxyResponseText);
           
-          if (Array.isArray(apiData) && apiData.length > 0) {
-            console.log('azureApiService: Large proxy dataset detected, showing first row');
-            apiData = apiData.slice(0, 1);
+          if (Array.isArray(apiData) && apiData.length > 100) {
+            console.log('azureApiService: Large proxy dataset detected, limiting to first 100 rows');
+            apiData = apiData.slice(0, 100);
           }
         } else {
           apiData = JSON.parse(proxyResponseText);
@@ -175,6 +177,13 @@ export const callAzureAgentApi = async (
 function processApiResponse(apiData: any, startTime: number): AzureApiResponse {
   const processingTime = Date.now() - startTime;
   
+  console.log('azureApiService: Processing API response:', {
+    dataType: Array.isArray(apiData) ? 'array' : typeof apiData,
+    isObject: typeof apiData === 'object',
+    hasDetail: apiData && typeof apiData === 'object' && 'detail' in apiData,
+    arrayLength: Array.isArray(apiData) ? apiData.length : 'N/A'
+  });
+  
   // Manejar respuesta con campo "detail" cuando no hay datos
   if (apiData && typeof apiData === 'object' && apiData.detail) {
     console.log('azureApiService: Processing response with detail field:', apiData.detail);
@@ -209,19 +218,18 @@ function processApiResponse(apiData: any, startTime: number): AzureApiResponse {
       const headers = Object.keys(apiData[0]);
       const rows = apiData.map((item: any) => Object.values(item));
       
-      // Para datasets muy anchos, crear mensaje descriptivo
-      if (headers.length > 50) {
-        responseText = `Se encontró un cliente con ${headers.length} campos de información. Esta es una vista completa de todos los datos disponibles:`;
-      } else {
-        responseText = `Se encontraron ${apiData.length} registros con ${headers.length} campos:`;
-      }
+      // Crear mensaje descriptivo
+      responseText = `Se encontraron ${apiData.length} registros con ${headers.length} campos:`;
       
+      // IMPORTANTE: Preservar los datos originales para la tabla
       tableData = {
         headers,
         rows
       };
       
       console.log('azureApiService: Created table data with', headers.length, 'headers and', rows.length, 'rows');
+      console.log('azureApiService: Table headers:', headers);
+      console.log('azureApiService: Sample row:', rows[0]);
     } else {
       responseText = 'No se encontraron registros.';
     }
@@ -263,11 +271,7 @@ function processApiResponse(apiData: any, startTime: number): AzureApiResponse {
       
       // Agregar información de tabla al texto si no existe
       if (!responseText) {
-        if (headers.length > 50) {
-          responseText = `Se encontraron ${dataArray.length} registros con ${headers.length} campos de información detallada:`;
-        } else {
-          responseText = `Se encontraron ${dataArray.length} registros:`;
-        }
+        responseText = `Se encontraron ${dataArray.length} registros con ${headers.length} campos:`;
       }
       
       console.log('azureApiService: Extracted table data with', dataArray.length, 'rows and', headers.length, 'columns');
@@ -331,6 +335,7 @@ function processApiResponse(apiData: any, startTime: number): AzureApiResponse {
 
   console.log('azureApiService: Final processed response:', {
     hasText: !!responseText,
+    textLength: responseText.length,
     hasTable: !!tableData,
     tableColumns: tableData?.headers?.length || 0,
     tableRows: tableData?.rows?.length || 0,
