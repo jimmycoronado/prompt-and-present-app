@@ -242,6 +242,22 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
     };
   }, [isLoading, toast]);
 
+  const handleRequestLocation = async () => {
+    const granted = await requestLocationPermission();
+    if (granted) {
+      toast({
+        title: "Ubicación obtenida",
+        description: "La ubicación se incluirá en los próximos mensajes"
+      });
+    } else {
+      toast({
+        title: "Ubicación no disponible",
+        description: "No se pudo obtener la ubicación del dispositivo",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleSendMessage = async (content: string) => {
     if (!content.trim() && uploadedFiles.length === 0) return;
 

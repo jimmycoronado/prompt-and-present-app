@@ -1,4 +1,3 @@
-
 import { AISettings } from "../types/settings";
 
 interface AzureApiResponse {
@@ -8,6 +7,7 @@ interface AzureApiResponse {
   downloadLink?: { url: string; filename: string };
   videoPreview?: any;
   processingTime?: number;
+  ipAddress?: string;
 }
 
 export const callAzureAgentApi = async (
@@ -209,6 +209,7 @@ function processApiResponse(apiData: any, startTime: number): AzureApiResponse {
   let chartData = undefined;
   let downloadLink = undefined;
   let videoPreview = undefined;
+  let ipAddress = undefined;
 
   // CASO 1: Respuesta es un array directo (datos tabulares puros)
   if (Array.isArray(apiData)) {
@@ -341,7 +342,8 @@ function processApiResponse(apiData: any, startTime: number): AzureApiResponse {
     tableRows: tableData?.rows?.length || 0,
     hasChart: !!chartData,
     hasDownload: !!downloadLink,
-    hasVideo: !!videoPreview
+    hasVideo: !!videoPreview,
+    ipAddress: ipAddress
   });
 
   return {
@@ -350,6 +352,7 @@ function processApiResponse(apiData: any, startTime: number): AzureApiResponse {
     chart: chartData,
     downloadLink: downloadLink,
     videoPreview: videoPreview,
-    processingTime
+    processingTime,
+    ipAddress: ipAddress
   };
 }

@@ -12,6 +12,8 @@ interface InputContainerProps {
   uploadedFiles: File[];
   setUploadedFiles: (files: File[] | ((prev: File[]) => File[])) => void;
   onVoiceModeClick?: () => void;
+  onRequestLocation?: () => void;
+  isLoadingLocation?: boolean;
 }
 
 export interface InputContainerRef {
@@ -26,7 +28,9 @@ export const InputContainer = forwardRef<InputContainerRef, InputContainerProps>
   onFilesSelected,
   uploadedFiles,
   setUploadedFiles,
-  onVoiceModeClick
+  onVoiceModeClick,
+  onRequestLocation,
+  isLoadingLocation
 }, ref) => {
   const isMobile = useIsMobile();
   const chatInputRef = useRef<ChatInputRef>(null);
