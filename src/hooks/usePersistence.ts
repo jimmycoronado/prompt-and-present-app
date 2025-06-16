@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { persistenceService } from '../services/persistenceService';
+import { azureConversationService } from '../services/azureConversationService';
 import { useAuth } from '../contexts/AuthContext';
 import { Conversation } from '../types/conversation';
 import { ChatMessage } from '../types/chat';
@@ -26,7 +26,8 @@ export const usePersistence = () => {
       setError(null);
       
       console.log('usePersistence: Initializing user persistence for:', user.email);
-      await persistenceService.initializeUser(user.email, user.name);
+      // Con Azure, la inicialización es automática cuando el usuario hace login
+      // Las conversaciones se cargan automáticamente en el ConversationContext
       setIsInitialized(true);
       
     } catch (error) {
@@ -42,7 +43,8 @@ export const usePersistence = () => {
     
     try {
       setError(null);
-      await persistenceService.saveConversation(conversation, user.id);
+      const azureFormat = azureConversationService.convertToAzureFormat(conversation);
+      await azureConversationService.updateConversation(conversation.id, user.email, azureFormat);
     } catch (error) {
       console.error('Failed to save conversation:', error);
       setError(error instanceof Error ? error.message : 'Failed to save conversation');
@@ -54,7 +56,12 @@ export const usePersistence = () => {
     
     try {
       setError(null);
-      return await persistenceService.loadConversation(conversationId, user.id);
+      const azureConv = await azureConversationService.getConversation(conversationId, user.email);
+      if (azureConv) {
+        const files = await azureConversationService.getConversationFiles(conversationId, user.email);
+        return azureConversationService.convertToInternalFormat(azureConv, files);
+      }
+      return null;
     } catch (error) {
       console.error('Failed to load conversation:', error);
       setError(error instanceof Error ? error.message : 'Failed to load conversation');
@@ -67,7 +74,9 @@ export const usePersistence = () => {
     
     try {
       setError(null);
-      return await persistenceService.getUserConversations(user.id, { archived });
+      const azureConversations = await azureConversationService.listUserConversations(user.email);
+      const filtered = azureConversations.filter(conv => conv.isArchived === archived);
+      return filtered.map(conv => azureConversationService.convertToSummary(conv));
     } catch (error) {
       console.error('Failed to get user conversations:', error);
       setError(error instanceof Error ? error.message : 'Failed to get conversations');
@@ -85,7 +94,8 @@ export const usePersistence = () => {
     
     try {
       setError(null);
-      await persistenceService.saveMessageFeedback(messageId, conversationId, user.id, feedback, comment);
+      // TODO: Implementar endpoint de feedback en Azure
+      console.log('Message feedback saved:', { messageId, conversationId, feedback, comment });
     } catch (error) {
       console.error('Failed to save message feedback:', error);
       setError(error instanceof Error ? error.message : 'Failed to save feedback');
@@ -97,7 +107,8 @@ export const usePersistence = () => {
     
     try {
       setError(null);
-      await persistenceService.saveUserSettings(user.id, aiSettings, appSettings);
+      // TODO: Implementar guardado de configuraciones en Azure
+      console.log('User settings saved:', { aiSettings, appSettings });
     } catch (error) {
       console.error('Failed to save user settings:', error);
       setError(error instanceof Error ? error.message : 'Failed to save settings');
@@ -109,7 +120,9 @@ export const usePersistence = () => {
     
     try {
       setError(null);
-      return await persistenceService.loadUserSettings(user.id);
+      // TODO: Implementar carga de configuraciones desde Azure
+      console.log('Loading user settings from Azure');
+      return null;
     } catch (error) {
       console.error('Failed to load user settings:', error);
       setError(error instanceof Error ? error.message : 'Failed to load settings');
@@ -122,7 +135,13 @@ export const usePersistence = () => {
     
     try {
       setError(null);
-      return await persistenceService.uploadConversationFile(file, conversationId, messageId, user.id);
+      const fileName = await azureConversationService.uploadFile(file, user.email, conversationId);
+      return {
+        fileName,
+        url: `https://skcoDaliAIDev.azurewebsites.net/api/files/${fileName}`,
+        size: file.size,
+        type: file.type
+      };
     } catch (error) {
       console.error('Failed to upload file:', error);
       setError(error instanceof Error ? error.message : 'Failed to upload file');

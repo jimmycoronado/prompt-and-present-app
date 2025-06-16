@@ -1,58 +1,34 @@
 
-export interface FileInfo {
-  name: string;
-  size: number;
-  type: string;
-}
-
-export interface TableData {
-  headers: string[];
-  rows: (string | number)[][];
-}
-
-export interface ChartData {
-  type: 'bar' | 'line' | 'pie' | 'area' | 'scatter' | 'radar' | 'treemap' | 'funnel' | 'composed' | 'sankey';
-  data: Array<{ [key: string]: string | number }>;
-  xKey?: string;
-  yKey?: string;
-  nameKey?: string;
-  valueKey?: string;
-  title?: string;
-  // Additional keys for complex charts
-  yKey2?: string; // For composed charts
-  radarKeys?: string[]; // For radar charts
-  sankeyNodes?: Array<{ name: string }>;
-  sankeyLinks?: Array<{ source: number; target: number; value: number }>;
-}
-
-export interface DownloadLink {
-  url: string;
-  filename: string;
-}
-
-export interface VideoPreview {
-  url: string;
-  title: string;
-  thumbnail: string;
-  duration?: string;
-  platform: 'youtube' | 'vimeo' | 'generic';
-}
-
-export interface MessageMetadata {
-  processingTime: number;
-  model: string;
-  tokensUsed: number;
-}
-
 export interface ChatMessage {
   id: string;
   type: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-  files?: FileInfo[];
-  data?: TableData;
-  chart?: ChartData;
-  downloadLink?: DownloadLink;
-  videoPreview?: VideoPreview;
-  metadata?: MessageMetadata;
+  files?: Array<{
+    name: string;
+    size: number;
+    type: string;
+    url?: string; // Añadido para URLs de archivos de Azure
+  }>;
+  data?: Array<Record<string, any>>;
+  chart?: {
+    type: 'bar' | 'line' | 'pie' | 'area';
+    data: Array<Record<string, any>>;
+    xAxis?: string;
+    yAxis?: string;
+  };
+  downloadLink?: {
+    url: string;
+    filename: string;
+  };
+  videoPreview?: {
+    url: string;
+    title: string;
+    thumbnail?: string;
+  };
+  metadata?: {
+    processingTime: number;
+    model: string;
+    tokensUsed: number;
+  };
 }

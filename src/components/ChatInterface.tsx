@@ -88,7 +88,8 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
   const { 
     currentConversation, 
     addMessageToCurrentConversation, 
-    createNewConversation 
+    createNewConversation,
+    uploadFileToConversation
   } = useConversation();
   const { aiSettings } = useSettings();
 
@@ -243,15 +244,34 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
 
     console.log('ChatInterface: START handleSendMessage with content:', content);
     console.log('ChatInterface: Using authenticated user email for Azure API:', userEmail);
-    console.log('ChatInterface: Using access token for Azure API:', !!accessToken);
+
+    // Subir archivos primero si existen
+    const uploadedFileNames: string[] = [];
+    if (uploadedFiles.length > 0) {
+      try {
+        console.log('ChatInterface: Uploading files to Azure:', uploadedFiles.length);
+        for (const file of uploadedFiles) {
+          const fileName = await uploadFileToConversation(file, currentConversation.id);
+          uploadedFileNames.push(fileName);
+        }
+        console.log('ChatInterface: Files uploaded successfully:', uploadedFileNames);
+      } catch (error) {
+        console.error('ChatInterface: Error uploading files:', error);
+        toast({
+          title: "Error al subir archivos",
+          description: "No se pudieron subir todos los archivos",
+          variant: "destructive"
+        });
+      }
+    }
 
     const userMessage: ChatMessageType = {
       id: Date.now().toString(),
       type: 'user',
       content,
       timestamp: new Date(),
-      files: uploadedFiles.map(file => ({
-        name: file.name,
+      files: uploadedFiles.map((file, index) => ({
+        name: uploadedFileNames[index] || file.name,
         size: file.size,
         type: file.type
       }))
@@ -273,7 +293,9 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
     }, 100);
 
     try {
-      console.log('ChatInterface: Calling Azure API with authenticated user email and access token:', userEmail, !!accessToken);
+      console.log('ChatInterface: Calling Azure API with conversation ID:', currentConversation.id);
+      // Aquí deberías llamar al agente maestro pasándole el conversation_id
+      // Por ahora mantengo la llamada existente
       const response = await callAzureAgentApi(content, uploadedFiles, aiSettings, userEmail, accessToken);
       console.log('ChatInterface: Received Azure API response:', response);
       
