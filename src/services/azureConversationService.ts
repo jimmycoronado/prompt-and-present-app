@@ -27,6 +27,11 @@ export interface AzureFileInfo {
   uploaded_at: string;
 }
 
+// Interface for the API response that wraps conversations in an object
+interface ListConversationsResponse {
+  conversations: AzureConversation[];
+}
+
 export class AzureConversationService {
   
   // Crear nueva conversación
@@ -134,7 +139,7 @@ export class AzureConversationService {
     }
   }
 
-  // Listar conversaciones de un usuario - FIXED ENDPOINT URL
+  // Listar conversaciones de un usuario - FIXED ENDPOINT URL AND RESPONSE HANDLING
   async listUserConversations(userEmail: string): Promise<AzureConversation[]> {
     const endpoint = `${API_BASE_URL}/listconversations/${encodeURIComponent(userEmail)}`;
     
@@ -162,19 +167,21 @@ export class AzureConversationService {
         throw new Error(`Failed to list conversations: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
-      const result = await response.json();
+      const result: ListConversationsResponse = await response.json();
       console.log('🎉 SUCCESS Response Body:', JSON.stringify(result, null, 2));
-      console.log('📊 Number of conversations:', Array.isArray(result) ? result.length : 'Not an array!');
       console.log('🔍 Response type:', typeof result);
-      console.log('🔍 Is Array:', Array.isArray(result));
-
-      // Ensure we return an array
-      if (!Array.isArray(result)) {
-        console.warn('⚠️ API response is not an array, wrapping in array or returning empty array');
+      console.log('🔍 Is object with conversations property:', result && typeof result === 'object' && 'conversations' in result);
+      
+      // Handle the correct API response format
+      if (result && typeof result === 'object' && 'conversations' in result && Array.isArray(result.conversations)) {
+        console.log('📊 Number of conversations in response:', result.conversations.length);
+        console.log('✅ Successfully extracted conversations array from response object');
+        return result.conversations;
+      } else {
+        console.warn('⚠️ API response does not have expected format with conversations property');
+        console.warn('🔍 Actual response structure:', Object.keys(result || {}));
         return [];
       }
-
-      return result;
     } catch (error) {
       console.error('💥 AZURE API ERROR - LIST CONVERSATIONS:', error);
       console.error('🔍 Error Type:', typeof error);
