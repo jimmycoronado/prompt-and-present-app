@@ -1,4 +1,3 @@
-
 import { Conversation, ConversationSummary } from '../types/conversation';
 import { ChatMessage } from '../types/chat';
 
@@ -32,66 +31,129 @@ export class AzureConversationService {
   
   // Crear nueva conversación
   async createConversation(userId: string, title: string): Promise<string> {
+    const endpoint = `${API_BASE_URL}/conversations`;
+    const requestBody = {
+      userId,
+      title,
+      messages: [],
+      tags: [],
+      isArchived: false,
+      totalTokens: 0,
+      attachments: []
+    };
+
+    console.log('🚀 AZURE API REQUEST - CREATE CONVERSATION');
+    console.log('📍 Endpoint:', endpoint);
+    console.log('📦 Request Body:', JSON.stringify(requestBody, null, 2));
+    console.log('👤 User ID:', userId);
+    console.log('📝 Title:', title);
+
     try {
-      const response = await fetch(`${API_BASE_URL}/conversations`, {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          userId,
-          title,
-          messages: [],
-          tags: [],
-          isArchived: false,
-          totalTokens: 0,
-          attachments: []
-        })
+        body: JSON.stringify(requestBody)
       });
 
+      console.log('📈 Response Status:', response.status);
+      console.log('📊 Response Headers:', Object.fromEntries(response.headers.entries()));
+      console.log('✅ Response OK:', response.ok);
+
       if (!response.ok) {
-        throw new Error(`Failed to create conversation: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('❌ Response Error Text:', errorText);
+        throw new Error(`Failed to create conversation: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
       const result = await response.json();
+      console.log('🎉 SUCCESS Response Body:', JSON.stringify(result, null, 2));
+      console.log('🆔 Created Conversation ID:', result.id);
+
       return result.id;
     } catch (error) {
-      console.error('Error creating conversation:', error);
+      console.error('💥 AZURE API ERROR - CREATE CONVERSATION:', error);
+      console.error('🔍 Error Type:', typeof error);
+      console.error('📝 Error Message:', error instanceof Error ? error.message : String(error));
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        console.error('🌐 Network Error: Unable to connect to Azure API');
+        console.error('🔗 Check if the endpoint is accessible:', endpoint);
+      }
+      
       throw error;
     }
   }
 
   // Obtener conversación por ID
   async getConversation(conversationId: string, userEmail: string): Promise<AzureConversation | null> {
+    const endpoint = `${API_BASE_URL}/conversation/${conversationId}?user_id=${encodeURIComponent(userEmail)}`;
+    
+    console.log('🚀 AZURE API REQUEST - GET CONVERSATION');
+    console.log('📍 Endpoint:', endpoint);
+    console.log('🆔 Conversation ID:', conversationId);
+    console.log('👤 User Email:', userEmail);
+
     try {
-      const response = await fetch(`${API_BASE_URL}/conversation/${conversationId}?user_id=${encodeURIComponent(userEmail)}`);
+      const response = await fetch(endpoint);
       
+      console.log('📈 Response Status:', response.status);
+      console.log('📊 Response Headers:', Object.fromEntries(response.headers.entries()));
+      console.log('✅ Response OK:', response.ok);
+
       if (!response.ok) {
         if (response.status === 404) {
+          console.log('📭 Conversation not found (404)');
           return null;
         }
-        throw new Error(`Failed to get conversation: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('❌ Response Error Text:', errorText);
+        throw new Error(`Failed to get conversation: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
-      return await response.json();
+      const result = await response.json();
+      console.log('🎉 SUCCESS Response Body:', JSON.stringify(result, null, 2));
+
+      return result;
     } catch (error) {
-      console.error('Error getting conversation:', error);
+      console.error('💥 AZURE API ERROR - GET CONVERSATION:', error);
+      console.error('🔍 Error Type:', typeof error);
+      console.error('📝 Error Message:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
 
   // Listar conversaciones de un usuario
   async listUserConversations(userEmail: string): Promise<AzureConversation[]> {
+    const endpoint = `${API_BASE_URL}/listconversation/${encodeURIComponent(userEmail)}`;
+    
+    console.log('🚀 AZURE API REQUEST - LIST CONVERSATIONS');
+    console.log('📍 Endpoint:', endpoint);
+    console.log('👤 User Email:', userEmail);
+
     try {
-      const response = await fetch(`${API_BASE_URL}/listconversation/${encodeURIComponent(userEmail)}`);
+      const response = await fetch(endpoint);
       
+      console.log('📈 Response Status:', response.status);
+      console.log('📊 Response Headers:', Object.fromEntries(response.headers.entries()));
+      console.log('✅ Response OK:', response.ok);
+
       if (!response.ok) {
-        throw new Error(`Failed to list conversations: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('❌ Response Error Text:', errorText);
+        throw new Error(`Failed to list conversations: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
-      return await response.json();
+      const result = await response.json();
+      console.log('🎉 SUCCESS Response Body:', JSON.stringify(result, null, 2));
+      console.log('📊 Number of conversations:', result.length);
+
+      return result;
     } catch (error) {
-      console.error('Error listing conversations:', error);
+      console.error('💥 AZURE API ERROR - LIST CONVERSATIONS:', error);
+      console.error('🔍 Error Type:', typeof error);
+      console.error('📝 Error Message:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
