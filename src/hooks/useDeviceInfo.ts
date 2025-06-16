@@ -41,11 +41,16 @@ export const useDeviceInfo = () => {
         deviceType = 'tablet';
       }
 
-      // Detectar navegador
+      // Detectar navegador - MEJORADO para detectar Edge correctamente
       let browserName = 'Unknown';
       let browserVersion = 'Unknown';
       
-      if (userAgent.indexOf('Chrome') > -1) {
+      // Primero verificar Edge (debe ir antes que Chrome porque Edge incluye "Chrome" en su UA)
+      if (userAgent.indexOf('Edg/') > -1 || userAgent.indexOf('Edge/') > -1) {
+        browserName = 'Edge';
+        const edgeMatch = userAgent.match(/(?:Edg|Edge)\/(\d+)/);
+        browserVersion = edgeMatch ? edgeMatch[1] : 'Unknown';
+      } else if (userAgent.indexOf('Chrome') > -1 && userAgent.indexOf('Edg/') === -1) {
         browserName = 'Chrome';
         const chromeMatch = userAgent.match(/Chrome\/(\d+)/);
         browserVersion = chromeMatch ? chromeMatch[1] : 'Unknown';
@@ -53,14 +58,10 @@ export const useDeviceInfo = () => {
         browserName = 'Firefox';
         const firefoxMatch = userAgent.match(/Firefox\/(\d+)/);
         browserVersion = firefoxMatch ? firefoxMatch[1] : 'Unknown';
-      } else if (userAgent.indexOf('Safari') > -1 && userAgent.indexOf('Chrome') === -1) {
+      } else if (userAgent.indexOf('Safari') > -1 && userAgent.indexOf('Chrome') === -1 && userAgent.indexOf('Edg/') === -1) {
         browserName = 'Safari';
         const safariMatch = userAgent.match(/Version\/(\d+)/);
         browserVersion = safariMatch ? safariMatch[1] : 'Unknown';
-      } else if (userAgent.indexOf('Edge') > -1) {
-        browserName = 'Edge';
-        const edgeMatch = userAgent.match(/Edge\/(\d+)/);
-        browserVersion = edgeMatch ? edgeMatch[1] : 'Unknown';
       }
 
       // Detectar sistema operativo
@@ -84,6 +85,8 @@ export const useDeviceInfo = () => {
       };
 
       console.log('Device info collected:', info);
+      console.log('User Agent for debugging:', userAgent);
+      console.log('Detected browser:', browserName, 'version:', browserVersion);
       setDeviceInfo(info);
     };
 
@@ -98,6 +101,7 @@ export const useDeviceInfo = () => {
 
     try {
       setIsLoadingLocation(true);
+      console.log('Requesting location permission...');
       
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(
@@ -122,6 +126,19 @@ export const useDeviceInfo = () => {
       return true;
     } catch (error) {
       console.warn('Failed to get location:', error);
+      if (error instanceof GeolocationPositionError) {
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            console.warn('Location permission denied by user');
+            break;
+          case error.POSITION_UNAVAILABLE:
+            console.warn('Location information is unavailable');
+            break;
+          case error.TIMEOUT:
+            console.warn('Location request timed out');
+            break;
+        }
+      }
       return false;
     } finally {
       setIsLoadingLocation(false);

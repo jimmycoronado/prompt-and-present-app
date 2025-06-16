@@ -1,3 +1,4 @@
+
 import { AISettings } from "../types/settings";
 
 interface AzureApiResponse {
@@ -310,6 +311,12 @@ function processApiResponse(apiData: any, startTime: number): AzureApiResponse {
       };
       
       console.log('azureApiService: Extracted video preview:', videoPreview);
+    }
+
+    // EXTRAER IP ADDRESS (si viene del servidor)
+    if (apiData.clientIp || apiData.ip_address || apiData.ipAddress) {
+      ipAddress = apiData.clientIp || apiData.ip_address || apiData.ipAddress;
+      console.log('azureApiService: Extracted IP address:', ipAddress);
     }
 
     // Si no hay texto pero hay otros elementos, crear un mensaje descriptivo

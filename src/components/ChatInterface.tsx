@@ -147,14 +147,31 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
     console.log('ChatInterface: Current conversation changed:', currentConversation?.id, currentConversation?.messages?.length);
   }, [currentConversation]);
 
-  // Request location permission on first load (optional)
+  // Request location permission on first load - MEJORADO para solicitar automáticamente
   useEffect(() => {
     if (!locationPermissionAsked && user) {
       setLocationPermissionAsked(true);
-      // Optionally request location permission automatically
-      // requestLocationPermission();
+      
+      // Solicitar ubicación automáticamente después de un pequeño delay
+      const timer = setTimeout(async () => {
+        console.log('ChatInterface: Auto-requesting location permission...');
+        const granted = await requestLocationPermission();
+        if (granted) {
+          console.log('ChatInterface: Location permission granted automatically');
+          toast({
+            title: "Ubicación obtenida",
+            description: "Tu ubicación se incluirá en los mensajes para mejor personalización",
+            duration: 3000
+          });
+        } else {
+          console.log('ChatInterface: Location permission denied or failed');
+          // No mostrar error automáticamente, solo log para debugging
+        }
+      }, 2000); // Esperar 2 segundos después de que el usuario se autentica
+
+      return () => clearTimeout(timer);
     }
-  }, [user, locationPermissionAsked, requestLocationPermission]);
+  }, [user, locationPermissionAsked, requestLocationPermission, toast]);
 
   // File validation helper
   const validateAndProcessFiles = (files: FileList | null) => {
