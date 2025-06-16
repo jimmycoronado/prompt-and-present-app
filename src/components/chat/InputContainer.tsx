@@ -1,5 +1,6 @@
 
-import { ChatInput } from "../ChatInput";
+import React, { useRef } from "react";
+import { ChatInput, ChatInputRef } from "../ChatInput";
 import { useIsMobile } from "../../hooks/use-mobile";
 
 interface InputContainerProps {
@@ -24,6 +25,14 @@ export const InputContainer: React.FC<InputContainerProps> = ({
   onVoiceModeClick
 }) => {
   const isMobile = useIsMobile();
+  const chatInputRef = useRef<ChatInputRef>(null);
+
+  // Expose the sendBannerMessage method to parent components if needed
+  React.useImperativeHandle(React.forwardRef(() => ({})).current, () => ({
+    sendBannerMessage: (automaticReply: string) => {
+      chatInputRef.current?.sendBannerMessage(automaticReply);
+    }
+  }));
 
   return (
     <div className={`${isMobile ? 'fixed bottom-0 left-0 right-0 z-40 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700' : 'flex-shrink-0 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900'}`}>
@@ -54,6 +63,7 @@ export const InputContainer: React.FC<InputContainerProps> = ({
       <div className="p-4">
         <div className="max-w-4xl mx-auto">
           <ChatInput 
+            ref={chatInputRef}
             onSendMessage={onSendMessage} 
             disabled={isLoading}
             initialValue={templateContent}

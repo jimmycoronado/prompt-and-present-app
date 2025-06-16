@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { Send, Paperclip, Radio } from 'lucide-react';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
@@ -16,7 +16,11 @@ interface ChatInputProps {
   onVoiceModeClick?: () => void;
 }
 
-export const ChatInput: React.FC<ChatInputProps> = ({
+export interface ChatInputRef {
+  sendBannerMessage: (automaticReply: string) => void;
+}
+
+export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
   onSendMessage,
   disabled = false,
   placeholder = "Escribe tu mensaje aquí...",
@@ -25,7 +29,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onFilesSelected,
   uploadedFiles = [],
   onVoiceModeClick
-}) => {
+}, ref) => {
   const [message, setMessage] = useState(initialValue);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -96,7 +100,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   // Expose the method via ref
-  React.useImperativeHandle(React.forwardRef(() => ({})).current, () => ({
+  useImperativeHandle(ref, () => ({
     sendBannerMessage
   }));
 
@@ -307,4 +311,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       />
     </form>
   );
-};
+});
+
+ChatInput.displayName = 'ChatInput';
