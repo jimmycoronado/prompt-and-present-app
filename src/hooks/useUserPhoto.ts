@@ -1,27 +1,27 @@
+
 import { useState, useEffect } from 'react';
-import { useMsal } from '@azure/msal-react';
-import { graphConfig, loginRequest } from '@/config/authConfig';
+import { useAuth } from '@/contexts/AuthContext';
+import { graphConfig } from '@/config/authConfig';
 
 export const useUserPhoto = () => {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const { instance, accounts } = useMsal();
+  const { accessToken, user } = useAuth();
 
   const fetchUserPhoto = async () => {
-    if (!accounts || accounts.length === 0) return;
+    if (!accessToken || !user) {
+      console.log('useUserPhoto: No access token or user available');
+      return;
+    }
 
     setLoading(true);
     try {
-      // Get access token
-      const response = await instance.acquireTokenSilent({
-        ...loginRequest,
-        account: accounts[0],
-      });
-
+      console.log('useUserPhoto: Fetching user photo from Microsoft Graph');
+      
       // Fetch photo from Microsoft Graph
       const photoResponse = await fetch(graphConfig.graphPhotoEndpoint, {
         headers: {
-          'Authorization': `Bearer ${response.accessToken}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
       });
 
@@ -29,18 +29,26 @@ export const useUserPhoto = () => {
         const photoBlob = await photoResponse.blob();
         const photoObjectUrl = URL.createObjectURL(photoBlob);
         setPhotoUrl(photoObjectUrl);
+        console.log('useUserPhoto: Photo fetched successfully');
+      } else {
+        console.log('useUserPhoto: No photo available or error occurred', photoResponse.status);
+        setPhotoUrl(null);
       }
     } catch (error) {
-      console.log('Error fetching user photo:', error);
-      // No photo available or error occurred, keep photoUrl as null
+      console.log('useUserPhoto: Error fetching user photo:', error);
+      setPhotoUrl(null);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (accounts && accounts.length > 0) {
+    if (accessToken && user) {
+      console.log('useUserPhoto: Access token and user available, fetching photo');
       fetchUserPhoto();
+    } else {
+      console.log('useUserPhoto: No access token or user, clearing photo');
+      setPhotoUrl(null);
     }
 
     // Cleanup function to revoke object URL
@@ -49,7 +57,7 @@ export const useUserPhoto = () => {
         URL.revokeObjectURL(photoUrl);
       }
     };
-  }, [accounts]);
+  }, [accessToken, user]);
 
   return { photoUrl, loading, refetch: fetchUserPhoto };
 };
