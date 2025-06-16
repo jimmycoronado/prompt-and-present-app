@@ -134,16 +134,23 @@ export class AzureConversationService {
     }
   }
 
-  // Listar conversaciones de un usuario
+  // Listar conversaciones de un usuario - FIXED ENDPOINT URL
   async listUserConversations(userEmail: string): Promise<AzureConversation[]> {
-    const endpoint = `${API_BASE_URL}/listconversation/${encodeURIComponent(userEmail)}`;
+    const endpoint = `${API_BASE_URL}/listconversations/${encodeURIComponent(userEmail)}`;
     
     console.log('🚀 AZURE API REQUEST - LIST CONVERSATIONS');
     console.log('📍 Endpoint:', endpoint);
     console.log('👤 User Email:', userEmail);
+    console.log('🔗 Method: GET');
+    console.log('📦 Body: None (GET request)');
 
     try {
-      const response = await fetch(endpoint);
+      const response = await fetch(endpoint, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
       
       console.log('📈 Response Status:', response.status);
       console.log('📊 Response Headers:', Object.fromEntries(response.headers.entries()));
@@ -157,13 +164,27 @@ export class AzureConversationService {
 
       const result = await response.json();
       console.log('🎉 SUCCESS Response Body:', JSON.stringify(result, null, 2));
-      console.log('📊 Number of conversations:', result.length);
+      console.log('📊 Number of conversations:', Array.isArray(result) ? result.length : 'Not an array!');
+      console.log('🔍 Response type:', typeof result);
+      console.log('🔍 Is Array:', Array.isArray(result));
+
+      // Ensure we return an array
+      if (!Array.isArray(result)) {
+        console.warn('⚠️ API response is not an array, wrapping in array or returning empty array');
+        return [];
+      }
 
       return result;
     } catch (error) {
       console.error('💥 AZURE API ERROR - LIST CONVERSATIONS:', error);
       console.error('🔍 Error Type:', typeof error);
       console.error('📝 Error Message:', error instanceof Error ? error.message : String(error));
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        console.error('🌐 Network Error: Unable to connect to Azure API');
+        console.error('🔗 Check if the endpoint is accessible:', endpoint);
+      }
+      
       throw error;
     }
   }
