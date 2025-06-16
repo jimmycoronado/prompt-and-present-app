@@ -15,13 +15,15 @@ interface ConversationHistoryProps {
 
 export const ConversationHistory: React.FC<ConversationHistoryProps> = ({ onClose }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [loadingConversationId, setLoadingConversationId] = useState<string | null>(null);
   const { 
     conversations, 
     loadConversation, 
     deleteConversation, 
     archiveConversation,
     searchConversations,
-    isLoading
+    isLoading,
+    currentConversation
   } = useConversation();
 
   // Log conversations data when component mounts and when conversations change
@@ -58,9 +60,28 @@ export const ConversationHistory: React.FC<ConversationHistoryProps> = ({ onClos
   }, [searchQuery, filteredConversations, conversations.length]);
 
   const handleLoadConversation = async (id: string) => {
-    console.log('📂 ConversationHistory: Loading conversation:', id);
-    await loadConversation(id);
-    onClose();
+    console.log('📂 ConversationHistory: STARTING handleLoadConversation for ID:', id);
+    
+    try {
+      setLoadingConversationId(id);
+      console.log('📂 ConversationHistory: Set loading state for conversation:', id);
+      
+      console.log('📂 ConversationHistory: Calling loadConversation...');
+      await loadConversation(id);
+      console.log('📂 ConversationHistory: loadConversation completed successfully');
+      
+      // Wait a bit to ensure the conversation is loaded before closing
+      setTimeout(() => {
+        console.log('📂 ConversationHistory: Closing conversation history after delay');
+        onClose();
+      }, 100);
+      
+    } catch (error) {
+      console.error('💥 ConversationHistory: Error loading conversation:', error);
+    } finally {
+      setLoadingConversationId(null);
+      console.log('📂 ConversationHistory: Cleared loading state');
+    }
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,6 +89,15 @@ export const ConversationHistory: React.FC<ConversationHistoryProps> = ({ onClos
     console.log('🔍 ConversationHistory: Search query changed:', newQuery);
     setSearchQuery(newQuery);
   };
+
+  // Log when currentConversation changes
+  useEffect(() => {
+    console.log('📂 ConversationHistory: currentConversation changed:', {
+      id: currentConversation?.id,
+      title: currentConversation?.title,
+      messageCount: currentConversation?.messages?.length
+    });
+  }, [currentConversation]);
 
   return (
     <div className="flex flex-col h-full">
@@ -86,6 +116,7 @@ export const ConversationHistory: React.FC<ConversationHistoryProps> = ({ onClos
         <div className="mt-2 text-xs text-gray-500">
           Debug: {conversations.length} conversaciones cargadas, {filteredConversations.length} filtradas
           {isLoading && " (Cargando...)"}
+          {loadingConversationId && ` (Cargando conversación: ${loadingConversationId})`}
         </div>
       </div>
 
@@ -114,14 +145,26 @@ export const ConversationHistory: React.FC<ConversationHistoryProps> = ({ onClos
             filteredConversations.map((conversation) => (
               <div
                 key={conversation.id}
-                className="group p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
+                className={`group p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer ${
+                  loadingConversationId === conversation.id ? 'opacity-50' : ''
+                } ${
+                  currentConversation?.id === conversation.id ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' : ''
+                }`}
                 onClick={() => handleLoadConversation(conversation.id)}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-gray-900 dark:text-white truncate">
-                      {conversation.title}
-                    </h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-medium text-gray-900 dark:text-white truncate">
+                        {conversation.title}
+                      </h3>
+                      {loadingConversationId === conversation.id && (
+                        <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                      )}
+                      {currentConversation?.id === conversation.id && (
+                        <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
+                      )}
+                    </div>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
                       {conversation.lastMessage}
                     </p>
