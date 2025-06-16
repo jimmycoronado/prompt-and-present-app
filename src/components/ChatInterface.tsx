@@ -9,6 +9,7 @@ import { useConversation } from "../contexts/ConversationContext";
 import { useSettings } from "../contexts/SettingsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useDeviceInfo } from "@/hooks/useDeviceInfo";
 import { DragOverlay } from "./chat/DragOverlay";
 import { MessagesContainer } from "./chat/MessagesContainer";
 import { InputContainer } from "./chat/InputContainer";
@@ -78,6 +79,7 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
   const [templateContent, setTemplateContent] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
   const [userTemplates, setUserTemplates] = useState<PromptTemplate[]>([]);
+  const [locationPermissionAsked, setLocationPermissionAsked] = useState(false);
   const mainContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -92,6 +94,7 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
     ensureConversationExists
   } = useConversation();
   const { aiSettings } = useSettings();
+  const { getCompleteDeviceInfo, requestLocationPermission, isLoadingLocation } = useDeviceInfo();
 
   const messages = currentConversation?.messages || [];
 
@@ -143,6 +146,15 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
   useEffect(() => {
     console.log('ChatInterface: Current conversation changed:', currentConversation?.id, currentConversation?.messages?.length);
   }, [currentConversation]);
+
+  // Request location permission on first load (optional)
+  useEffect(() => {
+    if (!locationPermissionAsked && user) {
+      setLocationPermissionAsked(true);
+      // Optionally request location permission automatically
+      // requestLocationPermission();
+    }
+  }, [user, locationPermissionAsked, requestLocationPermission]);
 
   // File validation helper
   const validateAndProcessFiles = (files: FileList | null) => {
@@ -275,6 +287,10 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
       }
     }
 
+    // Get device information
+    const deviceInfo = getCompleteDeviceInfo();
+    console.log('ChatInterface: Device info for message:', deviceInfo);
+
     const userMessage: ChatMessageType = {
       id: Date.now().toString(),
       type: 'user',
@@ -284,10 +300,11 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
         name: uploadedFileNames[index] || file.name,
         size: file.size,
         type: file.type
-      }))
+      })),
+      deviceInfo
     };
 
-    console.log('ChatInterface: Created user message:', userMessage);
+    console.log('ChatInterface: Created user message with device info:', userMessage);
     
     // Add user message immediately
     addMessageToCurrentConversation(userMessage);
@@ -320,6 +337,10 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
           processingTime: response.processingTime || Math.random() * 2000 + 500,
           model: aiSettings.model,
           tokensUsed: Math.floor(Math.random() * 1000) + 100
+        },
+        deviceInfo: {
+          ...deviceInfo,
+          ipAddress: response.ipAddress // IP address from server response if available
         }
       };
 
@@ -466,6 +487,8 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
         uploadedFiles={uploadedFiles}
         setUploadedFiles={setUploadedFiles}
         onVoiceModeClick={handleVoiceModeClick}
+        onRequestLocation={handleRequestLocation}
+        isLoadingLocation={isLoadingLocation}
       />
 
       {/* Voice Mode Overlay */}

@@ -33,6 +33,25 @@ export interface ChatMessage {
     model: string;
     tokensUsed: number;
   };
+  deviceInfo?: {
+    userAgent?: string;
+    platform?: string;
+    deviceType?: 'mobile' | 'tablet' | 'desktop';
+    browserName?: string;
+    browserVersion?: string;
+    operatingSystem?: string;
+    screenResolution?: string;
+    language?: string;
+    timezone?: string;
+    ipAddress?: string;
+    location?: {
+      latitude?: number;
+      longitude?: number;
+      city?: string;
+      country?: string;
+      accuracy?: number;
+    };
+  };
 }
 
 export interface VideoPreview {

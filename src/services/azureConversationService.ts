@@ -41,6 +41,25 @@ export interface AzureConversation {
       model: string;
       tokensUsed: number;
     };
+    deviceInfo?: {
+      userAgent?: string;
+      platform?: string;
+      deviceType?: 'mobile' | 'tablet' | 'desktop';
+      browserName?: string;
+      browserVersion?: string;
+      operatingSystem?: string;
+      screenResolution?: string;
+      language?: string;
+      timezone?: string;
+      ipAddress?: string;
+      location?: {
+        latitude?: number;
+        longitude?: number;
+        city?: string;
+        country?: string;
+        accuracy?: number;
+      };
+    };
   }>;
   createdAt: string;
   updatedAt: string;
@@ -460,7 +479,8 @@ export class AzureConversationService {
         chart: msg.chart,
         downloadLink: msg.downloadLink,
         videoPreview: msg.videoPreview,
-        metadata: msg.metadata
+        metadata: msg.metadata,
+        deviceInfo: msg.deviceInfo
       };
     });
 
@@ -517,7 +537,8 @@ export class AzureConversationService {
         downloadLink: msg.downloadLink,
         videoPreview: msg.videoPreview,
         files: msg.files,
-        metadata: msg.metadata
+        metadata: msg.metadata,
+        deviceInfo: msg.deviceInfo
       })),
       tags: conversation.tags,
       isArchived: conversation.isArchived,
