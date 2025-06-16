@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Conversation, ConversationSummary } from '../types/conversation';
 import { ChatMessage } from '../types/chat';
@@ -35,6 +36,7 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (userEmail) {
       console.log('🔍 ConversationContext: User email detected, loading conversations:', userEmail);
       loadConversations();
+      // Removed automatic last conversation loading - user starts with clean state
     } else {
       console.log('⚠️ ConversationContext: No user email, skipping conversation load');
     }
