@@ -20,7 +20,8 @@ const IndexContent = () => {
   const hasActiveConversation = currentConversation !== null;
 
   const handleNewChat = () => {
-    // Función para nuevo chat desde el SidePanel
+    // Function called from SidePanel when new chat is initiated
+    // The actual conversation clearing is handled by startNewConversation in SidePanel
   };
 
   const handleBannerAction = (automaticReply: string) => {

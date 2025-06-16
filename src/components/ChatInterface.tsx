@@ -78,7 +78,6 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
   const [templateContent, setTemplateContent] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
   const [userTemplates, setUserTemplates] = useState<PromptTemplate[]>([]);
-  const [conversationInitialized, setConversationInitialized] = useState(false);
   const mainContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -89,8 +88,8 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
   const { 
     currentConversation, 
     addMessageToCurrentConversation, 
-    createNewConversation,
-    uploadFileToConversation
+    uploadFileToConversation,
+    ensureConversationExists
   } = useConversation();
   const { aiSettings } = useSettings();
 
@@ -144,24 +143,6 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
   useEffect(() => {
     console.log('ChatInterface: Current conversation changed:', currentConversation?.id, currentConversation?.messages?.length);
   }, [currentConversation]);
-
-  // Initialize conversation once when component mounts and user is available
-  useEffect(() => {
-    if (userEmail && !conversationInitialized && !currentConversation) {
-      console.log('ChatInterface: Initializing new conversation for user:', userEmail);
-      setConversationInitialized(true);
-      
-      createNewConversation()
-        .then((conversationId) => {
-          console.log('ChatInterface: Successfully created conversation:', conversationId);
-        })
-        .catch((error) => {
-          console.error('ChatInterface: Failed to create conversation:', error);
-          // Reset the flag so it can try again
-          setConversationInitialized(false);
-        });
-    }
-  }, [userEmail, conversationInitialized, currentConversation, createNewConversation]);
 
   // File validation helper
   const validateAndProcessFiles = (files: FileList | null) => {
@@ -255,34 +236,30 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
     console.log('ChatInterface: START handleSendMessage with content:', content);
     console.log('ChatInterface: Current conversation at start:', currentConversation?.id);
 
-    // Ensure we have a conversation before proceeding
-    let activeConversation = currentConversation;
-    if (!activeConversation) {
-      console.log('ChatInterface: No current conversation, creating one...');
-      try {
-        const conversationId = await createNewConversation();
-        console.log('ChatInterface: Created conversation:', conversationId);
-        // The currentConversation should be updated by the context
-        // We'll proceed with the message sending
-      } catch (error) {
-        console.error('ChatInterface: Failed to create conversation:', error);
-        toast({
-          title: "Error",
-          description: "No se pudo crear la conversación. Los mensajes se guardarán localmente.",
-          variant: "destructive"
-        });
-      }
+    // Ensure we have a conversation before proceeding - this will create in Azure if needed
+    let conversationId: string;
+    try {
+      conversationId = await ensureConversationExists();
+      console.log('ChatInterface: Ensured conversation exists:', conversationId);
+    } catch (error) {
+      console.error('ChatInterface: Failed to ensure conversation exists:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo crear la conversación. Los mensajes se guardarán localmente.",
+        variant: "destructive"
+      });
+      return;
     }
 
     console.log('ChatInterface: Using authenticated user email for Azure API:', userEmail);
 
     // Upload files first if they exist
     const uploadedFileNames: string[] = [];
-    if (uploadedFiles.length > 0 && currentConversation) {
+    if (uploadedFiles.length > 0) {
       try {
         console.log('ChatInterface: Uploading files:', uploadedFiles.length);
         for (const file of uploadedFiles) {
-          const fileName = await uploadFileToConversation(file, currentConversation.id);
+          const fileName = await uploadFileToConversation(file, conversationId);
           uploadedFileNames.push(fileName);
         }
         console.log('ChatInterface: Files uploaded successfully:', uploadedFileNames);

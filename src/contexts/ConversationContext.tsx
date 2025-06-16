@@ -17,6 +17,8 @@ interface ConversationContextType {
   addMessageToCurrentConversation: (message: ChatMessage) => void;
   updateConversationTitle: (id: string, title: string) => Promise<void>;
   uploadFileToConversation: (file: File, conversationId: string) => Promise<string>;
+  startNewConversation: () => void;
+  ensureConversationExists: () => Promise<string>;
 }
 
 const ConversationContext = createContext<ConversationContextType | undefined>(undefined);
@@ -109,6 +111,7 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
 
+  // This function only creates in Azure (kept for backward compatibility)
   const createNewConversation = async (): Promise<string> => {
     if (!userEmail) throw new Error('User not authenticated');
     
@@ -138,6 +141,51 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       return azureConversationId;
     } catch (error) {
       console.error('Error creating conversation in Azure:', error);
+      throw error;
+    }
+  };
+
+  // New function to start a new conversation locally without creating in Azure
+  const startNewConversation = () => {
+    console.log('ConversationContext: Starting new local conversation (no Azure creation)');
+    setCurrentConversation(null);
+  };
+
+  // New function to ensure conversation exists (create in Azure when first message is sent)
+  const ensureConversationExists = async (): Promise<string> => {
+    if (!userEmail) throw new Error('User not authenticated');
+    
+    if (currentConversation?.id) {
+      console.log('ConversationContext: Conversation already exists:', currentConversation.id);
+      return currentConversation.id;
+    }
+
+    console.log('ConversationContext: No current conversation, creating new one in Azure');
+    
+    try {
+      // Create conversation in Azure
+      const azureConversationId = await azureConversationService.createConversation(userEmail, 'Nueva conversación');
+      
+      const newConversation: Conversation = {
+        id: azureConversationId,
+        title: 'Nueva conversación',
+        messages: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        tags: [],
+        isArchived: false,
+        totalTokens: 0
+      };
+
+      console.log('ConversationContext: Setting new Azure conversation:', newConversation);
+      setCurrentConversation(newConversation);
+      
+      // Reload conversations list from Azure
+      await loadConversations();
+      
+      return azureConversationId;
+    } catch (error) {
+      console.error('Error ensuring conversation exists in Azure:', error);
       throw error;
     }
   };
@@ -361,7 +409,9 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       searchConversations,
       addMessageToCurrentConversation,
       updateConversationTitle,
-      uploadFileToConversation
+      uploadFileToConversation,
+      startNewConversation,
+      ensureConversationExists
     }}>
       {children}
     </ConversationContext.Provider>

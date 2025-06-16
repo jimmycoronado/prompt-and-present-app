@@ -25,7 +25,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   hasActiveConversation 
 }) => {
   const [activeView, setActiveView] = useState<'main' | 'chats' | 'templates' | 'personalities'>('main');
-  const { createNewConversation } = useConversation();
+  const { startNewConversation } = useConversation();
   const isMobile = useIsMobile();
 
   // Touch gesture states
@@ -88,7 +88,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   }, [isMobile, isOpen, onToggle, touchStart, touchMove]);
 
   const handleNewChat = () => {
-    createNewConversation();
+    startNewConversation(); // This only clears the UI, no Azure call
     onNewChat();
   };
 
