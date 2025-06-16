@@ -17,11 +17,19 @@ import { SettingsModal } from './SettingsModal';
 
 export const UserMenu: React.FC = () => {
   const { user, signOut } = useAuth();
-  const { photoUrl } = useUserPhoto();
+  const { photoUrl, loading } = useUserPhoto();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  // Log user data when component renders
-  console.log('🎨 UserMenu rendering with user:', user);
+  // Log user data and photo state when component renders
+  console.log('🎨 UserMenu rendering with:', {
+    user: user ? {
+      email: user.email,
+      name: user.name,
+      id: user.id
+    } : null,
+    photoUrl: photoUrl ? 'Has photo URL' : 'No photo URL',
+    loading
+  });
 
   if (!user) {
     console.log('❌ UserMenu: No user, not rendering menu');
@@ -32,18 +40,6 @@ export const UserMenu: React.FC = () => {
                      user.user_metadata?.name || 
                      user.name ||
                      'Usuario';
-
-  console.log('📝 UserMenu display data:', {
-    displayName,
-    email: user.email,
-    fullUserObject: user
-  });
-
-  console.log('🔍 DEBUGGING: What text is being rendered?', {
-    displayName,
-    userEmail: user.email,
-    showingUserPrefix: displayName === 'Usuario'
-  });
 
   const initials = displayName
     .split(' ')
@@ -72,7 +68,12 @@ export const UserMenu: React.FC = () => {
           <Button variant="ghost" className="relative h-8 w-8 rounded-full">
             <Avatar className="h-8 w-8">
               {photoUrl && (
-                <AvatarImage src={photoUrl} alt={displayName} />
+                <AvatarImage 
+                  src={photoUrl} 
+                  alt={displayName}
+                  onLoad={() => console.log('✅ UserMenu: Avatar image loaded successfully')}
+                  onError={() => console.log('❌ UserMenu: Avatar image failed to load')}
+                />
               )}
               <AvatarFallback className="bg-skandia-green text-white text-xs">
                 {initials}
