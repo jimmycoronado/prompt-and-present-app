@@ -65,15 +65,8 @@ export const useNotifications = () => {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Supabase error details:', error);
-        // Solo mostrar error si es un error real de conexión o permisos
-        if (error.code && error.code !== 'PGRST116') { // PGRST116 es "no rows found"
-          toast({
-            title: "Error de conexión",
-            description: "No se pudieron cargar las notificaciones. Revisa tu conexión.",
-            variant: "destructive"
-          });
-        }
+        console.log('Supabase notifications error (silently handled):', error);
+        // No mostrar ningún toast de error - manejar silenciosamente
         return;
       }
 
@@ -87,13 +80,8 @@ export const useNotifications = () => {
       setNotifications(typedNotifications);
       setUnreadCount(typedNotifications.filter(n => !n.read).length);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
-      // Solo mostrar toast para errores de red o conexión
-      toast({
-        title: "Error de conexión",
-        description: "No se pudieron cargar las notificaciones. Revisa tu conexión.",
-        variant: "destructive"
-      });
+      console.log('Error fetching notifications (silently handled):', error);
+      // No mostrar ningún toast de error - las notificaciones no están configuradas
     } finally {
       setIsLoading(false);
     }
@@ -117,7 +105,7 @@ export const useNotifications = () => {
       );
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      console.log('Error marking notification as read (silently handled):', error);
     }
   };
 
@@ -137,7 +125,7 @@ export const useNotifications = () => {
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       setUnreadCount(0);
     } catch (error) {
-      console.error('Error marking all notifications as read:', error);
+      console.log('Error marking all notifications as read (silently handled):', error);
     }
   };
 
@@ -164,7 +152,7 @@ export const useNotifications = () => {
       
       return data;
     } catch (error) {
-      console.error('Error creating notification:', error);
+      console.log('Error creating notification (silently handled):', error);
       throw error;
     }
   };
