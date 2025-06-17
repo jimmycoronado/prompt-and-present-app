@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { Send, Paperclip, Radio } from 'lucide-react';
 import { Button } from './ui/button';
@@ -119,6 +120,8 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (disabled) return; // Prevenir cambios cuando está deshabilitado
+    
     const value = e.target.value;
     setMessage(value);
     onValueChange?.(value);
@@ -128,6 +131,11 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (disabled) {
+      e.preventDefault();
+      return;
+    }
+    
     if (e.key === 'Enter') {
       if (e.shiftKey) {
         return;
@@ -139,6 +147,8 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
+    
     const files = Array.from(e.target.files || []);
     if (files.length > 0 && onFilesSelected) {
       onFilesSelected(files);
@@ -146,6 +156,8 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
   };
 
   const handleTranscription = (text: string) => {
+    if (disabled) return;
+    
     const newMessage = message + (message ? ' ' : '') + text;
     setMessage(newMessage);
     onValueChange?.(newMessage);
@@ -158,12 +170,19 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
 
   const hasMessage = message.trim().length > 0;
 
+  // Mostrar placeholder diferente cuando está cargando
+  const displayPlaceholder = disabled ? "Esperando respuesta del agente..." : placeholder;
+
   // Mobile design similar to ChatGPT
   if (isMobile) {
     return (
       <form onSubmit={handleSubmit} className="flex flex-col space-y-3">
         {/* Main input container with clean design */}
-        <div className="relative bg-white dark:bg-gray-800 rounded-2xl border border-gray-300 dark:border-gray-600 shadow-sm mx-4">
+        <div className={`relative bg-white dark:bg-gray-800 rounded-2xl border shadow-sm mx-4 transition-all ${
+          disabled 
+            ? 'border-gray-200 dark:border-gray-700 opacity-60' 
+            : 'border-gray-300 dark:border-gray-600'
+        }`}>
           {/* Text area */}
           <div className="px-4 pt-4 pb-2">
             <Textarea
@@ -171,22 +190,27 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
               value={message}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              placeholder={placeholder}
+              placeholder={displayPlaceholder}
               disabled={disabled}
-              className="w-full min-h-[44px] max-h-[120px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent p-0 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+              className={`w-full min-h-[44px] max-h-[120px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent p-0 text-gray-900 dark:text-gray-100 transition-all ${
+                disabled 
+                  ? 'placeholder-gray-400 dark:placeholder-gray-500 cursor-not-allowed' 
+                  : 'placeholder-gray-500 dark:placeholder-gray-400'
+              }`}
               rows={1}
             />
           </div>
 
-          {/* Bottom controls bar - same background as text area, no border */}
+          {/* Bottom controls bar */}
           <div className="flex items-center justify-between px-4 pb-3 pt-1">
-            {/* Left side - Attach button with circle */}
+            {/* Left side - Attach button */}
             <Button
               type="button"
               variant="outline"
               size="icon"
-              onClick={() => fileInputRef.current?.click()}
-              className="h-8 w-8 text-gray-500 hover:text-orange-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full border border-gray-300 dark:border-gray-600"
+              onClick={() => !disabled && fileInputRef.current?.click()}
+              disabled={disabled}
+              className="h-8 w-8 text-gray-500 hover:text-orange-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Adjuntar archivo"
             >
               <Paperclip className="h-4 w-4" />
@@ -194,7 +218,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
 
             {/* Right side - Voice/Send buttons */}
             <div className="flex items-center space-x-2">
-              {/* Always show voice record button in mobile */}
+              {/* Voice record button */}
               <VoiceRecordButton 
                 onTranscription={handleTranscription}
                 disabled={disabled}
@@ -204,7 +228,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
                 <Button
                   type="submit"
                   disabled={disabled || !message.trim()}
-                  className="h-8 w-8 bg-green-500 hover:bg-green-600 text-white transition-all hover:scale-105 rounded-full"
+                  className="h-8 w-8 bg-green-500 hover:bg-green-600 text-white transition-all hover:scale-105 rounded-full disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                   size="icon"
                   aria-label="Enviar mensaje"
                 >
@@ -216,8 +240,9 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
                     type="button"
                     variant="outline"
                     size="icon"
-                    onClick={onVoiceModeClick}
-                    className="h-8 w-8 transition-all hover:scale-105 text-gray-500 hover:text-orange-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full border border-gray-300 dark:border-gray-600"
+                    onClick={() => !disabled && onVoiceModeClick()}
+                    disabled={disabled}
+                    className="h-8 w-8 transition-all hover:scale-105 text-gray-500 hover:text-orange-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                     aria-label="Activar modo de voz"
                     title="Modo de voz conversacional"
                   >
@@ -236,21 +261,27 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
           onChange={handleFileSelect}
           className="hidden"
           accept=".txt,.pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.csv,.xlsx,.xls"
+          disabled={disabled}
         />
       </form>
     );
   }
 
-  // Desktop design (unchanged)
+  // Desktop design
   return (
     <form onSubmit={handleSubmit} className="flex flex-col space-y-3">
-      <div className="flex items-end space-x-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg p-3 transition-all">
+      <div className={`flex items-end space-x-2 bg-white dark:bg-gray-800 border rounded-lg p-3 transition-all ${
+        disabled 
+          ? 'border-gray-200 dark:border-gray-700 opacity-60' 
+          : 'border-gray-300 dark:border-gray-600'
+      }`}>
         <Button
           type="button"
           variant="ghost"
           size="icon"
-          onClick={() => fileInputRef.current?.click()}
-          className="flex-shrink-0 h-8 w-8 text-gray-500 hover:text-orange-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+          onClick={() => !disabled && fileInputRef.current?.click()}
+          disabled={disabled}
+          className="flex-shrink-0 h-8 w-8 text-gray-500 hover:text-orange-500 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
           aria-label="Adjuntar archivo"
         >
           <Paperclip className="h-4 w-4" />
@@ -261,9 +292,13 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
           value={message}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder}
+          placeholder={displayPlaceholder}
           disabled={disabled}
-          className="flex-1 min-h-[44px] max-h-[120px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent p-0 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+          className={`flex-1 min-h-[44px] max-h-[120px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent p-0 text-gray-900 dark:text-gray-100 transition-all ${
+            disabled 
+              ? 'placeholder-gray-400 dark:placeholder-gray-500 cursor-not-allowed' 
+              : 'placeholder-gray-500 dark:placeholder-gray-400'
+          }`}
           rows={1}
         />
 
@@ -277,7 +312,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
             <Button
               type="submit"
               disabled={disabled || !message.trim()}
-              className="h-11 w-11 bg-green-500 hover:bg-green-600 text-white transition-all hover:scale-105"
+              className="h-11 w-11 bg-green-500 hover:bg-green-600 text-white transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               size="icon"
               aria-label="Enviar mensaje"
             >
@@ -289,8 +324,9 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
                 type="button"
                 variant="outline"
                 size="icon"
-                onClick={onVoiceModeClick}
-                className="h-11 w-11 transition-all hover:scale-105 text-gray-500 hover:text-orange-500 hover:bg-gray-100"
+                onClick={() => !disabled && onVoiceModeClick()}
+                disabled={disabled}
+                className="h-11 w-11 transition-all hover:scale-105 text-gray-500 hover:text-orange-500 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 aria-label="Activar modo de voz"
                 title="Modo de voz conversacional"
               >
@@ -308,6 +344,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
         onChange={handleFileSelect}
         className="hidden"
         accept=".txt,.pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.csv,.xlsx,.xls"
+        disabled={disabled}
       />
     </form>
   );

@@ -55,8 +55,9 @@ export const InputContainer = forwardRef<InputContainerRef, InputContainerProps>
               >
                 <span>{file.name}</span>
                 <button
-                  onClick={() => setUploadedFiles(files => files.filter((_, i) => i !== index))}
-                  className="text-orange-500 hover:text-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 rounded transition-colors"
+                  onClick={() => !isLoading && setUploadedFiles(files => files.filter((_, i) => i !== index))}
+                  disabled={isLoading}
+                  className="text-orange-500 hover:text-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   aria-label={`Remover archivo ${file.name}`}
                 >
                   ×
