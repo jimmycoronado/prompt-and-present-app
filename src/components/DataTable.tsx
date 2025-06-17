@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from './ui/button';
 
 interface DataTableProps {
@@ -12,7 +12,8 @@ interface DataTableProps {
 
 export const DataTable: React.FC<DataTableProps> = ({ data }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 20;
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const rowsPerPage = 10;
   
   // Convert array of objects to headers/rows format if needed
   const tableData = React.useMemo(() => {
@@ -31,8 +32,8 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
   const endIndex = startIndex + rowsPerPage;
   const currentRows = tableData.rows.slice(startIndex, endIndex);
 
-  // Determinar si necesitamos scroll horizontal
-  const needsHorizontalScroll = tableData.headers.length > 3;
+  // Determinar si es una tabla grande que necesita ser colapsable
+  const isLargeTable = tableData.headers.length > 5 || tableData.rows.length > 10;
 
   const handlePreviousPage = () => {
     setCurrentPage(prev => Math.max(prev - 1, 1));
@@ -60,95 +61,121 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
   };
 
   return (
-    <div className="w-full border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 shadow-sm">
-      {/* Header with title and export button */}
-      <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
-        <div className="flex items-center space-x-2">
-          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
-            Tabla {tableData.headers.length}x{tableData.rows.length}
-          </h3>
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={exportToCSV}
-          className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
-        >
-          <Download className="h-4 w-4" />
-        </Button>
-      </div>
-
-      {/* Table container */}
-      <div className={`max-h-[400px] overflow-y-auto ${needsHorizontalScroll ? 'overflow-x-auto' : ''}`}>
-        <div className={needsHorizontalScroll ? 'min-w-max' : 'w-full'}>
-          <table className="w-full text-sm">
-            <thead className="sticky top-0 bg-gray-50 dark:bg-gray-700 z-10">
-              <tr>
-                {tableData.headers.map((header, index) => (
-                  <th
-                    key={index}
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider border-r border-gray-200 dark:border-gray-600 last:border-r-0 whitespace-nowrap"
-                    style={needsHorizontalScroll ? { minWidth: '200px' } : {}}
-                  >
-                    {header}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
-              {currentRows.map((row, rowIndex) => (
-                <tr
-                  key={startIndex + rowIndex}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                >
-                  {row.map((cell, cellIndex) => (
-                    <td
-                      key={cellIndex}
-                      className="px-4 py-3 text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-gray-600 last:border-r-0 whitespace-nowrap"
-                      style={needsHorizontalScroll ? { minWidth: '200px' } : {}}
-                      title={String(cell)}
-                    >
-                      <div className="max-w-[200px] overflow-hidden text-ellipsis">
-                        {cell}
-                      </div>
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Pagination controls */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            Mostrando {startIndex + 1}-{Math.min(endIndex, tableData.rows.length)} de {tableData.rows.length} filas
-          </div>
+    <div className="chat-table-wrapper my-4 w-full">
+      {/* Header with title, stats, and controls */}
+      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-t-lg">
+        <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handlePreviousPage}
-              disabled={currentPage === 1}
-              className="text-gray-600 dark:text-gray-400"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              {currentPage} de {totalPages}
+            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+              Tabla de Datos
             </span>
+          </div>
+          <div className="text-xs text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">
+            {tableData.headers.length} columnas • {tableData.rows.length} filas
+          </div>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          {isLargeTable && (
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleNextPage}
-              disabled={currentPage === totalPages}
-              className="text-gray-600 dark:text-gray-400"
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
             >
-              <ChevronRight className="h-4 w-4" />
+              {isCollapsed ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronUp className="h-4 w-4" />
+              )}
             </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={exportToCSV}
+            className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+          >
+            <Download className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Collapsible table content */}
+      {!isCollapsed && (
+        <>
+          {/* Scrollable table container */}
+          <div className="scrollable-table">
+            <div className="overflow-x-auto border-l border-r border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800">
+              <table className="dataframe-table">
+                <thead>
+                  <tr>
+                    {tableData.headers.map((header, index) => (
+                      <th key={index} className="dataframe-header">
+                        {header}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentRows.map((row, rowIndex) => (
+                    <tr
+                      key={startIndex + rowIndex}
+                      className="dataframe-row"
+                    >
+                      {row.map((cell, cellIndex) => (
+                        <td key={cellIndex} className="dataframe-cell">
+                          <div className="cell-content" title={String(cell)}>
+                            {cell}
+                          </div>
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
+
+          {/* Pagination controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between p-3 border border-t-0 border-gray-200 dark:border-gray-600 rounded-b-lg bg-gray-50 dark:bg-gray-700/50">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Mostrando {startIndex + 1}-{Math.min(endIndex, tableData.rows.length)} de {tableData.rows.length} filas
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handlePreviousPage}
+                  disabled={currentPage === 1}
+                  className="text-gray-600 dark:text-gray-400 disabled:opacity-50"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-sm text-gray-600 dark:text-gray-400 px-2">
+                  {currentPage} de {totalPages}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                  className="text-gray-600 dark:text-gray-400 disabled:opacity-50"
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Collapsed state */}
+      {isCollapsed && (
+        <div className="p-4 border border-t-0 border-gray-200 dark:border-gray-600 rounded-b-lg bg-gray-50 dark:bg-gray-700/50 text-center">
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            Tabla contraída • Click para expandir
+          </span>
         </div>
       )}
     </div>

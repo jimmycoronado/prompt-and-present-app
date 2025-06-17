@@ -1,3 +1,4 @@
+
 import { User, Download, Copy, ThumbsUp, ThumbsDown } from "lucide-react";
 import { ChatMessage as ChatMessageType } from "../types/chat";
 import { DataTable } from "./DataTable";
@@ -116,13 +117,13 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
 
   return (
     <div 
-      className={`flex ${isUser ? 'justify-end' : 'justify-start'} transition-all duration-200`}
+      className={`flex ${isUser ? 'justify-end' : 'justify-start'} transition-all duration-200 mb-6`}
       role="article"
       aria-label={`Mensaje de ${isUser ? 'usuario' : 'asistente'}`}
     >
-      <div className={`max-w-4xl w-full ${isUser ? 'flex flex-row-reverse' : 'flex'} space-x-3 space-x-reverse`}>
+      <div className={`max-w-4xl w-full ${isUser ? 'flex flex-row-reverse' : 'flex'} gap-3`}>
         {/* Avatar */}
-        <div className={`flex-shrink-0 ${isUser ? 'ml-3' : 'mr-3'}`}>
+        <div className="flex-shrink-0">
           {isUser ? (
             <Avatar className="w-8 h-8">
               {photoUrl && (
@@ -143,25 +144,26 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
           )}
         </div>
 
-        {/* Message Content */}
-        <div className={`flex-1 ${isUser ? 'text-right' : 'text-left'} relative`}>
+        {/* Message Content Container */}
+        <div className={`flex-1 min-w-0 ${isUser ? 'text-right' : 'text-left'}`}>
           {/* Hover area that includes the message bubble and copy icon */}
           <div 
-            className={`group ${isUser ? 'pb-2' : ''}`}
+            className="group"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
+            {/* Message Bubble */}
             <div 
-              className={`inline-block p-4 relative ${
+              className={`chat-message-bubble ${
                 isUser
-                  ? 'rounded-lg bg-skandia-green text-white border border-skandia-green shadow-sm'
-                  : 'text-gray-900 dark:text-gray-100'
+                  ? 'ml-8 rounded-2xl bg-skandia-green text-white border border-skandia-green shadow-sm px-4 py-3'
+                  : 'mr-8 text-gray-900 dark:text-gray-100'
               }`}
             >
               
               {/* Text Content */}
               {message.content && (
-                <div className="whitespace-pre-wrap">
+                <div className="whitespace-pre-wrap break-words">
                   {message.content}
                 </div>
               )}
@@ -184,27 +186,6 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
                       </span>
                     </div>
                   ))}
-                </div>
-              )}
-
-              {/* Data Table */}
-              {message.data && (
-                <div className="mt-4">
-                  <DataTable data={message.data} />
-                </div>
-              )}
-
-              {/* Chart */}
-              {message.chart && (
-                <div className="mt-4">
-                  <DataChart chartData={message.chart} />
-                </div>
-              )}
-
-              {/* Video Preview */}
-              {message.videoPreview && (
-                <div className="mt-4">
-                  <VideoPreview video={message.videoPreview} />
                 </div>
               )}
 
@@ -240,6 +221,20 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
                     <Download className="h-4 w-4 mr-2" />
                     {message.downloadLink.filename}
                   </Button>
+                </div>
+              )}
+
+              {/* Video Preview */}
+              {message.videoPreview && (
+                <div className="mt-4">
+                  <VideoPreview video={message.videoPreview} />
+                </div>
+              )}
+
+              {/* Chart */}
+              {message.chart && (
+                <div className="mt-4">
+                  <DataChart chartData={message.chart} />
                 </div>
               )}
 
@@ -318,9 +313,16 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
             )}
           </div>
 
+          {/* Data Table - Outside the bubble for full width */}
+          {message.data && (
+            <div className={`${isUser ? 'mr-8' : 'mr-8'}`}>
+              <DataTable data={message.data} />
+            </div>
+          )}
+
           {/* Timestamp */}
-          <div className={`mt-0.5 text-xs text-gray-500 dark:text-gray-400 flex items-center ${
-            isUser ? 'justify-end' : 'justify-start'
+          <div className={`mt-1 text-xs text-gray-500 dark:text-gray-400 flex items-center ${
+            isUser ? 'justify-end mr-8' : 'justify-start'
           }`}>
             <time dateTime={validTimestamp.toISOString()}>
               {validTimestamp.toLocaleTimeString()}
