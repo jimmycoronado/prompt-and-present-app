@@ -13,7 +13,7 @@ import { useToast } from '../hooks/use-toast';
 import { CreateTemplateDialog } from './CreateTemplateDialog';
 
 interface PromptTemplatesProps {
-  onSelectTemplate: (template: PromptTemplate) => void;
+  onSelectTemplate: (content: string) => void;
   onClose: () => void;
 }
 
@@ -98,7 +98,8 @@ export const PromptTemplates: React.FC<PromptTemplatesProps> = ({ onSelectTempla
       }
     }
     
-    onSelectTemplate(template);
+    // Pass the template content instead of the whole template object
+    onSelectTemplate(template.content);
     onClose();
   };
 
@@ -318,7 +319,10 @@ export const PromptTemplates: React.FC<PromptTemplatesProps> = ({ onSelectTempla
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleDeleteTemplate(template)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteTemplate(template);
+                            }}
                             className="h-7 text-red-600 hover:text-red-700"
                           >
                             Eliminar
@@ -326,7 +330,10 @@ export const PromptTemplates: React.FC<PromptTemplatesProps> = ({ onSelectTempla
                         )}
                         <Button
                           size="sm"
-                          onClick={() => handleUseTemplate(template)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUseTemplate(template);
+                          }}
                           className="h-7"
                         >
                           Usar Plantilla
