@@ -210,7 +210,11 @@ class TemplatesService {
     try {
       console.log('TemplatesService: Deleting template:', templateId);
       
-      const response = await fetch(`${BACKEND_URL}/api/templates/${templateId}`, {
+      const params = new URLSearchParams({
+        user_id: userEmail
+      });
+      
+      const response = await fetch(`${BACKEND_URL}/api/templates/${templateId}?${params}`, {
         method: 'DELETE',
         headers: this.getHeaders(userEmail)
       });
