@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { ConversationHistory } from "./ConversationHistory";
 import { PromptTemplates } from "./PromptTemplates";
@@ -53,9 +54,9 @@ export const SidePanel: React.FC<SidePanelProps> = ({
       case 'templates':
         return <PromptTemplates onClose={() => setActiveView('main')} onSelectTemplate={handleSelectTemplate} />;
       case 'settings':
-        return <SettingsModal onClose={() => setShowSettings(false)} />;
+        return <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />;
       case 'notifications':
-        return <NotificationPanel onClose={() => setShowNotifications(false)} />;
+        return <NotificationPanel isOpen={showNotifications} onClose={() => setShowNotifications(false)} />;
       default:
         return null;
     }
