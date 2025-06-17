@@ -6,9 +6,10 @@ import { ScrollArea } from './ui/scroll-area';
 import { Badge } from './ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { PromptTemplate, TemplateCategory } from '../types/templates';
-import { templatesService } from '../services/templatesService';
+import { templatesService, CreateTemplateRequest } from '../services/templatesService';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/use-toast';
+import { CreateTemplateDialog } from './CreateTemplateDialog';
 
 interface PromptTemplatesProps {
   onSelectTemplate: (template: PromptTemplate) => void;
@@ -29,6 +30,7 @@ export const PromptTemplates: React.FC<PromptTemplatesProps> = ({ onSelectTempla
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [templates, setTemplates] = useState<PromptTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   
@@ -126,6 +128,37 @@ export const PromptTemplates: React.FC<PromptTemplatesProps> = ({ onSelectTempla
     }
   };
 
+  const handleCreateTemplate = async (templateData: CreateTemplateRequest) => {
+    if (!userEmail) {
+      toast({
+        title: "Error",
+        description: "Debes estar autenticado para crear plantillas",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      console.log('PromptTemplates: Creating new template:', templateData);
+      const newTemplate = await templatesService.createTemplate(userEmail, templateData);
+      
+      // Add to local state
+      setTemplates(prev => [newTemplate, ...prev]);
+      
+      toast({
+        title: "Plantilla creada",
+        description: "La plantilla se creó correctamente"
+      });
+    } catch (error) {
+      console.error('PromptTemplates: Error creating template:', error);
+      toast({
+        title: "Error al crear plantilla",
+        description: "No se pudo crear la plantilla",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-800 relative">
       {/* Close button */}
@@ -146,7 +179,7 @@ export const PromptTemplates: React.FC<PromptTemplatesProps> = ({ onSelectTempla
           <Button
             variant="outline"
             size="sm"
-            onClick={() => {/* TODO: Implementar crear plantilla personalizada */}}
+            onClick={() => setShowCreateDialog(true)}
           >
             <Plus className="h-4 w-4 mr-2" />
             Crear Plantilla
@@ -265,6 +298,14 @@ export const PromptTemplates: React.FC<PromptTemplatesProps> = ({ onSelectTempla
           </div>
         )}
       </ScrollArea>
+
+      {/* Create Template Dialog */}
+      <CreateTemplateDialog
+        isOpen={showCreateDialog}
+        onClose={() => setShowCreateDialog(false)}
+        onSubmit={handleCreateTemplate}
+        categories={defaultCategories}
+      />
     </div>
   );
 };
