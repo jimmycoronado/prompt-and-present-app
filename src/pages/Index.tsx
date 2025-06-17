@@ -11,7 +11,6 @@ import { useIsMobile } from "../hooks/use-mobile";
 
 const IndexContent = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isRestoringConversation, setIsRestoringConversation] = useState(false);
   const { currentConversation, isLoading } = useConversation();
   const isMobile = useIsMobile();
   
@@ -33,9 +32,7 @@ const IndexContent = () => {
     }
   };
 
-  // Only show "Restaurando conversación" when specifically loading a conversation from history
-  // Not when processing messages or during normal chat operations
-  if (isRestoringConversation) {
+  if (isLoading) {
     return (
       <div className={`${isMobile ? 'h-[100dvh] overflow-hidden' : 'min-h-screen'} bg-gray-50 dark:bg-gray-900 flex items-center justify-center`}>
         <div className="text-center">
@@ -67,7 +64,6 @@ const IndexContent = () => {
         onToggle={() => setSidebarOpen(!sidebarOpen)}
         onNewChat={handleNewChat}
         hasActiveConversation={hasActiveConversation}
-        onConversationLoading={setIsRestoringConversation}
       />
       
       {/* Contenido principal con altura calculada */}
