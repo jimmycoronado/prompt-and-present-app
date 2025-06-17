@@ -95,15 +95,15 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
 
         {/* Table container - colapsable para tablas grandes */}
         {(!shouldCollapse || !isCollapsed) && (
-          <div className="scrollable-table relative">
-            <div className="max-h-[400px] overflow-y-auto overflow-x-auto">
-              <table className="dataframe-table">
-                <thead>
+          <div className="w-full max-h-[400px] overflow-y-auto">
+            <div className="w-full overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 whitespace-nowrap">
+                <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
                     {tableData.headers.map((header, index) => (
                       <th
                         key={index}
-                        className="dataframe-header"
+                        className="px-3 py-2 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider min-w-[120px]"
                         title={header}
                       >
                         {header}
@@ -111,16 +111,16 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
                     ))}
                   </tr>
                 </thead>
-                <tbody className="bg-white dark:bg-gray-800">
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {currentRows.map((row, rowIndex) => (
                     <tr
                       key={startIndex + rowIndex}
-                      className="dataframe-row"
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
                     >
                       {row.map((cell, cellIndex) => (
                         <td
                           key={cellIndex}
-                          className="dataframe-cell"
+                          className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100 max-w-[250px] truncate"
                           title={String(cell)}
                         >
                           {cell}
@@ -131,13 +131,6 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
                 </tbody>
               </table>
             </div>
-            
-            {/* Indicador de scroll horizontal */}
-            {tableData.headers.length > 3 && (
-              <div className="absolute bottom-2 right-2 text-xs text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 px-2 py-1 rounded shadow-sm border">
-                ← Desliza para ver más →
-              </div>
-            )}
           </div>
         )}
 
