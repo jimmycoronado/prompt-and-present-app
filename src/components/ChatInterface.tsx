@@ -115,24 +115,15 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
 
       try {
         setIsLoadingTemplates(true);
-        console.log('ChatInterface: Loading user templates from backend for:', userEmail);
+        console.log('ChatInterface: Loading all templates (user + system) from backend for:', userEmail);
         
-        // Get both user templates and system templates
-        const [userTemplates, systemTemplates] = await Promise.all([
-          templatesService.getUserTemplates(userEmail, { isDefault: false }),
-          templatesService.getUserTemplates(userEmail, { isDefault: true })
-        ]);
+        // Get all templates (user and system) in one call
+        const allTemplates = await templatesService.getUserTemplates(userEmail);
         
-        const allTemplates = [...userTemplates, ...systemTemplates];
-        console.log('ChatInterface: Loaded templates:', {
-          userTemplates: userTemplates.length,
-          systemTemplates: systemTemplates.length,
-          total: allTemplates.length
-        });
-        
+        console.log('ChatInterface: Loaded all templates:', allTemplates.length);
         setUserTemplates(allTemplates);
       } catch (error) {
-        console.error('ChatInterface: Error loading user templates:', error);
+        console.error('ChatInterface: Error loading templates:', error);
         setUserTemplates([]);
       } finally {
         setIsLoadingTemplates(false);

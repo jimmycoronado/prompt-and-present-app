@@ -1,3 +1,4 @@
+
 import { PromptTemplate } from '../types/templates';
 
 const BACKEND_URL = 'https://skcodaliaidev.azurewebsites.net';
@@ -43,41 +44,77 @@ class TemplatesService {
 
   async getUserTemplates(userEmail: string, options?: {
     category?: string;
-    isDefault?: boolean;
     search?: string;
     limit?: number;
     offset?: number;
   }): Promise<PromptTemplate[]> {
     try {
-      console.log('TemplatesService: Getting user templates for:', userEmail, 'options:', options);
+      console.log('TemplatesService: Getting all templates (user + system) for:', userEmail, 'options:', options);
       
-      // For system templates (isDefault: true), use "system" as user_id
-      // For user templates (isDefault: false or undefined), use the user's email
-      const userId = options?.isDefault === true ? 'system' : userEmail;
+      // Get both user templates and system templates
+      const [userTemplates, systemTemplates] = await Promise.all([
+        this.fetchTemplatesByType(userEmail, false, options),
+        this.fetchTemplatesByType(userEmail, true, options)
+      ]);
+      
+      const allTemplates = [...userTemplates, ...systemTemplates];
+      console.log('TemplatesService: Combined templates:', {
+        userTemplates: userTemplates.length,
+        systemTemplates: systemTemplates.length,
+        total: allTemplates.length
+      });
+      
+      return allTemplates;
+    } catch (error) {
+      console.error('TemplatesService: Error fetching all templates:', error);
+      throw error;
+    }
+  }
+
+  private async fetchTemplatesByType(
+    userEmail: string, 
+    isDefault: boolean, 
+    options?: {
+      category?: string;
+      search?: string;
+      limit?: number;
+      offset?: number;
+    }
+  ): Promise<PromptTemplate[]> {
+    try {
+      // For system templates, use "system" as user_id but still send X-User-Id header
+      const userId = isDefault ? 'system' : userEmail;
       
       const params = new URLSearchParams({
         user_id: userId,
+        is_default: isDefault.toString(),
         ...(options?.category && { category: options.category }),
-        ...(options?.isDefault !== undefined && { is_default: options.isDefault.toString() }),
         ...(options?.search && { search: options.search }),
         ...(options?.limit && { limit: options.limit.toString() }),
         ...(options?.offset && { offset: options.offset.toString() })
       });
 
-      console.log('TemplatesService: Making request to:', `${BACKEND_URL}/api/templates?${params}`);
+      console.log('TemplatesService: Fetching templates:', {
+        type: isDefault ? 'system' : 'user',
+        url: `${BACKEND_URL}/api/templates?${params}`
+      });
 
       const response = await fetch(`${BACKEND_URL}/api/templates?${params}`, {
         method: 'GET',
-        headers: this.getHeaders()
+        headers: this.getHeaders(userEmail) // Always send user email in header
       });
 
       if (!response.ok) {
         console.error('TemplatesService: Response not OK:', response.status, response.statusText);
-        throw new Error(`Failed to fetch templates: ${response.statusText}`);
+        if (response.status === 422) {
+          const errorData = await response.json();
+          console.error('TemplatesService: Validation error:', errorData);
+        }
+        throw new Error(`Failed to fetch ${isDefault ? 'system' : 'user'} templates: ${response.statusText}`);
       }
 
       const templates = await response.json();
-      console.log('TemplatesService: Received templates:', templates.length, 'for userId:', userId);
+      console.log('TemplatesService: Received templates:', templates.length, 'for type:', isDefault ? 'system' : 'user');
       
       // Convert from backend format to frontend format
       return templates.map((template: any) => ({
@@ -86,14 +123,15 @@ class TemplatesService {
         description: template.description,
         content: template.content,
         category: template.category,
-        isDefault: template.isDefault || false,
+        isDefault: isDefault,
         createdAt: new Date(template.createdAt),
         usageCount: template.usageCount || 0,
         tags: template.tags || []
       }));
     } catch (error) {
-      console.error('TemplatesService: Error fetching templates:', error);
-      throw error;
+      console.error(`TemplatesService: Error fetching ${isDefault ? 'system' : 'user'} templates:`, error);
+      // Return empty array instead of throwing to allow partial success
+      return [];
     }
   }
 
@@ -215,7 +253,7 @@ class TemplatesService {
 
       const response = await fetch(`${BACKEND_URL}/api/templates/categories?${params}`, {
         method: 'GET',
-        headers: this.getHeaders()
+        headers: this.getHeaders(userEmail)
       });
 
       if (!response.ok) {

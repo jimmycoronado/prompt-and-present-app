@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { File, Plus, Search, Bookmark, Code, FileText, Lightbulb, MessageCircle, BarChart, Users, Calculator, Globe, X } from 'lucide-react';
 import { Button } from './ui/button';
@@ -45,21 +44,12 @@ export const PromptTemplates: React.FC<PromptTemplatesProps> = ({ onSelectTempla
 
       try {
         setIsLoading(true);
-        console.log('PromptTemplates: Loading templates from backend for:', userEmail);
+        console.log('PromptTemplates: Loading all templates (user + system) from backend for:', userEmail);
         
-        // Get both user templates and system templates
-        const [userTemplates, systemTemplates] = await Promise.all([
-          templatesService.getUserTemplates(userEmail, { isDefault: false }),
-          templatesService.getUserTemplates(userEmail, { isDefault: true })
-        ]);
+        // Get all templates (user and system) in one call
+        const allTemplates = await templatesService.getUserTemplates(userEmail);
         
-        const allTemplates = [...userTemplates, ...systemTemplates];
-        console.log('PromptTemplates: Loaded templates:', {
-          userTemplates: userTemplates.length,
-          systemTemplates: systemTemplates.length,
-          total: allTemplates.length
-        });
-        
+        console.log('PromptTemplates: Loaded all templates:', allTemplates.length);
         setTemplates(allTemplates);
       } catch (error) {
         console.error('PromptTemplates: Error loading templates:', error);
