@@ -16,7 +16,7 @@ interface MessagesContainerProps {
   onSelectTemplate: (content: string) => void;
 }
 
-export const MessagesContainer: React.FC<MessagesContainerProps> = ({
+export const MessagesContainer: React.FC<MessagesContainerProps> = React.memo(({
   messages,
   selectedMessage,
   onSelectMessage,
@@ -50,4 +50,6 @@ export const MessagesContainer: React.FC<MessagesContainerProps> = ({
       )}
     </div>
   );
-};
+});
+
+MessagesContainer.displayName = 'MessagesContainer';
