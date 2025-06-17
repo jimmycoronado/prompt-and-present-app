@@ -13,7 +13,7 @@ interface DataTableProps {
 export const DataTable: React.FC<DataTableProps> = ({ data }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const rowsPerPage = 10; // Reducimos a 10 filas por página para mejor UX
+  const rowsPerPage = 10;
   
   // Convert array of objects to headers/rows format if needed
   const tableData = React.useMemo(() => {
@@ -33,8 +33,7 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
   const currentRows = tableData.rows.slice(startIndex, endIndex);
 
   // Determinar si necesitamos colapsar por defecto (tablas muy grandes)
-  const shouldCollapse = tableData.headers.length > 5 || tableData.rows.length > 20;
-  const needsHorizontalScroll = tableData.headers.length > 3;
+  const shouldCollapse = tableData.headers.length > 4 || tableData.rows.length > 15;
 
   const handlePreviousPage = () => {
     setCurrentPage(prev => Math.max(prev - 1, 1));
@@ -68,7 +67,7 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
         <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
           <div className="flex items-center space-x-2">
             <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
-              Tabla {tableData.headers.length}x{tableData.rows.length}
+              Tabla {tableData.headers.length}×{tableData.rows.length}
             </h3>
             {shouldCollapse && (
               <Button
@@ -78,6 +77,9 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
                 className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
               >
                 {isCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+                <span className="ml-1 text-xs">
+                  {isCollapsed ? 'Expandir' : 'Contraer'}
+                </span>
               </Button>
             )}
           </div>
@@ -93,47 +95,49 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
 
         {/* Table container - colapsable para tablas grandes */}
         {(!shouldCollapse || !isCollapsed) && (
-          <div className="scrollable-table">
-            <div className={`max-h-[400px] overflow-y-auto ${needsHorizontalScroll ? 'overflow-x-auto' : ''}`}>
-              <div className={needsHorizontalScroll ? 'min-w-max' : 'w-full'}>
-                <table className="w-full text-sm dataframe-table">
-                  <thead className="sticky top-0 bg-gray-50 dark:bg-gray-700 z-10">
-                    <tr>
-                      {tableData.headers.map((header, index) => (
-                        <th
-                          key={index}
-                          className="dataframe-header"
-                          style={needsHorizontalScroll ? { minWidth: '150px' } : {}}
+          <div className="scrollable-table relative">
+            <div className="max-h-[400px] overflow-y-auto overflow-x-auto">
+              <table className="dataframe-table">
+                <thead>
+                  <tr>
+                    {tableData.headers.map((header, index) => (
+                      <th
+                        key={index}
+                        className="dataframe-header"
+                        title={header}
+                      >
+                        {header}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-800">
+                  {currentRows.map((row, rowIndex) => (
+                    <tr
+                      key={startIndex + rowIndex}
+                      className="dataframe-row"
+                    >
+                      {row.map((cell, cellIndex) => (
+                        <td
+                          key={cellIndex}
+                          className="dataframe-cell"
+                          title={String(cell)}
                         >
-                          {header}
-                        </th>
+                          {cell}
+                        </td>
                       ))}
                     </tr>
-                  </thead>
-                  <tbody className="bg-white dark:bg-gray-800">
-                    {currentRows.map((row, rowIndex) => (
-                      <tr
-                        key={startIndex + rowIndex}
-                        className="dataframe-row"
-                      >
-                        {row.map((cell, cellIndex) => (
-                          <td
-                            key={cellIndex}
-                            className="dataframe-cell"
-                            style={needsHorizontalScroll ? { minWidth: '150px' } : {}}
-                            title={String(cell)}
-                          >
-                            <div className="max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap">
-                              {cell}
-                            </div>
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             </div>
+            
+            {/* Indicador de scroll horizontal */}
+            {tableData.headers.length > 3 && (
+              <div className="absolute bottom-2 right-2 text-xs text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 px-2 py-1 rounded shadow-sm border">
+                ← Desliza para ver más →
+              </div>
+            )}
           </div>
         )}
 
@@ -143,7 +147,7 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
             <p className="text-sm">
               Tabla con {tableData.headers.length} columnas y {tableData.rows.length} filas
             </p>
-            <p className="text-xs mt-1">Haz clic en ↓ para expandir</p>
+            <p className="text-xs mt-1">Haz clic en "Expandir" para ver el contenido</p>
           </div>
         )}
 

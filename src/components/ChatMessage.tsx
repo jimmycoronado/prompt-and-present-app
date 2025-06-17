@@ -121,7 +121,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
       role="article"
       aria-label={`Mensaje de ${isUser ? 'usuario' : 'asistente'}`}
     >
-      <div className={`max-w-4xl w-full ${isUser ? 'flex flex-row-reverse' : 'flex'} space-x-3 space-x-reverse`}>
+      <div className={`max-w-full w-full ${isUser ? 'flex flex-row-reverse' : 'flex'} space-x-3 space-x-reverse`}>
         {/* Avatar */}
         <div className={`flex-shrink-0 ${isUser ? 'ml-3' : 'mr-3'}`}>
           {isUser ? (
@@ -288,9 +288,11 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
           </div>
 
           {/* Data components OUTSIDE message bubble for full width */}
-          {/* Data Table fuera del bubble para aprovechar todo el ancho */}
+          {/* Data Table fuera del bubble para aprovechar todo el ancho disponible */}
           {message.data && !isUser && (
-            <DataTable data={message.data} />
+            <div className="mt-4 w-full">
+              <DataTable data={message.data} />
+            </div>
           )}
 
           {/* Chart fuera del bubble */}
