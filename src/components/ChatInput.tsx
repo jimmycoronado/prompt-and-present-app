@@ -171,7 +171,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
   const hasMessage = message.trim().length > 0;
 
   // Mostrar placeholder diferente cuando está cargando
-  const displayPlaceholder = disabled ? "Esperando respuesta del agente..." : placeholder;
+  const displayPlaceholder = disabled ? "Consultando agente..." : placeholder;
 
   // Mobile design similar to ChatGPT
   if (isMobile) {
@@ -180,7 +180,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
         {/* Main input container with clean design */}
         <div className={`relative bg-white dark:bg-gray-800 rounded-2xl border shadow-sm mx-4 transition-all ${
           disabled 
-            ? 'border-gray-200 dark:border-gray-700 opacity-60' 
+            ? 'border-gray-200 dark:border-gray-700 opacity-60 cursor-not-allowed' 
             : 'border-gray-300 dark:border-gray-600'
         }`}>
           {/* Text area */}
@@ -224,7 +224,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
                 disabled={disabled}
               />
               
-              {hasMessage ? (
+              {hasMessage && !disabled ? (
                 <Button
                   type="submit"
                   disabled={disabled || !message.trim()}
@@ -272,7 +272,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
     <form onSubmit={handleSubmit} className="flex flex-col space-y-3">
       <div className={`flex items-end space-x-2 bg-white dark:bg-gray-800 border rounded-lg p-3 transition-all ${
         disabled 
-          ? 'border-gray-200 dark:border-gray-700 opacity-60' 
+          ? 'border-gray-200 dark:border-gray-700 opacity-60 cursor-not-allowed' 
           : 'border-gray-300 dark:border-gray-600'
       }`}>
         <Button
@@ -308,7 +308,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
             disabled={disabled}
           />
           
-          {hasMessage ? (
+          {hasMessage && !disabled ? (
             <Button
               type="submit"
               disabled={disabled || !message.trim()}
