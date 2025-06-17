@@ -15,15 +15,13 @@ interface SidePanelProps {
   onToggle: () => void;
   onNewChat: () => void;
   hasActiveConversation: boolean;
-  onSelectTemplate?: (content: string) => void; // Add this prop
 }
 
 export const SidePanel: React.FC<SidePanelProps> = ({ 
   isOpen, 
   onToggle, 
   onNewChat,
-  hasActiveConversation,
-  onSelectTemplate // Add this prop
+  hasActiveConversation 
 }) => {
   const [activeView, setActiveView] = useState<'main' | 'chats' | 'templates' | 'personalities'>('main');
   const { startNewConversation } = useConversation();
@@ -95,18 +93,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
 
   const handleSelectTemplate = (content: string) => {
     console.log('SidePanel: Template content selected:', content);
-    
-    // Pass the content to the parent component (ChatInterface)
-    if (onSelectTemplate) {
-      onSelectTemplate(content);
-    }
-    
     setActiveView('main');
-    
-    // Close the panel on mobile after selecting template
-    if (isMobile) {
-      onToggle();
-    }
   };
 
   const handleSelectPersonality = (personality: Personality) => {
