@@ -102,7 +102,7 @@ class TemplatesService {
 
       const response = await fetch(`${BACKEND_URL}/api/templates?${params}`, {
         method: 'GET',
-        headers: this.getHeaders(headerUserId) // Use correct header based on template type
+        headers: this.getHeaders(headerUserId)
       });
 
       if (!response.ok) {
@@ -157,52 +157,27 @@ class TemplatesService {
       const responseData = await response.json();
       console.log('TemplatesService: Template created with ID:', responseData.template_id);
       
-      // After creating, fetch the complete template data
+      // Build the template object directly from the request data and response
       if (responseData.template_id) {
-        const newTemplate = await this.getTemplateById(userEmail, responseData.template_id);
+        const newTemplate: PromptTemplate = {
+          id: responseData.template_id,
+          name: templateData.name,
+          description: templateData.description,
+          content: templateData.content,
+          category: templateData.category,
+          isDefault: false,
+          createdAt: new Date(),
+          usageCount: 0,
+          tags: templateData.tags || []
+        };
+        
+        console.log('TemplatesService: Created template object:', newTemplate);
         return newTemplate;
       } else {
         throw new Error('No template ID returned from creation');
       }
     } catch (error) {
       console.error('TemplatesService: Error creating template:', error);
-      throw error;
-    }
-  }
-
-  private async getTemplateById(userEmail: string, templateId: string): Promise<PromptTemplate> {
-    try {
-      console.log('TemplatesService: Getting template by ID:', templateId);
-      
-      const params = new URLSearchParams({
-        user_id: userEmail
-      });
-
-      const response = await fetch(`${BACKEND_URL}/api/templates/${templateId}?${params}`, {
-        method: 'GET',
-        headers: this.getHeaders(userEmail)
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch template: ${response.statusText}`);
-      }
-
-      const template = await response.json();
-      console.log('TemplatesService: Template fetched:', template);
-      
-      return {
-        id: template.id,
-        name: template.name,
-        description: template.description,
-        content: template.content,
-        category: template.category,
-        isDefault: template.isDefault || false,
-        createdAt: new Date(template.createdAt),
-        usageCount: template.usageCount || 0,
-        tags: template.tags || []
-      };
-    } catch (error) {
-      console.error('TemplatesService: Error fetching template by ID:', error);
       throw error;
     }
   }
