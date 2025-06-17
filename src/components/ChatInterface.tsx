@@ -13,6 +13,7 @@ import { useDeviceInfo } from "@/hooks/useDeviceInfo";
 import { DragOverlay } from "./chat/DragOverlay";
 import { MessagesContainer } from "./chat/MessagesContainer";
 import { InputContainer } from "./chat/InputContainer";
+import { templatesService } from "../services/templatesService";
 
 interface ChatInterfaceProps {
   onSelectMessage: (message: ChatMessageType | null) => void;
@@ -79,13 +80,14 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
   const [templateContent, setTemplateContent] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
   const [userTemplates, setUserTemplates] = useState<PromptTemplate[]>([]);
+  const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
   const [locationPermissionAsked, setLocationPermissionAsked] = useState(false);
   const mainContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   // Get user email and access token from auth context
   const { user, accessToken } = useAuth();
-  const userEmail = user?.email || "usuario@dominio.com";
+  const userEmail = user?.email || "";
 
   const { 
     currentConversation, 
@@ -98,39 +100,43 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
 
   const messages = currentConversation?.messages || [];
 
-  // Load user templates from localStorage
+  // Load user templates from backend instead of localStorage
   useEffect(() => {
-    const loadUserTemplates = () => {
+    const loadUserTemplates = async () => {
+      if (!userEmail) {
+        console.log('ChatInterface: No user email, skipping template load');
+        setUserTemplates([]);
+        return;
+      }
+
       try {
-        console.log('ChatInterface: Loading user templates from localStorage');
-        const savedTemplates = localStorage.getItem('promptTemplates');
-        console.log('ChatInterface: Raw saved templates:', savedTemplates);
+        setIsLoadingTemplates(true);
+        console.log('ChatInterface: Loading user templates from backend for:', userEmail);
         
-        if (savedTemplates) {
-          const templates: PromptTemplate[] = JSON.parse(savedTemplates);
-          console.log('ChatInterface: Parsed templates:', templates.length, templates);
-          setUserTemplates(templates);
-        } else {
-          console.log('ChatInterface: No saved templates found, will show default templates');
-          setUserTemplates([]);
-        }
+        // Get both user templates and system templates
+        const [userTemplates, systemTemplates] = await Promise.all([
+          templatesService.getUserTemplates(userEmail, { isDefault: false }),
+          templatesService.getUserTemplates(userEmail, { isDefault: true })
+        ]);
+        
+        const allTemplates = [...userTemplates, ...systemTemplates];
+        console.log('ChatInterface: Loaded templates:', {
+          userTemplates: userTemplates.length,
+          systemTemplates: systemTemplates.length,
+          total: allTemplates.length
+        });
+        
+        setUserTemplates(allTemplates);
       } catch (error) {
         console.error('ChatInterface: Error loading user templates:', error);
         setUserTemplates([]);
+      } finally {
+        setIsLoadingTemplates(false);
       }
     };
 
     loadUserTemplates();
-    
-    // Listen for template changes
-    const handleStorageChange = () => {
-      console.log('ChatInterface: Storage change detected, reloading templates');
-      loadUserTemplates();
-    };
-    window.addEventListener('storage', handleStorageChange);
-    
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+  }, [userEmail]);
 
   // Log when userTemplates changes
   useEffect(() => {
@@ -435,12 +441,29 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
 
   const handleSelectTemplate = (template: PromptTemplate) => {
     console.log('ChatInterface: Template selected:', template.content);
+    
+    // Record template usage
+    if (userEmail && template.id) {
+      templatesService.recordTemplateUsage(userEmail, template.id).catch(error => {
+        console.error('ChatInterface: Error recording template usage:', error);
+      });
+    }
+    
     setTemplateContent(template.content);
     setShowTemplates(false);
   };
 
   const handleCarouselTemplateSelect = (content: string) => {
     console.log('ChatInterface: Carousel template selected:', content);
+    
+    // Find the template by content to record usage
+    const selectedTemplate = userTemplates.find(t => t.content === content);
+    if (userEmail && selectedTemplate?.id) {
+      templatesService.recordTemplateUsage(userEmail, selectedTemplate.id).catch(error => {
+        console.error('ChatInterface: Error recording carousel template usage:', error);
+      });
+    }
+    
     setTemplateContent(content);
   };
 
