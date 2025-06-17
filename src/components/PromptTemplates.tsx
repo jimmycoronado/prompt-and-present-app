@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { File, Plus, Search, Bookmark, Code, FileText, Lightbulb, MessageCircle, BarChart, Users, Calculator, Globe, X } from 'lucide-react';
 import { Button } from './ui/button';
@@ -102,7 +103,25 @@ export const PromptTemplates: React.FC<PromptTemplatesProps> = ({ onSelectTempla
   };
 
   const handleDeleteTemplate = async (template: PromptTemplate) => {
-    if (!userEmail || template.isDefault) {
+    console.log('PromptTemplates: Attempting to delete template:', {
+      id: template.id,
+      name: template.name,
+      isDefault: template.isDefault,
+      userEmail: userEmail
+    });
+
+    if (!userEmail) {
+      console.error('PromptTemplates: No user email available');
+      toast({
+        title: "Error",
+        description: "No hay usuario autenticado",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (template.isDefault) {
+      console.log('PromptTemplates: Cannot delete default template');
       toast({
         title: "No se puede eliminar",
         description: "Las plantillas del sistema no se pueden eliminar",
@@ -111,22 +130,41 @@ export const PromptTemplates: React.FC<PromptTemplatesProps> = ({ onSelectTempla
       return;
     }
 
+    if (!template.id) {
+      console.error('PromptTemplates: Template has no ID');
+      toast({
+        title: "Error",
+        description: "La plantilla no tiene un ID válido",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
-      console.log('PromptTemplates: Deleting template:', template.id);
+      console.log('PromptTemplates: Calling delete service for template:', template.id);
       await templatesService.deleteTemplate(userEmail, template.id);
       
       // Remove from local state
       setTemplates(prev => prev.filter(t => t.id !== template.id));
       
+      console.log('PromptTemplates: Template deleted successfully');
       toast({
         title: "Plantilla eliminada",
         description: "La plantilla se eliminó correctamente"
       });
     } catch (error) {
       console.error('PromptTemplates: Error deleting template:', error);
+      
+      // More detailed error message based on the error
+      let errorMessage = "No se pudo eliminar la plantilla";
+      if (error instanceof Error) {
+        console.error('PromptTemplates: Delete error details:', error.message);
+        errorMessage = `Error: ${error.message}`;
+      }
+      
       toast({
         title: "Error al eliminar",
-        description: "No se pudo eliminar la plantilla",
+        description: errorMessage,
         variant: "destructive"
       });
     }
