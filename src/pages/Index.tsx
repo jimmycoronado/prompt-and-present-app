@@ -47,11 +47,11 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
       <Header 
-        onToggleSidePanel={handleToggleSidePanel}
-        isSidePanelOpen={isSidePanelOpen}
+        onToggleSidebar={handleToggleSidePanel}
+        onBannerAction={handleBannerAction}
       />
       
-      <DynamicBanner onAction={handleBannerAction} />
+      <DynamicBanner onClose={() => {}} onBannerAction={handleBannerAction} />
       
       <div className="flex-1 flex relative">
         <SidePanel 
