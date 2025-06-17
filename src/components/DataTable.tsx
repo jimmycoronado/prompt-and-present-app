@@ -95,7 +95,7 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
 
         {/* Table container - colapsable para tablas grandes */}
         {(!shouldCollapse || !isCollapsed) && (
-          <div className="w-full max-h-[400px] overflow-y-auto">
+          <div className="w-full max-h-[400px] overflow-y-auto overflow-x-auto">
             <div className="w-full overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 whitespace-nowrap">
                 <thead className="bg-gray-50 dark:bg-gray-700">
