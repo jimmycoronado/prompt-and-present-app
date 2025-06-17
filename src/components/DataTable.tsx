@@ -129,7 +129,7 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </table></div>
             </div>
           </div>
         )}
