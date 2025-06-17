@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Conversation, ConversationSummary } from '../types/conversation';
 import { ChatMessage } from '../types/chat';
@@ -229,8 +228,9 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       
       console.log('ConversationContext: Conversation saved to Azure successfully');
       
-      // Update the conversations list from Azure
-      await loadConversations();
+      // Removed the unnecessary loadConversations() call here
+      // The local state is already updated and the sidebar will reflect changes automatically
+      
     } catch (error) {
       console.error('Error saving conversation to Azure:', error);
       throw error;
