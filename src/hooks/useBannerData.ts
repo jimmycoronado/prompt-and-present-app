@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { BannerData, ApiBannerResponse } from '../types/banner';
 import { useAuth } from '../contexts/AuthContext';
 import { azureConversationService } from '../services/azureConversationService';
@@ -39,21 +39,35 @@ export const useBannerData = () => {
   const [banners, setBanners] = useState<BannerData[]>([]);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Use refs to track if we've already fetched for this user
+  const lastFetchedEmail = useRef<string | null>(null);
+  const hasFetchedOnce = useRef(false);
 
-  // Fetch banners from Azure API whenever user changes
+  // Fetch banners from Azure API only when user email changes or on first load
   useEffect(() => {
-    const fetchBanners = async () => {
-      if (!user?.email) {
+    const currentEmail = user?.email;
+    
+    // Skip if no email or already fetched for this email
+    if (!currentEmail || lastFetchedEmail.current === currentEmail) {
+      if (!currentEmail) {
         setIsLoading(false);
         setBanners([]);
-        return;
+        lastFetchedEmail.current = null;
+        hasFetchedOnce.current = false;
       }
+      return;
+    }
 
-      console.log('🎌 useBannerData: Fetching banners for user:', user.email);
-      setIsLoading(true);
+    console.log('🎌 useBannerData: Fetching banners for NEW user:', currentEmail);
+    console.log('🎌 useBannerData: Last fetched email was:', lastFetchedEmail.current);
+    
+    setIsLoading(true);
+    lastFetchedEmail.current = currentEmail;
 
+    const fetchBanners = async () => {
       try {
-        const apiResponse = await azureConversationService.getUserBanners(user.email);
+        const apiResponse = await azureConversationService.getUserBanners(currentEmail);
         console.log('🎌 useBannerData: Received banners from API:', apiResponse);
         
         // Sort by MessageOrder and transform
@@ -63,21 +77,22 @@ export const useBannerData = () => {
         
         console.log('🎌 useBannerData: Transformed and sorted banners:', sortedBanners);
         setBanners(sortedBanners);
-        setCurrentBannerIndex(0); // Reset to first banner when new data arrives
+        setCurrentBannerIndex(0);
+        hasFetchedOnce.current = true;
       } catch (error) {
         console.log('🎌 useBannerData: Error fetching banners (silently handled):', error);
-        setBanners([]); // Set empty array on error - no user notification needed
+        setBanners([]);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchBanners();
-  }, [user?.email]); // Depend on user email to refetch when user changes
+  }, [user?.email]); // Keep dependency but use ref to prevent unnecessary calls
 
   // Rotación automática de banners cada 8 segundos
   useEffect(() => {
-    if (banners.length <= 1) return; // No need to rotate if 0 or 1 banner
+    if (banners.length <= 1) return;
 
     const interval = setInterval(() => {
       setCurrentBannerIndex((prev) => (prev + 1) % banners.length);
