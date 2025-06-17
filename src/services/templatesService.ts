@@ -1,4 +1,3 @@
-
 import { PromptTemplate } from '../types/templates';
 
 const BACKEND_URL = 'https://skcodaliaidev.azurewebsites.net';
@@ -50,10 +49,14 @@ class TemplatesService {
     offset?: number;
   }): Promise<PromptTemplate[]> {
     try {
-      console.log('TemplatesService: Getting user templates for:', userEmail);
+      console.log('TemplatesService: Getting user templates for:', userEmail, 'options:', options);
+      
+      // For system templates (isDefault: true), use "system" as user_id
+      // For user templates (isDefault: false or undefined), use the user's email
+      const userId = options?.isDefault === true ? 'system' : userEmail;
       
       const params = new URLSearchParams({
-        user_id: userEmail,
+        user_id: userId,
         ...(options?.category && { category: options.category }),
         ...(options?.isDefault !== undefined && { is_default: options.isDefault.toString() }),
         ...(options?.search && { search: options.search }),
@@ -61,17 +64,20 @@ class TemplatesService {
         ...(options?.offset && { offset: options.offset.toString() })
       });
 
+      console.log('TemplatesService: Making request to:', `${BACKEND_URL}/api/templates?${params}`);
+
       const response = await fetch(`${BACKEND_URL}/api/templates?${params}`, {
         method: 'GET',
         headers: this.getHeaders()
       });
 
       if (!response.ok) {
+        console.error('TemplatesService: Response not OK:', response.status, response.statusText);
         throw new Error(`Failed to fetch templates: ${response.statusText}`);
       }
 
       const templates = await response.json();
-      console.log('TemplatesService: Received templates:', templates.length);
+      console.log('TemplatesService: Received templates:', templates.length, 'for userId:', userId);
       
       // Convert from backend format to frontend format
       return templates.map((template: any) => ({
