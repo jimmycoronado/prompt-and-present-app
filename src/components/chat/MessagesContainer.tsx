@@ -40,7 +40,7 @@ export const MessagesContainer: React.FC<MessagesContainerProps> = ({
               key={message.id}
               message={message}
               isSelected={selectedMessage?.id === message.id}
-              onSelect={() => onSelectMessage(selectedMessage?.id === message.id ? null : message)}
+              onClick={() => onSelectMessage(selectedMessage?.id === message.id ? null : message)}
             />
           ))}
           
