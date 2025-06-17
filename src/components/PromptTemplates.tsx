@@ -75,8 +75,12 @@ export const PromptTemplates: React.FC<PromptTemplatesProps> = ({ onSelectTempla
   };
 
   const filteredTemplates = templates.filter(template => {
-    const matchesSearch = template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         template.description.toLowerCase().includes(searchQuery.toLowerCase());
+    // Add null checks for template.name and template.description
+    const templateName = template.name || '';
+    const templateDescription = template.description || '';
+    
+    const matchesSearch = templateName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         templateDescription.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -240,9 +244,9 @@ export const PromptTemplates: React.FC<PromptTemplatesProps> = ({ onSelectTempla
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <CardTitle className="text-sm font-medium">{template.name}</CardTitle>
+                        <CardTitle className="text-sm font-medium">{template.name || 'Sin nombre'}</CardTitle>
                         <CardDescription className="text-xs mt-1">
-                          {template.description}
+                          {template.description || 'Sin descripción'}
                         </CardDescription>
                       </div>
                       <div className="flex items-center space-x-2 ml-4">
@@ -261,15 +265,15 @@ export const PromptTemplates: React.FC<PromptTemplatesProps> = ({ onSelectTempla
                   <CardContent className="pt-0">
                     <div className="bg-gray-50 dark:bg-gray-700/50 rounded p-3 mb-3">
                       <code className="text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-                        {template.content.length > 150 
+                        {template.content && template.content.length > 150 
                           ? template.content.substring(0, 150) + '...'
-                          : template.content
+                          : template.content || 'Sin contenido'
                         }
                       </code>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-gray-500">
-                        Usado {template.usageCount} veces
+                        Usado {template.usageCount || 0} veces
                       </span>
                       <div className="flex space-x-2">
                         {!template.isDefault && (
