@@ -95,41 +95,40 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
 
         {/* Table container - colapsable para tablas grandes */}
         {(!shouldCollapse || !isCollapsed) && (
-          <div className="w-full overflow-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 whitespace-nowrap">
-                <thead className="bg-gray-50 dark:bg-gray-700">
-                  <tr>
-                    {tableData.headers.map((header, index) => (
-                      <th
-                        key={index}
-                        className="px-3 py-2 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider min-w-[120px]"
-                        title={header}
+          <div className="w-full overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 whitespace-nowrap">
+              <thead className="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                  {tableData.headers.map((header, index) => (
+                    <th
+                      key={index}
+                      className="px-3 py-2 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider min-w-[120px]"
+                      title={header}
+                    >
+                      {header}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                {currentRows.map((row, rowIndex) => (
+                  <tr
+                    key={startIndex + rowIndex}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                  >
+                    {row.map((cell, cellIndex) => (
+                      <td
+                        key={cellIndex}
+                        className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100 max-w-[250px] truncate"
+                        title={String(cell)}
                       >
-                        {header}
-                      </th>
+                        {cell}
+                      </td>
                     ))}
                   </tr>
-                </thead>
-                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                  {currentRows.map((row, rowIndex) => (
-                    <tr
-                      key={startIndex + rowIndex}
-                      className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                    >
-                      {row.map((cell, cellIndex) => (
-                        <td
-                          key={cellIndex}
-                          className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100 max-w-[250px] truncate"
-                          title={String(cell)}
-                        >
-                          {cell}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
 
