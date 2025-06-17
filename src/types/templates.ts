@@ -8,6 +8,7 @@ export interface PromptTemplate {
   isDefault: boolean;
   createdAt: Date;
   usageCount: number;
+  tags: string[];
 }
 
 export interface TemplateCategory {
