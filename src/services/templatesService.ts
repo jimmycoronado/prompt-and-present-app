@@ -81,8 +81,9 @@ class TemplatesService {
     }
   ): Promise<PromptTemplate[]> {
     try {
-      // For system templates, use "system" as user_id but still send X-User-Id header
+      // For system templates, use "system" as user_id and also in header
       const userId = isDefault ? 'system' : userEmail;
+      const headerUserId = isDefault ? 'system' : userEmail;
       
       const params = new URLSearchParams({
         user_id: userId,
@@ -95,12 +96,13 @@ class TemplatesService {
 
       console.log('TemplatesService: Fetching templates:', {
         type: isDefault ? 'system' : 'user',
-        url: `${BACKEND_URL}/api/templates?${params}`
+        url: `${BACKEND_URL}/api/templates?${params}`,
+        headerUserId: headerUserId
       });
 
       const response = await fetch(`${BACKEND_URL}/api/templates?${params}`, {
         method: 'GET',
-        headers: this.getHeaders(userEmail) // Always send user email in header
+        headers: this.getHeaders(headerUserId) // Use correct header based on template type
       });
 
       if (!response.ok) {
