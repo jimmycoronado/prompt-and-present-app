@@ -62,7 +62,7 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
 
   return (
     <div className="chat-table-wrapper w-full my-4">
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm">
         {/* Header with title, collapse button and export button */}
         <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
           <div className="flex items-center space-x-2">
@@ -95,7 +95,7 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
 
         {/* Table container - colapsable para tablas grandes */}
         {(!shouldCollapse || !isCollapsed) && (
-          <div className="w-full max-h-[400px] overflow-y-auto overflow-x-auto">
+          <div className="w-full max-h-[400px] overflow-y-auto">
             <div className="w-full overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 whitespace-nowrap">
                 <thead className="bg-gray-50 dark:bg-gray-700">
