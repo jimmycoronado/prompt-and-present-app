@@ -1,4 +1,3 @@
-
 import { PromptTemplate } from '../types/templates';
 
 const BACKEND_URL = 'https://skcodaliaidev.azurewebsites.net';
@@ -113,8 +112,12 @@ class TemplatesService {
         throw new Error(`Failed to fetch ${isDefault ? 'system' : 'user'} templates: ${response.statusText}`);
       }
 
-      const templates = await response.json();
-      console.log('TemplatesService: Received templates:', templates.length, 'for type:', isDefault ? 'system' : 'user');
+      const responseData = await response.json();
+      console.log('TemplatesService: Raw response data:', responseData);
+      
+      // Extract templates array from response object
+      const templates = responseData.templates || [];
+      console.log('TemplatesService: Extracted templates array:', templates.length, 'for type:', isDefault ? 'system' : 'user');
       
       // Convert from backend format to frontend format
       return templates.map((template: any) => ({
@@ -123,7 +126,7 @@ class TemplatesService {
         description: template.description,
         content: template.content,
         category: template.category,
-        isDefault: isDefault,
+        isDefault: template.isDefault || isDefault,
         createdAt: new Date(template.createdAt),
         usageCount: template.usageCount || 0,
         tags: template.tags || []
