@@ -94,3 +94,67 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Estilos para tablas en el chat - inspirados en ChatGPT */
+@layer components {
+  .chat-table-wrapper {
+    @apply w-full my-4 max-w-full;
+  }
+
+  .scrollable-table {
+    @apply block overflow-x-auto;
+    border-radius: 8px;
+    padding: 0;
+  }
+
+  .dataframe-table {
+    @apply w-full text-sm;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+
+  .dataframe-header {
+    @apply text-left px-4 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider border-r border-gray-200 dark:border-gray-600 last:border-r-0;
+    background-color: rgb(249 250 251);
+    white-space: nowrap;
+  }
+
+  .dark .dataframe-header {
+    background-color: rgb(55 65 81);
+  }
+
+  .dataframe-row {
+    @apply hover:bg-gray-50 dark:hover:bg-gray-700/50;
+  }
+
+  .dataframe-row:nth-child(even) {
+    @apply bg-gray-50/30 dark:bg-gray-700/20;
+  }
+
+  .dataframe-cell {
+    @apply px-4 py-2 text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-gray-600 last:border-r-0;
+    border-bottom: 1px solid rgb(229 231 235);
+    white-space: nowrap;
+  }
+
+  .dark .dataframe-cell {
+    border-bottom: 1px solid rgb(75 85 99);
+  }
+
+  /* Indicador visual de scroll horizontal */
+  .scrollable-table::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .scrollable-table::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-gray-700 rounded;
+  }
+
+  .scrollable-table::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded;
+  }
+
+  .scrollable-table::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400 dark:bg-gray-500;
+  }
+}

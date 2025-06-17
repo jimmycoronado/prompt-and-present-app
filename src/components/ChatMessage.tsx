@@ -1,3 +1,4 @@
+
 import { User, Download, Copy, ThumbsUp, ThumbsDown } from "lucide-react";
 import { ChatMessage as ChatMessageType } from "../types/chat";
 import { DataTable } from "./DataTable";
@@ -145,159 +146,127 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
 
         {/* Message Content */}
         <div className={`flex-1 ${isUser ? 'text-right' : 'text-left'} relative`}>
-          {/* Hover area that includes the message bubble and copy icon */}
+          {/* Main message container */}
           <div 
             className={`group ${isUser ? 'pb-2' : ''}`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
-            <div 
-              className={`inline-block p-4 relative ${
-                isUser
-                  ? 'rounded-lg bg-skandia-green text-white border border-skandia-green shadow-sm'
-                  : 'text-gray-900 dark:text-gray-100'
-              }`}
-            >
-              
-              {/* Text Content */}
-              {message.content && (
+            {/* Text Content Container */}
+            {message.content && (
+              <div 
+                className={`inline-block p-4 relative max-w-[700px] ${
+                  isUser
+                    ? 'rounded-lg bg-skandia-green text-white border border-skandia-green shadow-sm'
+                    : 'text-gray-900 dark:text-gray-100'
+                }`}
+              >
                 <div className="whitespace-pre-wrap">
                   {message.content}
                 </div>
-              )}
 
-              {/* Files */}
-              {message.files && message.files.length > 0 && (
-                <div className="mt-3 space-y-2">
-                  {message.files.map((file, index) => (
-                    <div
-                      key={index}
-                      className={`flex items-center space-x-2 p-2 rounded ${
-                        isUser 
-                          ? 'bg-skandia-green/80' 
-                          : 'bg-gray-100 dark:bg-gray-800'
-                      }`}
-                    >
-                      <span className="text-sm">{file.name}</span>
-                      <span className="text-xs opacity-75">
-                        ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Data Table */}
-              {message.data && (
-                <div className="mt-4">
-                  <DataTable data={message.data} />
-                </div>
-              )}
-
-              {/* Chart */}
-              {message.chart && (
-                <div className="mt-4">
-                  <DataChart chartData={message.chart} />
-                </div>
-              )}
-
-              {/* Video Preview */}
-              {message.videoPreview && (
-                <div className="mt-4">
-                  <VideoPreview video={message.videoPreview} />
-                </div>
-              )}
-
-              {/* Image Preview and Download Link */}
-              {message.downloadLink && (
-                <div className="mt-4">
-                  {/* Image Preview */}
-                  <div className="mb-3">
-                    <img 
-                      src={message.downloadLink.url} 
-                      alt="Vista previa"
-                      className={`max-w-xs rounded border shadow-sm ${
-                        isUser ? 'border-white/20' : 'border-gray-200 dark:border-gray-700'
-                      }`}
-                      style={{ maxHeight: '200px', width: 'auto' }}
-                    />
+                {/* Files dentro del mensaje de usuario */}
+                {isUser && message.files && message.files.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    {message.files.map((file, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center space-x-2 p-2 rounded bg-skandia-green/80"
+                      >
+                        <span className="text-sm">{file.name}</span>
+                        <span className="text-xs opacity-75">
+                          ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                  
-                  {/* Download Button */}
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className={`${
-                      isUser 
-                        ? 'bg-white text-skandia-green hover:bg-gray-100 border border-white'
-                        : 'bg-skandia-green text-white hover:bg-skandia-green/80'
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDownload(message.downloadLink!.url, message.downloadLink!.filename);
-                    }}
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    {message.downloadLink.filename}
-                  </Button>
-                </div>
-              )}
+                )}
 
-              {/* Actions for Assistant Messages */}
-              {!isUser && message.content && (
-                <div className="mt-3 flex items-center space-x-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                  {/* Copy Button for Agent Messages - Always visible */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleCopyText();
-                    }}
-                    className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
-                    aria-label="Copiar mensaje"
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                  
-                  <div className="flex space-x-1">
+                {/* Image Preview and Download Link dentro del mensaje de usuario */}
+                {isUser && message.downloadLink && (
+                  <div className="mt-4">
+                    {/* Image Preview */}
+                    <div className="mb-3">
+                      <img 
+                        src={message.downloadLink.url} 
+                        alt="Vista previa"
+                        className="max-w-xs rounded border shadow-sm border-white/20"
+                        style={{ maxHeight: '200px', width: 'auto' }}
+                      />
+                    </div>
+                    
+                    {/* Download Button */}
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="bg-white text-skandia-green hover:bg-gray-100 border border-white"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDownload(message.downloadLink!.url, message.downloadLink!.filename);
+                      }}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      {message.downloadLink.filename}
+                    </Button>
+                  </div>
+                )}
+
+                {/* Actions for Assistant Messages dentro del bubble */}
+                {!isUser && message.content && (
+                  <div className="mt-3 flex items-center space-x-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                    {/* Copy Button for Agent Messages - Always visible */}
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleFeedback('positive');
+                        handleCopyText();
                       }}
-                      className={`hover:bg-gray-100 dark:hover:bg-gray-800 ${
-                        feedback === 'positive' 
-                          ? 'text-green-500 hover:text-green-600' 
-                          : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
-                      }`}
-                      aria-label="Me gusta esta respuesta"
+                      className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      aria-label="Copiar mensaje"
                     >
-                      <ThumbsUp className="h-4 w-4" />
+                      <Copy className="h-4 w-4" />
                     </Button>
                     
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleFeedback('negative');
-                      }}
-                      className={`hover:bg-gray-100 dark:hover:bg-gray-800 ${
-                        feedback === 'negative' 
-                          ? 'text-red-500 hover:text-red-600' 
-                          : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
-                      }`}
-                      aria-label="No me gusta esta respuesta"
-                    >
-                      <ThumbsDown className="h-4 w-4" />
-                    </Button>
+                    <div className="flex space-x-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFeedback('positive');
+                        }}
+                        className={`hover:bg-gray-100 dark:hover:bg-gray-800 ${
+                          feedback === 'positive' 
+                            ? 'text-green-500 hover:text-green-600' 
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+                        }`}
+                        aria-label="Me gusta esta respuesta"
+                      >
+                        <ThumbsUp className="h-4 w-4" />
+                      </Button>
+                      
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFeedback('negative');
+                        }}
+                        className={`hover:bg-gray-100 dark:hover:bg-gray-800 ${
+                          feedback === 'negative' 
+                            ? 'text-red-500 hover:text-red-600' 
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+                        }`}
+                        aria-label="No me gusta esta respuesta"
+                      >
+                        <ThumbsDown className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
 
             {/* Copy Button for User Messages - Positioned just below the bubble but above timestamp */}
             {isUser && message.content && (
@@ -317,6 +286,71 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSelected, o
               </div>
             )}
           </div>
+
+          {/* Data components OUTSIDE message bubble for full width */}
+          {/* Data Table fuera del bubble para aprovechar todo el ancho */}
+          {message.data && !isUser && (
+            <DataTable data={message.data} />
+          )}
+
+          {/* Chart fuera del bubble */}
+          {message.chart && !isUser && (
+            <div className="mt-4">
+              <DataChart chartData={message.chart} />
+            </div>
+          )}
+
+          {/* Video Preview fuera del bubble */}
+          {message.videoPreview && !isUser && (
+            <div className="mt-4">
+              <VideoPreview video={message.videoPreview} />
+            </div>
+          )}
+
+          {/* Files y Download Link fuera del bubble para mensajes del asistente */}
+          {!isUser && message.files && message.files.length > 0 && (
+            <div className="mt-4 space-y-2">
+              {message.files.map((file, index) => (
+                <div
+                  key={index}
+                  className="flex items-center space-x-2 p-2 rounded bg-gray-100 dark:bg-gray-800"
+                >
+                  <span className="text-sm">{file.name}</span>
+                  <span className="text-xs opacity-75">
+                    ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {!isUser && message.downloadLink && (
+            <div className="mt-4">
+              {/* Image Preview */}
+              <div className="mb-3">
+                <img 
+                  src={message.downloadLink.url} 
+                  alt="Vista previa"
+                  className="max-w-xs rounded border shadow-sm border-gray-200 dark:border-gray-700"
+                  style={{ maxHeight: '200px', width: 'auto' }}
+                />
+              </div>
+              
+              {/* Download Button */}
+              <Button
+                variant="secondary"
+                size="sm"
+                className="bg-skandia-green text-white hover:bg-skandia-green/80"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDownload(message.downloadLink!.url, message.downloadLink!.filename);
+                }}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                {message.downloadLink.filename}
+              </Button>
+            </div>
+          )}
 
           {/* Timestamp */}
           <div className={`mt-0.5 text-xs text-gray-500 dark:text-gray-400 flex items-center ${
