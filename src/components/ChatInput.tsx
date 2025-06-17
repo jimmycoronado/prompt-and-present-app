@@ -64,6 +64,8 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
   useEffect(() => {
     if (initialValue !== message) {
       setMessage(initialValue);
+      // Solo notificar al padre cuando viene de una plantilla (initialValue)
+      onValueChange?.(initialValue);
       // Auto-resize when content is set programmatically (from templates)
       // Use multiple frames for mobile compatibility
       setTimeout(() => {
@@ -74,7 +76,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
         }, 50);
       }, 0);
     }
-  }, [initialValue]);
+  }, [initialValue, onValueChange]);
 
   // Exposed method for banner messages
   const sendBannerMessage = (automaticReply: string) => {
@@ -111,6 +113,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
     if (message.trim() && !disabled) {
       onSendMessage(message.trim());
       setMessage("");
+      // Solo notificar al padre cuando se envía o limpia
       onValueChange?.("");
       
       if (textareaRef.current) {
@@ -124,7 +127,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
     
     const value = e.target.value;
     setMessage(value);
-    onValueChange?.(value);
+    // REMOVIDO: onValueChange?.(value); - No notificar al padre en cada tecla
     
     // Auto-resize textarea
     autoResizeTextarea();
@@ -160,6 +163,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
     
     const newMessage = message + (message ? ' ' : '') + text;
     setMessage(newMessage);
+    // Solo notificar al padre cuando viene de transcripción de voz
     onValueChange?.(newMessage);
     
     if (textareaRef.current) {
