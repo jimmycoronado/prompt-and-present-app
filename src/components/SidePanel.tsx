@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { PanelLeft, Search, MessageSquare, FileText, Edit3, Plus, X, User } from 'lucide-react';
 import { Button } from './ui/button';
@@ -92,9 +91,8 @@ export const SidePanel: React.FC<SidePanelProps> = ({
     onNewChat();
   };
 
-  const handleSelectTemplate = (template: PromptTemplate) => {
-    // TODO: Implement template selection logic
-    console.log('Selected template:', template);
+  const handleSelectTemplate = (content: string) => {
+    console.log('SidePanel: Template content selected:', content);
     setActiveView('main');
   };
 

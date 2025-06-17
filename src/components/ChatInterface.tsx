@@ -434,17 +434,19 @@ export const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
     });
   };
 
-  const handleSelectTemplate = (template: PromptTemplate) => {
-    console.log('ChatInterface: Template selected:', template.content);
+  const handleSelectTemplate = (content: string) => {
+    console.log('ChatInterface: Template content selected:', content);
     
-    // Record template usage
-    if (userEmail && template.id) {
-      templatesService.recordTemplateUsage(userEmail, template.id).catch(error => {
+    // No need to find template by content since we already have the content
+    // Just record usage if we can find the template
+    const selectedTemplate = userTemplates.find(t => t.content === content);
+    if (userEmail && selectedTemplate?.id) {
+      templatesService.recordTemplateUsage(userEmail, selectedTemplate.id).catch(error => {
         console.error('ChatInterface: Error recording template usage:', error);
       });
     }
     
-    setTemplateContent(template.content);
+    setTemplateContent(content);
     setShowTemplates(false);
   };
 
