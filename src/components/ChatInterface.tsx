@@ -34,7 +34,8 @@ const defaultCarouselTemplates: PromptTemplate[] = [
     category: 'data',
     isDefault: true,
     createdAt: new Date(),
-    usageCount: 0
+    usageCount: 0,
+    tags: ['salarios', 'análisis', 'datos', 'clientes']
   },
   {
     id: 'carousel-2',
@@ -44,7 +45,8 @@ const defaultCarouselTemplates: PromptTemplate[] = [
     category: 'analysis',
     isDefault: true,
     createdAt: new Date(),
-    usageCount: 0
+    usageCount: 0,
+    tags: ['comisiones', 'clientes', 'top', 'análisis']
   },
   {
     id: 'carousel-3',
@@ -54,7 +56,8 @@ const defaultCarouselTemplates: PromptTemplate[] = [
     category: 'writing',
     isDefault: true,
     createdAt: new Date(),
-    usageCount: 0
+    usageCount: 0,
+    tags: ['resumen', 'ejecutivo', 'recomendaciones', 'conclusiones']
   },
   {
     id: 'carousel-4',
@@ -64,7 +67,8 @@ const defaultCarouselTemplates: PromptTemplate[] = [
     category: 'business',
     isDefault: true,
     createdAt: new Date(),
-    usageCount: 0
+    usageCount: 0,
+    tags: ['plan', 'estrategia', 'pasos', 'recursos']
   }
 ];
 
