@@ -56,6 +56,19 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({ children }
         account: account,
       });
       console.log('✅ Access token acquired:', response.accessToken.substring(0, 20) + '...');
+      
+      // 🆕 LOG COMPLETO DEL TOKEN PARA DEBUGGING
+      console.log('📋 AZURE ENTRA TOKEN COMPLETO:');
+      console.log('-----------------------------------');
+      console.log(response.accessToken);
+      console.log('-----------------------------------');
+      console.log('ℹ️ Token Info:', {
+        tokenType: response.tokenType,
+        expiresOn: response.expiresOn,
+        scopes: response.scopes,
+        account: response.account?.username
+      });
+      
       return response.accessToken;
     } catch (error) {
       console.error('❌ Failed to acquire access token silently:', error);
@@ -66,6 +79,19 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({ children }
           account: account,
         });
         console.log('✅ Access token acquired via popup:', response.accessToken.substring(0, 20) + '...');
+        
+        // 🆕 LOG COMPLETO DEL TOKEN PARA DEBUGGING (POPUP)
+        console.log('📋 AZURE ENTRA TOKEN COMPLETO (via popup):');
+        console.log('-----------------------------------');
+        console.log(response.accessToken);
+        console.log('-----------------------------------');
+        console.log('ℹ️ Token Info:', {
+          tokenType: response.tokenType,
+          expiresOn: response.expiresOn,
+          scopes: response.scopes,
+          account: response.account?.username
+        });
+        
         return response.accessToken;
       } catch (popupError) {
         console.error('❌ Failed to acquire access token via popup:', popupError);
@@ -149,6 +175,20 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({ children }
       if (result.accessToken) {
         setAccessToken(result.accessToken);
         console.log('🔑 Access token set from login result:', result.accessToken.substring(0, 20) + '...');
+        
+        // 🆕 LOG COMPLETO DEL TOKEN DESPUÉS DEL LOGIN
+        console.log('📋 AZURE ENTRA TOKEN COMPLETO (después del login):');
+        console.log('-----------------------------------');
+        console.log(result.accessToken);
+        console.log('-----------------------------------');
+        console.log('ℹ️ Token Info después del login:', {
+          tokenType: result.tokenType,
+          expiresOn: result.expiresOn,
+          scopes: result.scopes,
+          account: result.account?.username,
+          idToken: result.idToken ? 'ID Token presente' : 'No ID Token',
+          idTokenClaims: result.idTokenClaims
+        });
       }
       
       return { error: null };
